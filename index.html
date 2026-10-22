@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
+  <title>CifraFlow — App de Cifras, PDFs e Repertórios</title>
+  <meta name="description" content="Aplicativo completo de cifras musicais em texto e PDF, com transposição de tom, auto-scroll, links de YouTube e Spotify, repertórios e compartilhamento." />
+
+  <!-- PWA & Mobile Install Meta Tags (Android / iOS / Desktop) -->
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="CifraFlow" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/styles.css" />
+
+  <!-- PDF.js for cross-platform Android/iOS/PC multi-page PDF canvas rendering -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Sidebar (Desktop & Mobile Drawer) -->
+    <aside id="sidebar" class="sidebar">
+      <div class="brand-header">
+        <a href="#" class="brand-logo" onclick="App.showAllSongs(); return false;">
+          <div class="brand-icon">C#</div>
+          <div>
+            <div class="brand-title">CifraFlow</div>
+            <div class="brand-subtitle">Cifras • PDFs • Palco</div>
+          </div>
+        </a>
+      </div>
+
+      <div class="sidebar-actions">
+        <button class="btn btn-primary" style="width: 100%;" onclick="App.openSongModal()">
+          + Nova Cifra / PDF
+        </button>
+        <div style="display: flex; gap: 6px;">
+          <button class="btn btn-secondary btn-sm" style="flex: 1;" onclick="App.triggerImportFileDialog()">
+            📥 Importar
+          </button>
+          <button class="btn btn-secondary btn-sm" style="flex: 1;" onclick="App.exportFullLibraryBackup()">
+            💾 Backup
+          </button>
+        </div>
+        <input type="file" id="importPackageInput" accept=".json,.cifra" style="display: none;" onchange="App.onImportFileSelected(this)" />
+      </div>
+
+      <nav class="nav-section">
+        <div class="nav-label">Biblioteca</div>
+        <ul class="nav-list">
+          <li>
+            <button class="nav-item active" data-nav="all" onclick="App.showAllSongs()">
+              <div class="nav-item-left">
+                <span>🎵</span>
+                <span>Todas as Cifras</span>
+              </div>
+              <span id="navTotalCount" class="nav-badge">0</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-item" data-nav="favorites" onclick="App.showFavorites()">
+              <div class="nav-item-left">
+                <span>⭐</span>
+                <span>Favoritas</span>
+              </div>
+              <span id="navFavCount" class="nav-badge">0</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-item" data-nav="setlists" onclick="App.showSetlists()">
+              <div class="nav-item-left">
+                <span>📋</span>
+                <span>Repertórios (Setlists)</span>
+              </div>
+              <span id="navSetlistCount" class="nav-badge">0</span>
+            </button>
+          </li>
+        </ul>
+
+        <div class="nav-label">
+          <span>Categorias / Pastas</span>
+          <button type="button" class="nav-header-btn" onclick="App.openCategoriesModal()" title="Criar, editar ou excluir pastas">
+            + Nova / Editar
+          </button>
+        </div>
+        <ul id="sidebarCategoriesList" class="nav-list"></ul>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="btn btn-accent-outline btn-sm" style="width: 100%;" onclick="App.openInstallModal()">
+          📲 Instalar / Compartilhar App
+        </button>
+        <button id="themeToggleBtn" class="btn btn-secondary btn-sm" style="width: 100%;" onclick="App.toggleTheme()">
+          ☀️ Modo Claro
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-area">
+      <!-- Top Search & Quick Actions Bar -->
+      <header class="topbar">
+        <button class="btn btn-secondary btn-icon" style="display: inline-flex;" onclick="App.toggleMobileSidebar()" title="Menu">
+          ☰
+        </button>
+
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input
+            type="text"
+            id="globalSearchInput"
+            class="search-input"
+            placeholder="Buscar música, artista, tom ou trecho da letra..."
+          />
+          <button id="searchClearBtn" class="search-clear" onclick="App.clearSearch()">✖</button>
+        </div>
+
+        <div class="topbar-actions">
+          <button id="topInstallBtn" class="btn btn-secondary btn-sm" onclick="App.openInstallModal()">
+            📲 Instalar / Compartilhar
+          </button>
+          <button class="btn btn-primary btn-sm" onclick="App.openSongModal()">
+            + Nova Cifra
+          </button>
+        </div>
+      </header>
+
+      <!-- VIEW 1: LIBRARY (Cifras & PDFs) -->
+      <section id="libraryView" class="view-container">
+        <div class="view-header">
+          <div>
+            <h1 id="libraryTitle" class="view-title">Minhas Cifras</h1>
+            <p id="librarySubtitle" class="view-subtitle">
+              Organize cifras digitadas, arquivos PDF e links de YouTube e Spotify
+            </p>
+          </div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="btn btn-secondary btn-sm" onclick="App.openCategoriesModal()">
+              📁 Gerenciar Pastas
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="App.triggerImportFileDialog()">
+              📥 Importar Cifra / Pacote
+            </button>
+            <button class="btn btn-primary btn-sm" onclick="App.openSongModal()">
+              + Adicionar Música
+            </button>
+          </div>
+        </div>
+
+        <!-- Category Chips -->
+        <div id="categoryChipsBar" class="filter-chips" style="margin-bottom: 14px;"></div>
+
+        <!-- Type Filter & Sorting -->
+        <div class="filter-bar">
+          <div class="filter-chips">
+            <button class="chip active" data-type-filter="ALL" onclick="App.setTypeFilter('ALL')">Todos os Formatos</button>
+            <button class="chip" data-type-filter="TEXT" onclick="App.setTypeFilter('TEXT')">📝 Cifras Digitadas</button>
+            <button class="chip" data-type-filter="PDF" onclick="App.setTypeFilter('PDF')">📄 Arquivos PDF</button>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-size: 12.5px; color: var(--text-secondary);">Ordenar:</span>
+            <select class="filter-select" onchange="App.setSortBy(this.value)">
+              <option value="recent">Recentes</option>
+              <option value="title">Ordem Alfabética (A-Z)</option>
+              <option value="artist">Artista / Banda</option>
+              <option value="key">Tom Musical</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Songs Grid -->
+        <div id="songsGrid" class="songs-grid"></div>
+      </section>
+
+      <!-- VIEW 2: SETLISTS (Repertórios) -->
+      <section id="setlistsView" class="view-container" style="display: none;">
+        <div class="view-header">
+          <div>
+            <h1 class="view-title">📋 Repertórios / Setlists</h1>
+            <p class="view-subtitle">
+              Monte a ordem das músicas para apresentações, ensaios ou cultos e use o Modo Palco
+            </p>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-secondary btn-sm" onclick="App.triggerImportFileDialog()">
+              📥 Importar Repertório
+            </button>
+            <button class="btn btn-primary" onclick="App.openSetlistModal()">
+              + Novo Repertório
+            </button>
+          </div>
+        </div>
+
+        <div id="setlistsGrid" class="setlists-grid"></div>
+      </section>
+
+      <!-- VIEW 3: READER (Visualizador de Cifra / PDF + Transposição + Player + Auto-scroll) -->
+      <section id="readerView" style="display: none;">
+        <!-- Stage Mode Banner (Active when playing a Setlist) -->
+        <div id="stageModeBanner" class="stage-banner" style="display: none;">
+          <button id="stagePrevBtn" class="btn btn-secondary btn-sm" onclick="App.stageNavigate(-1)">
+            ⬅ Anterior
+          </button>
+          <div id="stageSetlistTitle" style="font-size: 13.5px; font-weight: 800; color: var(--accent); text-align: center;"></div>
+          <button id="stageNextBtn" class="btn btn-primary btn-sm" onclick="App.stageNavigate(1)">
+            Próxima Música ➡
+          </button>
+        </div>
+
+        <!-- Sticky Reader Toolbar -->
+        <div class="reader-toolbar">
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <button class="btn btn-secondary btn-sm" onclick="App.backFromReader()">
+              ← Voltar
+            </button>
+
+            <!-- Transpose Pill -->
+            <div class="control-pill" title="Transpor Tom (-1/2 ou +1/2 semitom)">
+              <button onclick="App.transpose(-1)">-½</button>
+              <span id="readerCurrentKey" class="pill-value" onclick="App.resetTranspose()" style="cursor: pointer;" title="Clique para voltar ao tom original">C</span>
+              <button onclick="App.transpose(1)">+½</button>
+            </div>
+
+            <button class="btn btn-secondary btn-sm" onclick="App.toggleAccidentals()" title="Alternar entre Sustenidos (#) e Bemóis (b)">
+              ♯/♭
+            </button>
+
+            <button id="readerSaveKeyBtn" class="btn btn-accent-outline btn-sm" style="display: none;" onclick="App.saveTransposedKeyPermanently()">
+              💾 Fixar Tom
+            </button>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <!-- Font size Pill -->
+            <div class="control-pill" title="Tamanho da Letra">
+              <button onclick="App.changeFontSize(-2)">A-</button>
+              <button onclick="App.changeFontSize(2)">A+</button>
+            </div>
+
+            <button id="readerColumnsBtn" class="btn btn-secondary btn-sm" onclick="App.toggleTwoColumns()" title="Alternar 1 ou 2 colunas">
+              ☷ 2 Colunas
+            </button>
+
+            <button class="btn btn-secondary btn-sm" onclick="window.print()" title="Imprimir ou Salvar em PDF">
+              🖨️ Imprimir
+            </button>
+
+            <button class="btn btn-secondary btn-sm" onclick="App.editActiveSong()">
+              ✏️ Editar
+            </button>
+
+            <button class="btn btn-primary btn-sm" onclick="App.openShareModalForSong()">
+              📤 Compartilhar
+            </button>
+          </div>
+        </div>
+
+        <div class="view-container">
+          <!-- Song Header Card -->
+          <div class="reader-header-card">
+            <div>
+              <h1 id="readerTitle" class="reader-song-title">Título da Música</h1>
+              <div id="readerArtist" class="reader-song-artist">Artista</div>
+              <div id="readerMetaPills" class="reader-meta-pills"></div>
+              <div id="readerNotesBox" style="display: none; margin-top: 12px; padding: 8px 12px; background: var(--accent-soft); border-left: 3px solid var(--accent); border-radius: 6px; font-size: 13px;"></div>
+            </div>
+
+            <!-- YouTube & Spotify Action Bar -->
+            <div id="readerMediaLinksBar" class="media-links-bar"></div>
+          </div>
+
+          <!-- Embedded YouTube & Spotify Drawer -->
+          <div id="readerMediaDrawer" class="media-drawer" style="display: none;"></div>
+
+          <!-- Switcher if song has BOTH Typed Cipher and Attached PDF -->
+          <div id="readerModeSwitcher" class="filter-chips" style="display: none; margin-bottom: 14px;">
+            <button class="chip active" data-reader-tab="both" onclick="App.setReaderTab('both')">📝+📄 Mostrar Cifra e PDF</button>
+            <button class="chip" data-reader-tab="text" onclick="App.setReaderTab('text')">📝 Apenas Cifra Digitada</button>
+            <button class="chip" data-reader-tab="pdf" onclick="App.setReaderTab('pdf')">📄 Apenas PDF</button>
+          </div>
+
+          <!-- Typed Cipher Sheet -->
+          <div id="readerCipherSheet" class="cipher-sheet" style="margin-bottom: 20px;">
+            <div id="readerCipherContent" class="cipher-content"></div>
+          </div>
+
+          <!-- Attached PDF Viewer Sheet -->
+          <div id="readerPdfSheet" class="pdf-sheet" style="display: none;">
+            <div class="pdf-toolbar">
+              <strong id="readerPdfFilename" style="font-size: 14px;">📄 cifra.pdf</strong>
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <div class="control-pill">
+                  <button onclick="App.changePdfZoom(-0.2)">🔍 -</button>
+                  <span id="readerPdfZoomLabel" class="pill-value">100%</span>
+                  <button onclick="App.changePdfZoom(0.2)">🔍 +</button>
+                </div>
+                <button class="btn btn-secondary btn-sm" onclick="App.openCurrentPdfExternal()">
+                  ↗ Abrir PDF Original
+                </button>
+              </div>
+            </div>
+            <div id="readerPdfPagesContainer" class="pdf-pages-container"></div>
+          </div>
+        </div>
+
+        <!-- Floating Auto-Scroll Bar -->
+        <div class="autoscroll-bar">
+          <button id="autoScrollToggleBtn" class="btn btn-secondary btn-sm" onclick="App.toggleAutoScroll()">
+            ▶️ Auto-Scroll
+          </button>
+          <input
+            type="range"
+            min="1"
+            max="10"
+            value="3"
+            oninput="App.setAutoScrollSpeed(this.value)"
+            title="Velocidade da rolagem automática"
+          />
+          <span id="autoScrollSpeedLabel" style="font-family: var(--font-mono); font-size: 12.5px; font-weight: 700; min-width: 26px;">3x</span>
+        </div>
+      </section>
+    </main>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-bottom-nav">
+      <button class="mob-nav-btn active" data-mob-nav="library" onclick="App.showAllSongs()">
+        <span>🎵</span>
+        <span>Cifras</span>
+      </button>
+      <button class="mob-nav-btn" data-mob-nav="favorites" onclick="App.showFavorites()">
+        <span>⭐</span>
+        <span>Favoritas</span>
+      </button>
+      <button class="mob-nav-btn" onclick="App.openSongModal()" style="color: var(--accent);">
+        <span>➕</span>
+        <span>Adicionar</span>
+      </button>
+      <button class="mob-nav-btn" data-mob-nav="setlists" onclick="App.showSetlists()">
+        <span>📋</span>
+        <span>Repertórios</span>
+      </button>
+      <button class="mob-nav-btn" onclick="App.openInstallModal()">
+        <span>📲</span>
+        <span>Compartilhar</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- MODAL 1: ADD / EDIT SONG (Cifra Digitada + Anexo PDF + YouTube/Spotify) -->
+  <div id="songModalBackdrop" class="modal-backdrop">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2 id="songModalTitle" class="modal-title">🎵 Nova Cifra / PDF</h2>
+        <button class="icon-btn" onclick="App.closeSongModal()">✖</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Nome da Música *</label>
+            <input type="text" id="songTitleInput" class="form-input" placeholder="Ex: Tempo Perdido" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Artista / Banda</label>
+            <input type="text" id="songArtistInput" class="form-input" placeholder="Ex: Legião Urbana" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Categoria / Pasta</label>
+            <input type="text" id="songCategoryInput" list="categoryOptionsList" class="form-input" placeholder="Selecione ou digite uma nova..." />
+            <datalist id="categoryOptionsList"></datalist>
+          </div>
+        </div>
+
+        <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));">
+          <div class="form-group">
+            <label class="form-label">Tom (Ex: C, G, Am, F#m)</label>
+            <input type="text" id="songKeyInput" class="form-input" placeholder="C" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Capotraste (Casa)</label>
+            <select id="songCapoInput" class="form-select">
+              <option value="0">Sem capotraste</option>
+              <option value="1">1ª casa</option>
+              <option value="2">2ª casa</option>
+              <option value="3">3ª casa</option>
+              <option value="4">4ª casa</option>
+              <option value="5">5ª casa</option>
+              <option value="6">6ª casa</option>
+              <option value="7">7ª casa</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">BPM (Andamento)</label>
+            <input type="number" id="songBpmInput" class="form-input" placeholder="Ex: 120" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Compasso</label>
+            <select id="songTimeSigInput" class="form-select">
+              <option value="4/4">4/4</option>
+              <option value="3/4">3/4</option>
+              <option value="6/8">6/8</option>
+              <option value="2/4">2/4</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- YouTube & Spotify Links -->
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">▶️ Link do YouTube (Vídeo ou Áudio)</label>
+            <input
+              type="url"
+              id="songYoutubeInput"
+              class="form-input"
+              placeholder="https://www.youtube.com/watch?v=..."
+              oninput="App.updateMediaDetectionBadges()"
+            />
+            <span id="ytDetectHint" style="font-size: 11.5px; color: #f87171;"></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label">🎧 Link do Spotify (Faixa, Álbum ou Playlist)</label>
+            <input
+              type="url"
+              id="songSpotifyInput"
+              class="form-input"
+              placeholder="https://open.spotify.com/track/..."
+              oninput="App.updateMediaDetectionBadges()"
+            />
+            <span id="spDetectHint" style="font-size: 11.5px; color: #34d399;"></span>
+          </div>
+        </div>
+
+        <!-- Option A: Attach PDF -->
+        <div class="form-group">
+          <label class="form-label">📄 Anexo de Cifra em PDF (Opcional — Você pode anexar PDF, digitar a cifra abaixo, ou usar ambos)</label>
+          <div id="pdfDropzone" class="pdf-dropzone" onclick="document.getElementById('pdfFileInput').click()">
+            <div id="pdfUploadStatus" style="font-size: 13.5px; color: var(--text-secondary);">
+              Clique aqui ou arraste um arquivo <strong>.PDF</strong> de cifra do seu celular ou computador
+            </div>
+            <input type="file" id="pdfFileInput" accept="application/pdf,.pdf" style="display: none;" onchange="App.onPdfInputChanged(this)" />
+          </div>
+          <div style="margin-top: 4px;">
+            <button type="button" id="clearPdfBtn" class="btn btn-danger btn-sm" style="display: none;" onclick="App.clearAttachedPdf()">
+              🗑️ Remover PDF Anexado
+            </button>
+          </div>
+        </div>
+
+        <!-- Option B: Typed Cipher -->
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+            <label class="form-label">📝 Cifra Digitada (Cole do Cifra Club ou digite os acordes acima da letra)</label>
+          </div>
+          <div class="quick-insert-bar">
+            <span style="font-size: 11.5px; color: var(--text-muted); align-self: center; margin-right: 4px;">Inserir rápido:</span>
+            <button type="button" class="quick-chip" onclick="App.insertCipherSnippet('[Intro] ')">[Intro]</button>
+            <button type="button" class="quick-chip" onclick="App.insertCipherSnippet('[Primeira Parte]\n')">[Primeira Parte]</button>
+            <button type="button" class="quick-chip" onclick="App.insertCipherSnippet('[Refrão]\n')">[Refrão]</button>
+            <button type="button" class="quick-chip" onclick="App.insertCipherSnippet('[Ponte]\n')">[Ponte]</button>
+            <button type="button" class="quick-chip" onclick="App.insertCipherSnippet('[Final]\n')">[Final]</button>
+            <button type="button" class="quick-chip" onclick="App.insertCipherSnippet('C  G  Am7  F ')">C G Am7 F</button>
+            <button type="button" class="quick-chip" onclick="App.insertCipherSnippet('G  D/F#  Em7  C9 ')">G D/F# Em7 C9</button>
+          </div>
+          <textarea
+            id="songContentInput"
+            class="form-textarea mono"
+            placeholder="[Intro] C  G  Am  F&#10;&#10;C                 G&#10;Digite ou cole os acordes na linha acima da letra&#10;Am                F&#10;O app destaca e transpõe todos os acordes automaticamente!"
+          ></textarea>
+        </div>
+
+        <!-- Notes -->
+        <div class="form-group">
+          <label class="form-label">📌 Observações / Dicas de Execução (Opcional)</label>
+          <input type="text" id="songNotesInput" class="form-input" placeholder="Ex: Entrar apenas voz e violão na 1ª parte..." />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" id="deleteSongModalBtn" class="btn btn-danger" style="margin-right: auto; display: none;" onclick="App.deleteCurrentEditingSong()">
+          🗑️ Excluir
+        </button>
+        <button type="button" class="btn btn-secondary" onclick="App.closeSongModal()">Cancelar</button>
+        <button type="button" class="btn btn-primary" onclick="App.saveSongFromModal()">💾 Salvar Cifra</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: SETLIST / REPERTÓRIO -->
+  <div id="setlistModalBackdrop" class="modal-backdrop">
+    <div class="modal-dialog" style="max-width: 650px;">
+      <div class="modal-header">
+        <h2 id="setlistModalTitle" class="modal-title">📋 Novo Repertório</h2>
+        <button class="icon-btn" onclick="App.closeSetlistModal()">✖</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Nome do Repertório / Evento *</label>
+            <input type="text" id="setlistTitleInput" class="form-input" placeholder="Ex: Show Sexta-Feira / Culto Domingo" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Data</label>
+            <input type="date" id="setlistDateInput" class="form-input" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Descrição / Anotações do Evento</label>
+          <input type="text" id="setlistDescInput" class="form-input" placeholder="Ex: Passagem de som às 18h30" />
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Adicionar Músicas ao Repertório</label>
+          <select id="setlistAddSongSelect" class="form-select" onchange="App.addSongToSetlistDraft()"></select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Ordem das Músicas (Você pode ajustar o tom de cada música para este repertório)</label>
+          <div id="setlistDraftList" style="display: flex; flex-direction: column; gap: 6px; max-height: 280px; overflow-y: auto;"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="App.closeSetlistModal()">Cancelar</button>
+        <button type="button" class="btn btn-primary" onclick="App.saveSetlistFromModal()">💾 Salvar Repertório</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 3: SHARE SONG / EXPORT PACKAGE -->
+  <div id="shareModalBackdrop" class="modal-backdrop">
+    <div class="modal-dialog" style="max-width: 600px;">
+      <div class="modal-header">
+        <h2 class="modal-title">📤 Compartilhar Cifra</h2>
+        <button class="icon-btn" onclick="App.closeShareModal()">✖</button>
+      </div>
+      <div class="modal-body">
+        <div style="font-size: 15px; font-weight: 700; color: var(--accent);" id="shareSongTitleLabel"></div>
+
+        <!-- Option 1: Instant Share Link & QR Code -->
+        <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px;">
+          <div style="font-size: 13.5px; font-weight: 700; margin-bottom: 8px;">🔗 1. Link Direto e QR Code (Abre a cifra com 1 clique)</div>
+          <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+            <input type="text" id="shareInstantLinkInput" class="form-input" readonly />
+            <button class="btn btn-primary" onclick="App.copyShareLink()">Copiar Link</button>
+          </div>
+          <div style="text-align: center;">
+            <img id="shareQrCodeImg" alt="QR Code da Cifra" style="border-radius: 8px; background: #fff; padding: 6px; max-width: 170px;" />
+            <div id="shareQrHint" style="font-size: 12px; color: var(--text-secondary); margin-top: 6px;"></div>
+          </div>
+        </div>
+
+        <!-- Option 2: Share Complete File Package (Includes Attached PDF!) -->
+        <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px;">
+          <div style="font-size: 13.5px; font-weight: 700; margin-bottom: 4px;">📦 2. Enviar Arquivo Completo (.cifra.json — Inclui PDF Anexado!)</div>
+          <p style="font-size: 12.5px; color: var(--text-secondary); margin-bottom: 10px;">
+            Ideal para enviar no grupo do WhatsApp ou Telegram quando a música possui arquivo PDF anexado. Quem receber só clica em <strong>"Importar"</strong> no app!
+          </p>
+          <div id="sharePdfWarning" style="display: none; font-size: 12px; color: var(--accent); margin-bottom: 8px;">
+            💡 Esta música possui um PDF anexado! Use o botão abaixo para enviar a cifra com o PDF incluso.
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            <button class="btn btn-primary btn-sm" onclick="App.exportCurrentSongPackage(true)">
+              📲 Enviar Arquivo no Celular / WhatsApp
+            </button>
+            <button class="btn btn-secondary btn-sm" onclick="App.exportCurrentSongPackage(false)">
+              ⬇️ Baixar Arquivo (.cifra.json)
+            </button>
+          </div>
+        </div>
+
+        <!-- Option 3: Share Formatted Text on WhatsApp -->
+        <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px;">
+          <div style="font-size: 13.5px; font-weight: 700; margin-bottom: 6px;">💬 3. Enviar Cifra em Texto no WhatsApp</div>
+          <button class="btn btn-secondary btn-sm" onclick="App.shareTextOnWhatsApp()">
+            Enviar Cifra Formatada em Texto + Links YouTube/Spotify
+          </button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="App.closeShareModal()">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 4: INCOMING SHARED SONG (#share=...) -->
+  <div id="incomingShareModalBackdrop" class="modal-backdrop">
+    <div class="modal-dialog" style="max-width: 620px;">
+      <div class="modal-header">
+        <h2 class="modal-title">🎁 Cifra Compartilhada com Você!</h2>
+        <button class="icon-btn" onclick="App.closeIncomingShareModal()">✖</button>
+      </div>
+      <div class="modal-body">
+        <div>
+          <h3 id="incomingSongTitle" style="font-size: 20px; font-weight: 800;"></h3>
+          <div id="incomingSongArtist" style="font-size: 13.5px; color: var(--text-secondary); margin-top: 2px;"></div>
+        </div>
+        <div id="incomingSongPreview" class="cipher-sheet cipher-content" style="max-height: 300px; overflow-y: auto; padding: 16px;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="App.closeIncomingShareModal()">Ignorar</button>
+        <button class="btn btn-primary" onclick="App.acceptIncomingSharedSong()">
+          💾 Salvar na Minha Biblioteca
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 5: INSTALL ON ANDROID / IOS & SHARE APP ONLINE -->
+  <div id="installModalBackdrop" class="modal-backdrop">
+    <div class="modal-dialog" style="max-width: 640px;">
+      <div class="modal-header">
+        <h2 class="modal-title">📲 Instalar no Android, iOS ou PC e Compartilhar</h2>
+        <button class="icon-btn" onclick="App.closeInstallModal()">✖</button>
+      </div>
+      <div class="modal-body">
+        <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px;">
+          <div style="font-size: 14px; font-weight: 700; margin-bottom: 8px;">🔗 Link do Aplicativo</div>
+          <div style="display: flex; gap: 8px;">
+            <input type="text" id="installAppUrlInput" class="form-input" readonly />
+            <button class="btn btn-primary" onclick="App.copyAppUrl()">Copiar</button>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px;">
+            <h4 style="font-size: 14px; font-weight: 800; color: var(--accent); margin-bottom: 6px;">🤖 Como Instalar no Android</h4>
+            <ol style="padding-left: 18px; font-size: 13px; color: var(--text-secondary); display: flex; flex-direction: column; gap: 4px;">
+              <li>Abra o link do app no navegador <strong>Chrome</strong>.</li>
+              <li>Toque no menu <strong>⋮ (três pontos)</strong> no canto superior direito.</li>
+              <li>Toque em <strong>"Instalar aplicativo"</strong> ou <strong>"Adicionar à tela inicial"</strong>.</li>
+            </ol>
+          </div>
+
+          <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px;">
+            <h4 style="font-size: 14px; font-weight: 800; color: var(--accent); margin-bottom: 6px;">🍎 Como Instalar no iPhone / iPad (iOS)</h4>
+            <ol style="padding-left: 18px; font-size: 13px; color: var(--text-secondary); display: flex; flex-direction: column; gap: 4px;">
+              <li>Abra o link do app no <strong>Safari</strong>.</li>
+              <li>Toque no botão <strong>Compartilhar (ícone quadrado com seta para cima ⬆️)</strong> na barra inferior.</li>
+              <li>Role para baixo e toque em <strong>"Adicionar à Tela de Início"</strong>.</li>
+            </ol>
+          </div>
+        </div>
+
+        <div style="background: var(--accent-soft); border: 1px solid var(--accent-border); border-radius: 12px; padding: 14px;">
+          <h4 style="font-size: 14px; font-weight: 800; color: var(--accent); margin-bottom: 6px;">🌐 Como deixar online grátis PARA SEMPRE?</h4>
+          <p style="font-size: 13px; color: var(--text-primary); line-height: 1.55;">
+            • <strong>Opção 1 — Cloudflare Pages (Ilimitado e Grátis para sempre):</strong> Acesse <a href="https://dash.cloudflare.com/" target="_blank" rel="noopener" style="color: var(--accent); font-weight: 700;">dash.cloudflare.com</a> → <em>Workers &amp; Pages</em> → <em>Pages</em> → <em>Upload assets</em> e arraste esta pasta.<br />
+            • <strong>Opção 2 — Netlify (Grátis para sempre com login Google):</strong> Em <a href="https://app.netlify.com/drop" target="_blank" rel="noopener" style="color: var(--accent); font-weight: 700;">app.netlify.com/drop</a>, faça login gratuito com sua conta Google (sem login o link dura apenas 1h; <strong>com login gratuito ele fica ativo para sempre!</strong>).
+          </p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="App.closeInstallModal()">Entendi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 6: MANAGE CATEGORIES / FOLDERS (Criar, Renomear e Excluir Pastas) -->
+  <div id="categoriesModalBackdrop" class="modal-backdrop">
+    <div class="modal-dialog" style="max-width: 560px;">
+      <div class="modal-header">
+        <h2 class="modal-title">📁 Gerenciar Categorias / Pastas</h2>
+        <button class="icon-btn" onclick="App.closeCategoriesModal()">✖</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Criar Nova Pasta / Categoria</label>
+          <div style="display: flex; gap: 8px;">
+            <input
+              type="text"
+              id="newCategoryNameInput"
+              class="form-input"
+              placeholder="Ex: Repertório Casamento, Pagode, Bossa Nova..."
+              onkeydown="if(event.key==='Enter'){event.preventDefault();App.createNewCategoryFromModal();}"
+            />
+            <button type="button" class="btn btn-primary" onclick="App.createNewCategoryFromModal()">
+              + Criar Pasta
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Pastas Existentes (Clique em ✏️ para renomear ou 🗑️ para excluir)</label>
+          <div id="categoriesManagerList" style="display: flex; flex-direction: column; gap: 8px; max-height: 340px; overflow-y: auto;"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" onclick="App.closeCategoriesModal()">Concluído</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notifications Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- App Scripts -->
+  <script src="js/db.js"></script>
+  <script src="js/chord-engine.js"></script>
+  <script src="js/share.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

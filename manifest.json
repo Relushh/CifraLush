@@ -1,0 +1,33 @@
+{
+  "name": "CifraFlow — Cifras, PDFs e Repertórios",
+  "short_name": "CifraFlow",
+  "description": "Aplicativo de cifras musicais em texto e PDF com transposição de tom, auto-scroll, links de YouTube/Spotify, repertórios e compartilhamento.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "lang": "pt-BR",
+  "categories": ["music", "productivity", "entertainment"],
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
