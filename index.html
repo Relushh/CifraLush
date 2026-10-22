@@ -13,9 +13,9 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="CifraFlow" />
   <link rel="manifest" href="manifest.json" />
-  <link rel="icon" type="image/svg+xml" href="icons/icon.svg" />
-  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
-  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <link rel="icon" type="image/svg+xml" href="icon.svg" />
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -23,7 +23,1302 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet" />
 
   <!-- Styles -->
-  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+:root {
+  --bg-primary: #0b1120;
+  --bg-secondary: #111827;
+  --bg-surface: #1e293b;
+  --bg-surface-hover: #26354d;
+  --bg-elevated: #0f172a;
+  --border-color: rgba(148, 163, 184, 0.16);
+  --border-strong: rgba(148, 163, 184, 0.28);
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --accent: #f59e0b;
+  --accent-hover: #fbbf24;
+  --accent-soft: rgba(245, 158, 11, 0.14);
+  --accent-border: rgba(245, 158, 11, 0.38);
+  --chord-color: #fbbf24;
+  --chord-bg: rgba(245, 158, 11, 0.12);
+  --section-color: #38bdf8;
+  --section-bg: rgba(56, 189, 248, 0.12);
+  --youtube: #ef4444;
+  --youtube-soft: rgba(239, 68, 68, 0.14);
+  --spotify: #10b981;
+  --spotify-soft: rgba(16, 185, 129, 0.14);
+  --pdf-color: #f43f5e;
+  --pdf-soft: rgba(244, 63, 94, 0.14);
+  --danger: #ef4444;
+  --success: #10b981;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25);
+  --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.6);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --cipher-font-size: 16px;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Consolas', 'Courier New', monospace;
+}
+
+[data-theme="light"] {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #f1f5f9;
+  --bg-surface: #ffffff;
+  --bg-surface-hover: #f8fafc;
+  --bg-elevated: #ffffff;
+  --border-color: rgba(15, 23, 42, 0.1);
+  --border-strong: rgba(15, 23, 42, 0.2);
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --accent: #d97706;
+  --accent-hover: #b45309;
+  --accent-soft: rgba(217, 119, 6, 0.12);
+  --accent-border: rgba(217, 119, 6, 0.35);
+  --chord-color: #c2410c;
+  --chord-bg: rgba(234, 88, 12, 0.1);
+  --section-color: #0284c7;
+  --section-bg: rgba(2, 132, 199, 0.1);
+  --shadow-sm: 0 2px 6px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.1);
+  --shadow-lg: 0 20px 40px rgba(15, 23, 42, 0.16);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  height: 100%;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+
+/* App Shell Layout */
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Sidebar Navigation */
+.sidebar {
+  width: 270px;
+  background-color: var(--bg-secondary);
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 40;
+  transition: transform 0.25s ease;
+}
+
+.brand-header {
+  padding: 20px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: var(--text-primary);
+}
+
+.brand-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #f59e0b, #ea580c);
+  color: #fff;
+  font-weight: 800;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.brand-title {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.brand-subtitle {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.sidebar-actions {
+  padding: 16px 14px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nav-section {
+  padding: 10px 14px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.nav-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin: 14px 8px 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.nav-item:hover {
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+.nav-item.active {
+  background-color: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.nav-item-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.nav-item-left span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nav-badge {
+  font-size: 11px;
+  padding: 2px 7px;
+  border-radius: 99px;
+  background-color: var(--bg-surface);
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.nav-item.active .nav-badge {
+  background-color: var(--accent);
+  color: #fff;
+}
+
+.nav-cat-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  border-radius: var(--radius-sm);
+  padding-right: 4px;
+  transition: background-color 0.15s ease;
+}
+
+.nav-cat-row:hover {
+  background-color: var(--bg-surface);
+}
+
+.nav-cat-row.active {
+  background-color: var(--accent-soft);
+}
+
+.nav-cat-row .nav-item {
+  flex: 1;
+  min-width: 0;
+  background: transparent !important;
+}
+
+.nav-cat-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  opacity: 0.65;
+  transition: opacity 0.15s ease;
+}
+
+.nav-cat-row:hover .nav-cat-actions {
+  opacity: 1;
+}
+
+.nav-cat-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px 5px;
+  border-radius: 5px;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.nav-cat-btn:hover {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.nav-header-btn {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border: 1px solid var(--accent-border);
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.nav-header-btn:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+.sidebar-footer {
+  padding: 12px 14px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Main Content Area */
+.main-area {
+  flex: 1;
+  margin-left: 270px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 85px;
+}
+
+/* Topbar */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background-color: var(--bg-secondary);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-color);
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.search-box {
+  position: relative;
+  flex: 1;
+  max-width: 520px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  padding: 10px 36px 10px 38px;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 99px;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.search-clear {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  display: none;
+}
+
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 15px;
+  border-radius: var(--radius-sm);
+  font-size: 13.5px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #f59e0b, #ea580c);
+  color: #ffffff;
+  box-shadow: 0 3px 10px rgba(234, 88, 12, 0.25);
+}
+
+.btn-primary:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+.btn-secondary:hover {
+  background-color: var(--bg-surface-hover);
+  border-color: var(--border-strong);
+}
+
+.btn-accent-outline {
+  background-color: var(--accent-soft);
+  color: var(--accent);
+  border-color: var(--accent-border);
+}
+
+.btn-accent-outline:hover {
+  background-color: var(--accent);
+  color: #fff;
+}
+
+.btn-danger {
+  background-color: rgba(239, 68, 68, 0.12);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.btn-danger:hover {
+  background-color: #ef4444;
+  color: #fff;
+}
+
+.btn-sm {
+  padding: 6px 11px;
+  font-size: 12.5px;
+}
+
+.btn-icon {
+  padding: 8px;
+  border-radius: var(--radius-sm);
+}
+
+/* Content Container */
+.view-container {
+  padding: 24px;
+  max-width: 1240px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.view-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.view-title {
+  font-size: 23px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.view-subtitle {
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+/* Filter Bar */
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.filter-chips {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.chip {
+  padding: 6px 13px;
+  border-radius: 99px;
+  font-size: 12.5px;
+  font-weight: 600;
+  background-color: var(--bg-surface);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+  font-family: inherit;
+}
+
+.chip:hover {
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+}
+
+.chip.active {
+  background-color: var(--accent);
+  color: #ffffff;
+  border-color: var(--accent);
+}
+
+.filter-select {
+  padding: 7px 12px;
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  font-size: 13px;
+  font-family: inherit;
+}
+
+/* Song Grid & Cards */
+.songs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.song-card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 14px;
+  transition: all 0.18s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+.song-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-border);
+  box-shadow: var(--shadow-md);
+}
+
+.song-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.song-key-badge {
+  min-width: 42px;
+  height: 42px;
+  padding: 0 8px;
+  border-radius: 10px;
+  background-color: var(--accent-soft);
+  border: 1px solid var(--accent-border);
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.song-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.song-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.song-artist {
+  font-size: 13px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+}
+
+.song-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.icon-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.icon-btn:hover {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.icon-btn.fav-active {
+  color: #fbbf24;
+}
+
+.song-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-color);
+}
+
+.badge-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+}
+
+.badge-pdf {
+  background-color: var(--pdf-soft);
+  color: var(--pdf-color);
+}
+
+.badge-text {
+  background-color: var(--section-bg);
+  color: var(--section-color);
+}
+
+.badge-yt {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+
+.badge-sp {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+}
+
+/* Setlists (Repertórios) Grid */
+.setlists-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.setlist-card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.setlist-songs-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background-color: var(--bg-secondary);
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  max-height: 160px;
+  overflow-y: auto;
+}
+
+.setlist-preview-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  gap: 8px;
+}
+
+.setlist-preview-num {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  width: 20px;
+}
+
+/* Reader / Song Viewer */
+.reader-toolbar {
+  position: sticky;
+  top: 61px;
+  z-index: 25;
+  background-color: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  padding: 10px 20px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  box-shadow: var(--shadow-sm);
+}
+
+.stage-banner {
+  background: linear-gradient(90deg, rgba(245, 158, 11, 0.18), rgba(234, 88, 12, 0.18));
+  border-bottom: 1px solid var(--accent-border);
+  padding: 8px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.control-pill {
+  display: inline-flex;
+  align-items: center;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.control-pill button {
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  padding: 7px 11px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+
+.control-pill button:hover {
+  background-color: var(--bg-surface-hover);
+}
+
+.control-pill .pill-value {
+  padding: 0 10px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  border-left: 1px solid var(--border-color);
+  border-right: 1px solid var(--border-color);
+  min-width: 44px;
+  text-align: center;
+}
+
+.reader-header-card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  margin-bottom: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.reader-song-title {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.reader-song-artist {
+  font-size: 15px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+.reader-meta-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.meta-pill {
+  font-size: 12.5px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+}
+
+.meta-pill strong {
+  color: var(--text-primary);
+}
+
+.media-links-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-youtube {
+  background-color: rgba(239, 68, 68, 0.14);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+}
+
+.btn-youtube:hover, .btn-youtube.active {
+  background-color: #ef4444;
+  color: #ffffff;
+}
+
+.btn-spotify {
+  background-color: rgba(16, 185, 129, 0.14);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.btn-spotify:hover, .btn-spotify.active {
+  background-color: #10b981;
+  color: #ffffff;
+}
+
+/* Media Embed Drawer */
+.media-drawer {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.media-embed-box {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  padding: 12px;
+}
+
+.media-embed-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.yt-iframe-wrap {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%;
+  height: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #000;
+}
+
+.yt-iframe-wrap iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* Cipher Sheet Display */
+.cipher-sheet {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 26px;
+  overflow-x: auto;
+  box-shadow: var(--shadow-sm);
+}
+
+.cipher-content {
+  font-family: var(--font-mono);
+  font-size: var(--cipher-font-size);
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: break-word;
+  tab-size: 4;
+}
+
+.cipher-content.two-columns {
+  column-count: 2;
+  column-gap: 40px;
+  column-rule: 1px solid var(--border-color);
+}
+
+.cipher-line {
+  min-height: 1.5em;
+}
+
+.chord-token {
+  color: var(--chord-color);
+  font-weight: 800;
+  background-color: var(--chord-bg);
+  padding: 1px 3px;
+  border-radius: 4px;
+}
+
+.section-token {
+  display: inline-block;
+  color: var(--section-color);
+  background-color: var(--section-bg);
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 6px;
+  margin-top: 8px;
+  margin-bottom: 2px;
+}
+
+/* PDF Viewer Sheet */
+.pdf-sheet {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pdf-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.pdf-pages-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  overflow-x: auto;
+  padding: 8px 0;
+}
+
+.pdf-page-canvas {
+  max-width: 100%;
+  height: auto !important;
+  border-radius: 6px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+  background-color: #ffffff;
+}
+
+/* Auto-scroll Floating Bar */
+.autoscroll-bar {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 35;
+  background-color: var(--bg-elevated);
+  border: 1px solid var(--accent-border);
+  border-radius: 99px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: var(--shadow-lg);
+}
+
+.autoscroll-bar input[type="range"] {
+  width: 90px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+/* Modals */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background-color: rgba(2, 6, 23, 0.75);
+  backdrop-filter: blur(4px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.modal-backdrop.open {
+  display: flex;
+}
+
+.modal-dialog {
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 780px;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.modal-header {
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modal-title {
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.modal-body {
+  padding: 20px 22px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modal-footer {
+  padding: 14px 22px;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  background-color: var(--bg-elevated);
+}
+
+/* Forms */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.form-textarea.mono {
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+  line-height: 1.55;
+  min-height: 250px;
+  resize: vertical;
+}
+
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.quick-insert-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px;
+  background-color: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+}
+
+.quick-chip {
+  padding: 4px 9px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.quick-chip:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.pdf-dropzone {
+  border: 2px dashed var(--border-strong);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  text-align: center;
+  background-color: var(--bg-surface);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.pdf-dropzone:hover, .pdf-dropzone.dragover {
+  border-color: var(--accent);
+  background-color: var(--accent-soft);
+}
+
+/* Mobile Bottom Nav */
+.mobile-bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 45;
+  background-color: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+  justify-content: space-around;
+}
+
+.mob-nav-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.mob-nav-btn.active {
+  color: var(--accent);
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 50px 20px;
+  background-color: var(--bg-surface);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-lg);
+}
+
+/* Toast Notification */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 90;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.toast {
+  background-color: #0f172a;
+  color: #ffffff;
+  border: 1px solid var(--accent);
+  padding: 11px 18px;
+  border-radius: 99px;
+  font-size: 13.5px;
+  font-weight: 600;
+  box-shadow: var(--shadow-lg);
+  animation: fadeInUp 0.2s ease;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 900px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
+  .sidebar.mobile-open {
+    transform: translateX(0);
+    box-shadow: var(--shadow-lg);
+  }
+  .main-area {
+    margin-left: 0;
+  }
+  .mobile-bottom-nav {
+    display: flex;
+  }
+  .autoscroll-bar {
+    bottom: 74px;
+    right: 14px;
+  }
+  .cipher-content.two-columns {
+    column-count: 1;
+  }
+  .view-container {
+    padding: 16px;
+  }
+  .topbar {
+    padding: 10px 14px;
+  }
+}
+
+/* Print Stylesheet */
+@media print {
+  .sidebar, .topbar, .reader-toolbar, .stage-banner, .autoscroll-bar, .mobile-bottom-nav, .media-links-bar, .media-drawer {
+    display: none !important;
+  }
+  .main-area {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  body, .cipher-sheet, .reader-header-card {
+    background: #fff !important;
+    color: #000 !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+  .chord-token {
+    color: #b45309 !important;
+    background: none !important;
+  }
+}
+
+</style>
 
   <!-- PDF.js for cross-platform Android/iOS/PC multi-page PDF canvas rendering -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -703,10 +1998,2547 @@
   <!-- Toast Notifications Container -->
   <div id="toastContainer" class="toast-container"></div>
 
-  <!-- App Scripts -->
-  <script src="js/db.js"></script>
-  <script src="js/chord-engine.js"></script>
-  <script src="js/share.js"></script>
-  <script src="js/app.js"></script>
+  <!-- App Scripts (Self-Contained) -->
+  <script>
+/**
+ * CifraFlow — Camada de Persistência Local (IndexedDB)
+ * Suporta armazenamento de cifras digitadas, arquivos PDF completos,
+ * categorias personalizadas e repertórios (setlists) sem limite de 5MB.
+ */
+(function (global) {
+  const DB_NAME = 'CifraFlowDB';
+  const DB_VERSION = 1;
+
+  const DEFAULT_CATEGORIES = [
+    'Repertório Geral',
+    'Acústico / Voz e Violão',
+    'Louvor / Gospel',
+    'MPB / Nacional',
+    'Pop / Rock',
+    'Sertanejo / Forró'
+  ];
+
+  const INITIAL_SONGS = [
+    {
+      id: 'song-demo-1',
+      title: 'Tempo Perdido',
+      artist: 'Legião Urbana',
+      category: 'Pop / Rock',
+      key: 'Em',
+      capo: 0,
+      bpm: 122,
+      timeSignature: '4/4',
+      favorite: true,
+      youtubeUrl: 'https://www.youtube.com/watch?v=2hr7Uqu6G80',
+      spotifyUrl: 'https://open.spotify.com/track/7C2iU2be2fE3A17C8zD9iR',
+      notes: 'Batida rock balada constante. Crescer dinâmica no refrão final ("Somos tão jovens").',
+      content: `[Intro] C  Am7  Bm7  Em
+        C  Am7  Bm7  Em
+
+[Primeira Parte]
+C                     Am7
+  Todos os dias quando acordo
+Bm7                        Em
+  Não tenho mais o tempo que passou
+C                   Am7
+  Mas tenho muito tempo
+Bm7                        Em
+  Temos todo o tempo do mundo
+
+[Segunda Parte]
+C                 Am7
+  Todos os dias antes de dormir
+Bm7                            Em
+  Lembro e esqueço como foi o dia
+C                Am7
+  Sempre em frente
+Bm7                     Em
+  Não temos tempo a perder
+
+[Refrão]
+C                  Am7
+  Nosso suor sagrado
+            Bm7
+É bem mais belo que esse sangue amargo
+      Em
+E tão sério
+      C        Am7
+E selvagem! Selvagem!
+   Bm7        Em
+Selvagem!
+
+[Final]
+           C                Am7
+Temos nosso próprio tempo
+           Bm7              Em
+Temos nosso próprio tempo
+           C                Am7
+Temos nosso próprio tempo
+       Bm7         Em
+Somos tão jovens!`,
+      pdfData: null,
+      pdfName: null,
+      createdAt: Date.now() - 86400000 * 2,
+      updatedAt: Date.now() - 3600000
+    },
+    {
+      id: 'song-demo-2',
+      title: 'Anunciação',
+      artist: 'Alceu Valença',
+      category: 'MPB / Nacional',
+      key: 'G',
+      capo: 0,
+      bpm: 108,
+      timeSignature: '4/4',
+      favorite: true,
+      youtubeUrl: 'https://www.youtube.com/watch?v=OR74idpsweg',
+      spotifyUrl: 'https://open.spotify.com/track/43M2L963G50M6i1U6jX9B4',
+      notes: 'Ótima para abrir apresentação acústica. Melodia da introdução pode ser feita no violão.',
+      content: `[Intro] G  Em  C  D7  G
+
+[Primeira Parte]
+               G
+Na bruma leve das paixões
+                 Em
+Que vêm de dentro
+                   C
+Tu vens chegando pra brincar
+              D7
+No meu quintal
+            G
+No teu cavalo
+                     Em
+Peito nu, cabelo ao vento
+                 C
+E o sol quarando nossas roupas
+         D7          G
+No varal
+
+[Refrão]
+Tu vens, tu vens!
+   Em           C
+Eu já escuto os teus sinais!
+         D7          G
+Tu vens, tu vens!
+   Em           C            D7
+Eu já escuto os teus sinais!
+
+[Segunda Parte]
+          Em
+A voz do anjo
+                     Bm
+Sussurrou no meu ouvido
+          C
+Eu não duvido
+                    G
+Já escuto os teus sinais
+            C
+Que tu virias
+                   G
+Numa manhã de domingo
+          Am7       D7         G
+Eu te anuncio nos sinos das catedrais`,
+      pdfData: null,
+      pdfName: null,
+      createdAt: Date.now() - 86400000,
+      updatedAt: Date.now() - 1800000
+    },
+    {
+      id: 'song-demo-3',
+      title: 'Bondade de Deus (Goodness of God)',
+      artist: 'Isaías Saad',
+      category: 'Louvor / Gospel',
+      key: 'G',
+      capo: 1,
+      bpm: 68,
+      timeSignature: '4/4',
+      favorite: false,
+      youtubeUrl: 'https://www.youtube.com/watch?v=mZ9yZ3d1f8k',
+      spotifyUrl: 'https://open.spotify.com/track/1M2G1k8p8iK4B2i4G0n5L2',
+      notes: 'Capotraste na 1ª casa para soar em Ab (Lá bemol), usando formas de Sol Maior (G).',
+      content: `[Intro] G  C  G  C
+
+[Primeira Parte]
+         G
+Te amo, Deus
+       C               G
+Tua graça nunca falha
+      D/F#          Em
+Todos os dias
+          C              D4  D
+Eu estou em Tuas mãos
+              Em
+Desde quando me levanto
+        C            G  D/F#  Em
+Até eu me deitar
+        C            D           G
+Eu cantarei da bondade de Deus
+
+[Refrão]
+  C                     G
+És fiel em todo tempo
+  C                     G     D/F#  Em
+És fiel em todo tempo
+  C                        G          D/F#  Em
+Com todo fôlego que há em mim
+        C            D           G
+Eu cantarei da bondade de Deus
+
+[Ponte]
+G/B              C
+Tua bondade me perseguirá
+    D                G
+Me perseguirá, Senhor
+G/B              C
+Tua bondade me perseguirá
+    D                G
+Me perseguirá, Senhor`,
+      pdfData: null,
+      pdfName: null,
+      createdAt: Date.now() - 40000000,
+      updatedAt: Date.now()
+    }
+  ];
+
+  const INITIAL_SETLISTS = [
+    {
+      id: 'setlist-demo-1',
+      title: 'Repertório de Sexta (Exemplo)',
+      date: new Date().toISOString().slice(0, 10),
+      description: 'Sequência principal para ensaio e apresentação ao vivo.',
+      items: [
+        { songId: 'song-demo-2', customKey: 'G' },
+        { songId: 'song-demo-1', customKey: 'Em' },
+        { songId: 'song-demo-3', customKey: 'G' }
+      ],
+      createdAt: Date.now()
+    }
+  ];
+
+  let dbInstance = null;
+
+  function openDB() {
+    if (dbInstance) return Promise.resolve(dbInstance);
+
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+      request.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains('songs')) {
+          const songStore = db.createObjectStore('songs', { keyPath: 'id' });
+          songStore.createIndex('category', 'category', { unique: false });
+          songStore.createIndex('updatedAt', 'updatedAt', { unique: false });
+        }
+        if (!db.objectStoreNames.contains('setlists')) {
+          db.createObjectStore('setlists', { keyPath: 'id' });
+        }
+        if (!db.objectStoreNames.contains('meta')) {
+          db.createObjectStore('meta', { keyPath: 'key' });
+        }
+      };
+
+      request.onsuccess = (e) => {
+        dbInstance = e.target.result;
+        resolve(dbInstance);
+      };
+
+      request.onerror = (e) => {
+        reject(e.target.error);
+      };
+    });
+  }
+
+  async function txStore(storeName, mode, callback) {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction(storeName, mode);
+      const store = tx.objectStore(storeName);
+      const req = callback(store);
+      tx.oncomplete = () => resolve(req ? req.result : undefined);
+      tx.onerror = () => reject(tx.error);
+    });
+  }
+
+  const CifraDB = {
+    async init() {
+      await openDB();
+      const seeded = await this.getMeta('seeded_v1');
+      if (!seeded) {
+        const existingSongs = await this.getAllSongs();
+        if (existingSongs.length === 0) {
+          for (const song of INITIAL_SONGS) {
+            await this.saveSong(song);
+          }
+          for (const setlist of INITIAL_SETLISTS) {
+            await this.saveSetlist(setlist);
+          }
+        }
+        await this.setMeta('categories', DEFAULT_CATEGORIES);
+        await this.setMeta('seeded_v1', true);
+      }
+    },
+
+    async getAllSongs() {
+      const list = await txStore('songs', 'readonly', (store) => store.getAll());
+      return (list || []).sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0));
+    },
+
+    async getSong(id) {
+      return txStore('songs', 'readonly', (store) => store.get(id));
+    },
+
+    async saveSong(song) {
+      const now = Date.now();
+      const record = {
+        ...song,
+        id: song.id || 'song-' + now + '-' + Math.random().toString(36).slice(2, 7),
+        createdAt: song.createdAt || now,
+        updatedAt: now
+      };
+      await txStore('songs', 'readwrite', (store) => store.put(record));
+      if (record.category) {
+        await this.ensureCategory(record.category);
+      }
+      return record;
+    },
+
+    async deleteSong(id) {
+      await txStore('songs', 'readwrite', (store) => store.delete(id));
+      // Also clean from setlists
+      const setlists = await this.getAllSetlists();
+      for (const sl of setlists) {
+        const filtered = (sl.items || []).filter((item) => item.songId !== id);
+        if (filtered.length !== (sl.items || []).length) {
+          sl.items = filtered;
+          await this.saveSetlist(sl);
+        }
+      }
+    },
+
+    async getAllSetlists() {
+      const list = await txStore('setlists', 'readonly', (store) => store.getAll());
+      return (list || []).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+    },
+
+    async getSetlist(id) {
+      return txStore('setlists', 'readonly', (store) => store.get(id));
+    },
+
+    async saveSetlist(setlist) {
+      const now = Date.now();
+      const record = {
+        ...setlist,
+        id: setlist.id || 'setlist-' + now + '-' + Math.random().toString(36).slice(2, 7),
+        createdAt: setlist.createdAt || now,
+        updatedAt: now
+      };
+      await txStore('setlists', 'readwrite', (store) => store.put(record));
+      return record;
+    },
+
+    async deleteSetlist(id) {
+      return txStore('setlists', 'readwrite', (store) => store.delete(id));
+    },
+
+    async getMeta(key) {
+      const res = await txStore('meta', 'readonly', (store) => store.get(key));
+      return res ? res.value : null;
+    },
+
+    async setMeta(key, value) {
+      return txStore('meta', 'readwrite', (store) => store.put({ key, value }));
+    },
+
+    async getCategories() {
+      const cats = await this.getMeta('categories');
+      return Array.isArray(cats) && cats.length > 0 ? cats : [...DEFAULT_CATEGORIES];
+    },
+
+    async ensureCategory(categoryName) {
+      const clean = (categoryName || '').trim();
+      if (!clean) return;
+      const cats = await this.getCategories();
+      if (!cats.includes(clean)) {
+        cats.push(clean);
+        await this.setMeta('categories', cats);
+      }
+    },
+
+    async renameCategory(oldName, newName) {
+      const cleanOld = (oldName || '').trim();
+      const cleanNew = (newName || '').trim();
+      if (!cleanOld || !cleanNew || cleanOld === cleanNew) return;
+
+      const cats = await this.getCategories();
+      const updatedCats = cats.map((c) => (c === cleanOld ? cleanNew : c));
+      // Deduplicate if renamed into an existing category
+      const uniqueCats = [...new Set(updatedCats)];
+      await this.setMeta('categories', uniqueCats);
+
+      // Update all songs in this category
+      const songs = await this.getAllSongs();
+      for (const s of songs) {
+        if ((s.category || 'Repertório Geral') === cleanOld) {
+          s.category = cleanNew;
+          await txStore('songs', 'readwrite', (store) => store.put(s));
+        }
+      }
+    },
+
+    async deleteCategory(categoryName) {
+      const clean = (categoryName || '').trim();
+      if (!clean) return;
+
+      let cats = await this.getCategories();
+      cats = cats.filter((c) => c !== clean);
+      if (cats.length === 0) {
+        cats = ['Geral'];
+      }
+      await this.setMeta('categories', cats);
+
+      const fallbackCategory = cats[0];
+      const songs = await this.getAllSongs();
+      for (const s of songs) {
+        if ((s.category || 'Repertório Geral') === clean) {
+          s.category = fallbackCategory;
+          await txStore('songs', 'readwrite', (store) => store.put(s));
+        }
+      }
+      return fallbackCategory;
+    }
+  };
+
+  global.CifraDB = CifraDB;
+})(window);
+
+  </script>
+  <script>
+/**
+ * CifraFlow — Motor Musical de Acordes, Transposição e Mídia (YouTube / Spotify)
+ */
+(function (global) {
+  const NOTES_SHARP = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+  const NOTES_FLAT  = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
+
+  const NOTE_TO_INDEX = {
+    'C': 0,  'B#': 0,
+    'C#': 1, 'Db': 1,
+    'D': 2,
+    'D#': 3, 'Eb': 3,
+    'E': 4,  'Fb': 4,
+    'F': 5,  'E#': 5,
+    'F#': 6, 'Gb': 6,
+    'G': 7,
+    'G#': 8, 'Ab': 8,
+    'A': 9,
+    'A#': 10, 'Bb': 10,
+    'B': 11, 'Cb': 11
+  };
+
+  // Keys that naturally prefer flats
+  const FLAT_KEYS = new Set(['F', 'Bb', 'Eb', 'Ab', 'Db', 'Gb', 'Dm', 'Gm', 'Cm', 'Fm', 'Bbm', 'Ebm']);
+
+  // Regex for a single chord token
+  const CHORD_REGEX = /^([A-G][#b]?)(m|maj|M|min|dim|aug|sus|add|º|°|\+|-|\d|\/(?=[0-9])|\([#b+\-\d/]+\))*(\/([A-G][#b]?))?$/;
+
+  // Neutral tokens allowed on a chord line (bar lines, repeat markers, etc.)
+  const NEUTRAL_TOKEN_REGEX = /^(\|+|\/+|-+|\.+|\(\d+x\)|\d+x|x\d+|\(solo\)|\(riff\)|\(pausa\))$/i;
+
+  function isChordToken(token) {
+    if (!token || typeof token !== 'string') return false;
+    const cleaned = token.replace(/^[|(]+|[|),.;:]+$/g, '');
+    if (!cleaned) return false;
+    return CHORD_REGEX.test(cleaned);
+  }
+
+  function transposeNote(note, semitones, useFlats) {
+    const idx = NOTE_TO_INDEX[note];
+    if (idx === undefined) return note;
+    const nextIdx = ((idx + semitones) % 12 + 12) % 12;
+    return useFlats ? NOTES_FLAT[nextIdx] : NOTES_SHARP[nextIdx];
+  }
+
+  function transposeSingleChord(token, semitones, useFlats) {
+    if (!semitones && useFlats === undefined) return token;
+
+    // Preserve outer parentheses/bars if attached
+    const prefixMatch = token.match(/^[|(]+/);
+    const suffixMatch = token.match(/[|),.;:]+$/);
+    const prefix = prefixMatch ? prefixMatch[0] : '';
+    const suffix = suffixMatch ? suffixMatch[0] : '';
+    const core = token.slice(prefix.length, token.length - suffix.length);
+
+    const match = core.match(CHORD_REGEX);
+    if (!match) return token;
+
+    const root = match[1];
+    const bassPart = match[3] || '';
+    const bassNote = match[4] || '';
+    const middle = core.slice(root.length, core.length - bassPart.length);
+
+    const preferFlats = useFlats !== undefined ? useFlats : root.includes('b') || bassNote.includes('b');
+    const newRoot = transposeNote(root, semitones, preferFlats);
+    const newBass = bassNote ? '/' + transposeNote(bassNote, semitones, preferFlats) : '';
+
+    return prefix + newRoot + middle + newBass + suffix;
+  }
+
+  function transposeKeyName(keyStr, semitones, forceFlats) {
+    if (!keyStr) return 'C';
+    const trimmed = keyStr.trim();
+    const match = trimmed.match(/^([A-G][#b]?)(.*)$/);
+    if (!match) return trimmed;
+    const root = match[1];
+    const rest = match[2] || '';
+    const useFlats = forceFlats !== undefined ? forceFlats : FLAT_KEYS.has(trimmed);
+    const newRoot = transposeNote(root, semitones, useFlats);
+    return newRoot + rest;
+  }
+
+  function isChordLine(line) {
+    const trimmed = line.trim();
+    if (!trimmed) return false;
+
+    // Remove leading section tag like [Intro] if present
+    const withoutSection = trimmed.replace(/^\[[^\]]+\]\s*/, '');
+    if (!withoutSection) return false;
+
+    const tokens = withoutSection.split(/\s+/).filter(Boolean);
+    if (tokens.length === 0) return false;
+
+    let chordCount = 0;
+    for (const tok of tokens) {
+      if (isChordToken(tok)) {
+        chordCount++;
+      } else if (NEUTRAL_TOKEN_REGEX.test(tok)) {
+        continue;
+      } else {
+        return false;
+      }
+    }
+
+    if (chordCount === 0) return false;
+
+    // Guard against single-word Portuguese lines that happen to be "E" or "A"
+    if (tokens.length === 1 && (tokens[0] === 'A' || tokens[0] === 'E') && line.indexOf('  ') === -1) {
+      return true; // Isolated 'A' or 'E' on its own line in a cipher is a chord
+    }
+
+    return true;
+  }
+
+  /**
+   * Transposes a chord line while maintaining column alignment above lyrics
+   */
+  function transposeChordLinePreservingColumns(line, semitones, useFlats) {
+    let sectionPrefix = '';
+    let workingLine = line;
+
+    const secMatch = line.match(/^(\s*\[[^\]]+\])(.*)$/);
+    if (secMatch) {
+      sectionPrefix = secMatch[1];
+      workingLine = secMatch[2];
+    }
+
+    const tokenRegex = /\S+/g;
+    const tokens = [];
+    let m;
+    while ((m = tokenRegex.exec(workingLine)) !== null) {
+      tokens.push({
+        text: m[0],
+        index: m.index
+      });
+    }
+
+    if (tokens.length === 0) return line;
+
+    let result = '';
+    for (let i = 0; i < tokens.length; i++) {
+      const tok = tokens[i];
+      const desiredStart = tok.index;
+      const currentLen = result.length;
+
+      if (currentLen < desiredStart) {
+        result += ' '.repeat(desiredStart - currentLen);
+      } else if (i > 0) {
+        result += ' ';
+      }
+
+      if (isChordToken(tok.text)) {
+        result += transposeSingleChord(tok.text, semitones, useFlats);
+      } else {
+        result += tok.text;
+      }
+    }
+
+    return sectionPrefix + result;
+  }
+
+  /**
+   * Transposes an entire cipher text (supports both chord-lines and inline [Chord] notation)
+   */
+  function transposeCipherText(text, semitones, useFlats) {
+    if (!text) return '';
+    if (semitones === 0 && useFlats === undefined) return text;
+
+    const lines = text.split(/\r?\n/);
+    return lines
+      .map((line) => {
+        if (isChordLine(line)) {
+          return transposeChordLinePreservingColumns(line, semitones, useFlats);
+        }
+        // Check for inline [Chord] tokens inside lyric lines
+        return line.replace(/\[([^\]]+)\]/g, (full, inner) => {
+          if (isChordToken(inner.trim())) {
+            return '[' + transposeSingleChord(inner.trim(), semitones, useFlats) + ']';
+          }
+          return full;
+        });
+      })
+      .join('\n');
+  }
+
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  /**
+   * Renders cipher text to rich HTML with highlighted chords and section badges
+   */
+  function renderCipherHtml(text, semitones = 0, useFlats = false) {
+    if (!text) return '';
+    const transposed = transposeCipherText(text, semitones, useFlats);
+    const lines = transposed.split(/\r?\n/);
+
+    return lines
+      .map((line) => {
+        const trimmed = line.trim();
+        if (!trimmed) {
+          return '<div class="cipher-line">&nbsp;</div>';
+        }
+
+        // Pure section header line e.g. [Refrão]
+        if (/^\[[^\]]+\]$/.test(trimmed) && !isChordToken(trimmed.slice(1, -1))) {
+          return `<div class="cipher-line"><span class="section-token">${escapeHtml(trimmed)}</span></div>`;
+        }
+
+        // Chord line (possibly starting with [Intro])
+        if (isChordLine(line)) {
+          let htmlLine = '';
+          let rest = line;
+          const secMatch = line.match(/^(\s*)(\[[^\]]+\])(.*)$/);
+          if (secMatch) {
+            htmlLine += escapeHtml(secMatch[1]) + `<span class="section-token">${escapeHtml(secMatch[2])}</span>`;
+            rest = secMatch[3];
+          }
+          htmlLine += rest.replace(/\S+/g, (tok) => {
+            if (isChordToken(tok)) {
+              return `<span class="chord-token">${escapeHtml(tok)}</span>`;
+            }
+            return escapeHtml(tok);
+          });
+          return `<div class="cipher-line">${htmlLine}</div>`;
+        }
+
+        // Lyric line (highlight inline [Chord] or [Section] if any)
+        const formattedLyric = escapeHtml(line).replace(/\[([^\]]+)\]/g, (full, inner) => {
+          if (isChordToken(inner.trim())) {
+            return `<span class="chord-token">[${inner}]</span>`;
+          }
+          return `<span class="section-token">[${inner}]</span>`;
+        });
+        return `<div class="cipher-line">${formattedLyric}</div>`;
+      })
+      .join('');
+  }
+
+  /**
+   * Extract YouTube Video ID from any YouTube link
+   */
+  function extractYouTubeId(url) {
+    if (!url || typeof url !== 'string') return null;
+    const clean = url.trim();
+    const patterns = [
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/|music\.youtube\.com\/watch\?v=)([A-Za-z0-9_-]{11})/,
+      /[?&]v=([A-Za-z0-9_-]{11})/
+    ];
+    for (const p of patterns) {
+      const m = clean.match(p);
+      if (m && m[1]) return m[1];
+    }
+    return null;
+  }
+
+  /**
+   * Extract Spotify Type & ID from any Spotify link or URI
+   */
+  function extractSpotifyEmbedUrl(url) {
+    if (!url || typeof url !== 'string') return null;
+    const clean = url.trim();
+
+    // Match spotify:track:ID
+    const uriMatch = clean.match(/^spotify:(track|album|playlist|artist):([A-Za-z0-9]+)$/i);
+    if (uriMatch) {
+      return `https://open.spotify.com/embed/${uriMatch[1].toLowerCase()}/${uriMatch[2]}?utm_source=generator`;
+    }
+
+    // Match https://open.spotify.com/(intl-xx/)?(track|album|playlist|artist)/ID
+    const webMatch = clean.match(/spotify\.com\/(?:intl-[a-zA-Z-]+\/)?(track|album|playlist|artist)\/([A-Za-z0-9]+)/i);
+    if (webMatch) {
+      return `https://open.spotify.com/embed/${webMatch[1].toLowerCase()}/${webMatch[2]}?utm_source=generator`;
+    }
+
+    return null;
+  }
+
+  global.ChordEngine = {
+    NOTES_SHARP,
+    NOTES_FLAT,
+    isChordToken,
+    isChordLine,
+    transposeSingleChord,
+    transposeKeyName,
+    transposeCipherText,
+    renderCipherHtml,
+    extractYouTubeId,
+    extractSpotifyEmbedUrl
+  };
+})(window);
+
+  </script>
+  <script>
+/**
+ * CifraFlow — Motor de Compartilhamento, Exportação/Importação (.cifra.json) e Renderização PDF
+ */
+(function (global) {
+  // Configure PDF.js worker if loaded
+  if (global.pdfjsLib) {
+    global.pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }
+
+  function utf8ToBase64Url(str) {
+    const bytes = new TextEncoder().encode(str);
+    let binary = '';
+    for (let i = 0; i < bytes.length; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+    return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+
+  function base64UrlToUtf8(b64url) {
+    let b64 = b64url.replace(/-/g, '+').replace(/_/g, '/');
+    while (b64.length % 4) b64 += '=';
+    const binary = atob(b64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
+    return new TextDecoder().decode(bytes);
+  }
+
+  function dataUrlToUint8Array(dataUrl) {
+    const base64Index = dataUrl.indexOf(';base64,');
+    const base64 = base64Index !== -1 ? dataUrl.slice(base64Index + 8) : dataUrl;
+    const raw = atob(base64);
+    const uint8Array = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) {
+      uint8Array[i] = raw.charCodeAt(i);
+    }
+    return uint8Array;
+  }
+
+  function sanitizeFilename(name) {
+    return (name || 'cifra')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-zA-Z0-9_-]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .toLowerCase() || 'cifra';
+  }
+
+  const ShareEngine = {
+    /**
+     * Generates a self-contained share link for a song (excluding heavy PDF binary so URL stays compact)
+     */
+    createSongShareLink(song, semitones = 0) {
+      const transposedKey = global.ChordEngine.transposeKeyName(song.key || 'C', semitones);
+      const transposedContent = global.ChordEngine.transposeCipherText(song.content || '', semitones);
+
+      const compactPayload = {
+        v: 1,
+        t: 'song',
+        d: {
+          title: song.title,
+          artist: song.artist || '',
+          category: song.category || 'Repertório Geral',
+          key: transposedKey,
+          capo: song.capo || 0,
+          bpm: song.bpm || '',
+          timeSignature: song.timeSignature || '4/4',
+          youtubeUrl: song.youtubeUrl || '',
+          spotifyUrl: song.spotifyUrl || '',
+          notes: song.notes || '',
+          content: transposedContent
+        }
+      };
+
+      const encoded = utf8ToBase64Url(JSON.stringify(compactPayload));
+      const baseUrl = window.location.href.split('#')[0];
+      return `${baseUrl}#share=${encoded}`;
+    },
+
+    /**
+     * Parses a #share=... payload from URL hash
+     */
+    parseShareHash(hashStr) {
+      if (!hashStr || !hashStr.startsWith('#share=')) return null;
+      try {
+        const encoded = hashStr.slice(7);
+        const jsonStr = base64UrlToUtf8(encoded);
+        const parsed = JSON.parse(jsonStr);
+        if (parsed && parsed.d && parsed.d.title) {
+          return parsed;
+        }
+      } catch (err) {
+        console.error('Erro ao ler link compartilhado:', err);
+      }
+      return null;
+    },
+
+    /**
+     * Formats song as clean text for WhatsApp / Telegram
+     */
+    formatSongForWhatsApp(song, semitones = 0) {
+      const key = global.ChordEngine.transposeKeyName(song.key || 'C', semitones);
+      const body = global.ChordEngine.transposeCipherText(song.content || '', semitones);
+      const lines = [];
+      lines.push(`🎵 *${song.title}* — _${song.artist || 'Artista'}_`);
+      lines.push(`🎼 *Tom:* ${key}${song.capo ? ` (Capo ${song.capo}ª casa)` : ''}${song.bpm ? ` | *BPM:* ${song.bpm}` : ''}`);
+      if (song.youtubeUrl) lines.push(`▶️ *YouTube:* ${song.youtubeUrl}`);
+      if (song.spotifyUrl) lines.push(`🎧 *Spotify:* ${song.spotifyUrl}`);
+      if (song.notes) lines.push(`📝 *Obs:* ${song.notes}`);
+      if (body.trim()) {
+        lines.push('');
+        lines.push('```');
+        lines.push(body.trim());
+        lines.push('```');
+      } else if (song.pdfName) {
+        lines.push(`\n📄 *Cifra em PDF anexada:* ${song.pdfName}`);
+      }
+      return lines.join('\n');
+    },
+
+    /**
+     * Builds a portable .cifra.json package (supports single song with PDF, setlist with songs+PDFs, or full library)
+     */
+    buildExportPackage({ type, songs = [], setlists = [], categories = [], title = 'Pacote CifraFlow' }) {
+      return {
+        app: 'CifraFlow',
+        version: 1,
+        exportType: type,
+        title,
+        exportedAt: new Date().toISOString(),
+        categories,
+        songs,
+        setlists
+      };
+    },
+
+    /**
+     * Downloads or shares a .cifra.json package via native mobile share or file download
+     */
+    async exportPackageFile(pkg, filenamePrefix, useNativeShare = false) {
+      const jsonString = JSON.stringify(pkg, null, 2);
+      const fileName = `${sanitizeFilename(filenamePrefix)}.cifra.json`;
+      const blob = new Blob([jsonString], { type: 'application/json' });
+
+      if (useNativeShare && navigator.canShare) {
+        try {
+          const file = new File([blob], fileName, { type: 'application/json' });
+          if (navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              title: pkg.title || 'CifraFlow',
+              text: `Compartilhando "${pkg.title}" pelo app CifraFlow. Importe este arquivo no app para abrir as cifras e PDFs!`,
+              files: [file]
+            });
+            return { sharedNatively: true };
+          }
+        } catch (err) {
+          if (err.name === 'AbortError') return { aborted: true };
+        }
+      }
+
+      // Standard download
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(() => {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 400);
+      return { downloaded: true, fileName };
+    },
+
+    /**
+     * Renders a PDF DataURL inside a container using PDF.js (multi-page high-DPI canvas)
+     */
+    async renderPdfToContainer(pdfDataUrl, containerEl, scale = 1.35) {
+      if (!containerEl || !pdfDataUrl) return;
+      containerEl.innerHTML = '<div style="padding:24px;color:var(--text-secondary);">Carregando páginas do PDF...</div>';
+
+      try {
+        if (!global.pdfjsLib) {
+          throw new Error('PDF.js indisponível offline');
+        }
+
+        const pdfBytes = dataUrlToUint8Array(pdfDataUrl);
+        const loadingTask = global.pdfjsLib.getDocument({ data: pdfBytes });
+        const pdfDoc = await loadingTask.promise;
+
+        containerEl.innerHTML = '';
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+        for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
+          const page = await pdfDoc.getPage(pageNum);
+          const viewport = page.getViewport({ scale: scale * dpr });
+
+          const canvas = document.createElement('canvas');
+          canvas.className = 'pdf-page-canvas';
+          const ctx = canvas.getContext('2d');
+
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+          canvas.style.width = `${Math.round(viewport.width / dpr)}px`;
+
+          containerEl.appendChild(canvas);
+          await page.render({ canvasContext: ctx, viewport }).promise;
+        }
+      } catch (err) {
+        console.warn('Usando fallback de visualização de PDF:', err);
+        containerEl.innerHTML = `
+          <iframe src="${pdfDataUrl}" style="width:100%;height:78vh;border:none;border-radius:8px;background:#fff;"></iframe>
+        `;
+      }
+    },
+
+    /**
+     * Opens a PDF DataURL in a new browser tab or downloads it
+     */
+    openPdfInNewTab(pdfDataUrl, pdfName = 'cifra.pdf') {
+      try {
+        const bytes = dataUrlToUint8Array(pdfDataUrl);
+        const blob = new Blob([bytes], { type: 'application/pdf' });
+        const blobUrl = URL.createObjectURL(blob);
+        const win = window.open(blobUrl, '_blank');
+        if (!win) {
+          const a = document.createElement('a');
+          a.href = blobUrl;
+          a.download = pdfName;
+          a.click();
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  };
+
+  global.ShareEngine = ShareEngine;
+})(window);
+
+  </script>
+  <script>
+/**
+ * CifraFlow — Controlador Principal da Aplicação (UI, Leitor, Auto-Scroll, Repertórios e PWA)
+ */
+(function (global) {
+  const state = {
+    songs: [],
+    setlists: [],
+    categories: [],
+    currentView: 'library', // 'library' | 'setlists' | 'reader'
+    filterCategory: 'ALL',
+    filterFavorites: false,
+    filterType: 'ALL', // 'ALL' | 'TEXT' | 'PDF'
+    searchQuery: '',
+    sortBy: 'recent', // 'recent' | 'title' | 'artist' | 'key'
+    theme: localStorage.getItem('cifraflow_theme') || 'dark',
+
+    // Reader state
+    activeSong: null,
+    transposeSemitones: 0,
+    useFlats: undefined,
+    fontSize: parseInt(localStorage.getItem('cifraflow_fontsize') || '16', 10),
+    twoColumns: false,
+    activeReaderTab: 'both', // 'both' | 'text' | 'pdf'
+    pdfScale: 1.35,
+    showMediaPlayer: false,
+
+    // Stage / Setlist playback state
+    activeSetlist: null,
+    activeSetlistIndex: 0,
+
+    // Auto-scroll state
+    autoScrollActive: false,
+    autoScrollSpeed: 3,
+    autoScrollAccumulator: 0,
+    autoScrollRaf: null,
+
+    // Editor state
+    editingSongId: null,
+    editorPdfData: null,
+    editorPdfName: null,
+
+    // Setlist editor state
+    editingSetlistId: null,
+    setlistDraftItems: [],
+
+    // Incoming shared song via URL
+    incomingSharedSong: null,
+
+    // PWA install prompt
+    deferredInstallPrompt: null
+  };
+
+  // Helper DOM selector
+  const $ = (id) => document.getElementById(id);
+
+  function showToast(message) {
+    const container = $('toastContainer');
+    if (!container) return;
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = message;
+    container.appendChild(toast);
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      setTimeout(() => toast.remove(), 250);
+    }, 3000);
+  }
+
+  function escapeHtml(str) {
+    return String(str || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  // Theme management
+  function applyTheme(theme) {
+    state.theme = theme;
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('cifraflow_theme', theme);
+    const btn = $('themeToggleBtn');
+    if (btn) {
+      btn.innerHTML = theme === 'dark' ? '☀️ Modo Claro' : '🌙 Modo Escuro';
+    }
+  }
+
+  // Load all data from IndexedDB
+  async function refreshData() {
+    state.songs = await global.CifraDB.getAllSongs();
+    state.setlists = await global.CifraDB.getAllSetlists();
+    state.categories = await global.CifraDB.getCategories();
+    renderSidebar();
+    if (state.currentView === 'library') {
+      renderLibraryView();
+    } else if (state.currentView === 'setlists') {
+      renderSetlistsView();
+    }
+  }
+
+  // Sidebar rendering
+  function renderSidebar() {
+    const totalCount = $('navTotalCount');
+    const favCount = $('navFavCount');
+    const setlistCount = $('navSetlistCount');
+
+    if (totalCount) totalCount.textContent = state.songs.length;
+    if (favCount) favCount.textContent = state.songs.filter((s) => s.favorite).length;
+    if (setlistCount) setlistCount.textContent = state.setlists.length;
+
+    // Highlight main nav items
+    document.querySelectorAll('[data-nav]').forEach((el) => {
+      const target = el.getAttribute('data-nav');
+      let active = false;
+      if (target === 'all' && state.currentView === 'library' && state.filterCategory === 'ALL' && !state.filterFavorites) {
+        active = true;
+      } else if (target === 'favorites' && state.currentView === 'library' && state.filterFavorites) {
+        active = true;
+      } else if (target === 'setlists' && state.currentView === 'setlists') {
+        active = true;
+      }
+      el.classList.toggle('active', active);
+    });
+
+    // Categories list in sidebar
+    const catListEl = $('sidebarCategoriesList');
+    if (catListEl) {
+      catListEl.innerHTML = state.categories
+        .map((cat) => {
+          const count = state.songs.filter((s) => (s.category || 'Repertório Geral') === cat).length;
+          const isActive = state.currentView === 'library' && !state.filterFavorites && state.filterCategory === cat;
+          const safeCat = escapeHtml(cat).replace(/'/g, "\\'");
+          return `
+            <li class="nav-cat-row ${isActive ? 'active' : ''}">
+              <button class="nav-item ${isActive ? 'active' : ''}" onclick="App.selectCategory('${safeCat}')">
+                <div class="nav-item-left">
+                  <span>📁</span>
+                  <span>${escapeHtml(cat)}</span>
+                </div>
+                <span class="nav-badge">${count}</span>
+              </button>
+              <div class="nav-cat-actions">
+                <button type="button" class="nav-cat-btn" title="Renomear pasta" onclick="App.promptRenameCategory('${safeCat}')">✏️</button>
+                <button type="button" class="nav-cat-btn" title="Excluir pasta" onclick="App.confirmDeleteCategory('${safeCat}')">🗑️</button>
+              </div>
+            </li>
+          `;
+        })
+        .join('');
+    }
+
+    // Mobile bottom nav active states
+    document.querySelectorAll('.mob-nav-btn').forEach((btn) => {
+      const tab = btn.getAttribute('data-mob-nav');
+      const isAct =
+        (tab === 'library' && state.currentView === 'library' && !state.filterFavorites) ||
+        (tab === 'favorites' && state.currentView === 'library' && state.filterFavorites) ||
+        (tab === 'setlists' && state.currentView === 'setlists');
+      btn.classList.toggle('active', isAct);
+    });
+  }
+
+  // Filtered & sorted songs
+  function getFilteredSongs() {
+    const q = state.searchQuery.trim().toLowerCase();
+
+    return state.songs
+      .filter((song) => {
+        if (state.filterFavorites && !song.favorite) return false;
+        if (state.filterCategory !== 'ALL' && (song.category || 'Repertório Geral') !== state.filterCategory) {
+          return false;
+        }
+        if (state.filterType === 'TEXT' && !(song.content && song.content.trim())) return false;
+        if (state.filterType === 'PDF' && !song.pdfData) return false;
+
+        if (q) {
+          const hay = `${song.title || ''} ${song.artist || ''} ${song.category || ''} ${song.key || ''} ${song.content || ''} ${song.notes || ''}`.toLowerCase();
+          if (!hay.includes(q)) return false;
+        }
+        return true;
+      })
+      .sort((a, b) => {
+        if (state.sortBy === 'title') return (a.title || '').localeCompare(b.title || '', 'pt-BR');
+        if (state.sortBy === 'artist') return (a.artist || '').localeCompare(b.artist || '', 'pt-BR');
+        if (state.sortBy === 'key') return (a.key || '').localeCompare(b.key || '', 'pt-BR');
+        return (b.updatedAt || 0) - (a.updatedAt || 0);
+      });
+  }
+
+  // Render Library View
+  function renderLibraryView() {
+    $('libraryView').style.display = 'block';
+    $('setlistsView').style.display = 'none';
+    $('readerView').style.display = 'none';
+    stopAutoScroll();
+
+    // Update header title
+    const titleEl = $('libraryTitle');
+    const subEl = $('librarySubtitle');
+    if (state.filterFavorites) {
+      titleEl.textContent = '⭐ Cifras Favoritas';
+      subEl.textContent = 'Suas músicas marcadas para acesso rápido';
+    } else if (state.filterCategory !== 'ALL') {
+      titleEl.textContent = `📁 ${state.filterCategory}`;
+      subEl.textContent = 'Cifras organizadas nesta categoria';
+    } else {
+      titleEl.textContent = 'Minhas Cifras';
+      subEl.textContent = 'Organize cifras digitadas, arquivos PDF e links de YouTube e Spotify';
+    }
+
+    // Render category chips bar
+    const chipsContainer = $('categoryChipsBar');
+    if (chipsContainer) {
+      const allCats = ['ALL', ...state.categories];
+      chipsContainer.innerHTML =
+        allCats
+          .map((cat) => {
+            const active = state.filterCategory === cat && !state.filterFavorites;
+            const label = cat === 'ALL' ? 'Todas as Categorias' : cat;
+            return `<button class="chip ${active ? 'active' : ''}" onclick="App.selectCategory('${escapeHtml(cat).replace(/'/g, "\\'")}')">${escapeHtml(label)}</button>`;
+          })
+          .join('') +
+        `<button class="chip" style="border-style:dashed;color:var(--accent);" onclick="App.openCategoriesModal()">+ Nova / Editar Pastas</button>`;
+    }
+
+    // Type filter chips
+    document.querySelectorAll('[data-type-filter]').forEach((btn) => {
+      btn.classList.toggle('active', btn.getAttribute('data-type-filter') === state.filterType);
+    });
+
+    const songs = getFilteredSongs();
+    const grid = $('songsGrid');
+
+    if (songs.length === 0) {
+      grid.innerHTML = `
+        <div class="empty-state" style="grid-column: 1 / -1;">
+          <div style="font-size: 42px; margin-bottom: 10px;">🎸</div>
+          <h3 style="font-size: 18px; margin-bottom: 6px;">Nenhuma cifra encontrada</h3>
+          <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 18px;">
+            Adicione uma nova cifra digitada, anexe um PDF ou limpe os filtros de busca.
+          </p>
+          <button class="btn btn-primary" onclick="App.openSongModal()">+ Adicionar Nova Cifra</button>
+        </div>
+      `;
+      return;
+    }
+
+    grid.innerHTML = songs
+      .map((song) => {
+        const hasText = Boolean(song.content && song.content.trim());
+        const hasPdf = Boolean(song.pdfData);
+        const hasYt = Boolean(song.youtubeUrl && song.youtubeUrl.trim());
+        const hasSp = Boolean(song.spotifyUrl && song.spotifyUrl.trim());
+
+        return `
+          <div class="song-card" onclick="App.openSongReader('${song.id}')">
+            <div class="song-card-top">
+              <div class="song-key-badge" title="Tom da música">${escapeHtml(song.key || 'C')}</div>
+              <div class="song-info">
+                <div class="song-title">${escapeHtml(song.title)}</div>
+                <div class="song-artist">${escapeHtml(song.artist || 'Artista não informado')}</div>
+              </div>
+              <div class="song-card-actions" onclick="event.stopPropagation()">
+                <button class="icon-btn ${song.favorite ? 'fav-active' : ''}" title="Favoritar" onclick="App.toggleFavorite('${song.id}')">
+                  ${song.favorite ? '★' : '☆'}
+                </button>
+                <button class="icon-btn" title="Compartilhar esta cifra" onclick="App.openShareModalForSong('${song.id}')">
+                  📤
+                </button>
+              </div>
+            </div>
+            <div class="song-card-meta">
+              <div class="badge-group">
+                <span class="badge">📁 ${escapeHtml(song.category || 'Geral')}</span>
+                ${hasText ? '<span class="badge badge-text">📝 Cifra</span>' : ''}
+                ${hasPdf ? '<span class="badge badge-pdf">📄 PDF</span>' : ''}
+              </div>
+              <div class="badge-group">
+                ${hasYt ? '<span class="badge badge-yt" title="Possui link do YouTube">▶ YT</span>' : ''}
+                ${hasSp ? '<span class="badge badge-sp" title="Possui link do Spotify">🎧 Spotify</span>' : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      })
+      .join('');
+  }
+
+  // Render Setlists (Repertórios) View
+  function renderSetlistsView() {
+    $('libraryView').style.display = 'none';
+    $('setlistsView').style.display = 'block';
+    $('readerView').style.display = 'none';
+    stopAutoScroll();
+
+    const grid = $('setlistsGrid');
+    if (state.setlists.length === 0) {
+      grid.innerHTML = `
+        <div class="empty-state" style="grid-column: 1 / -1;">
+          <div style="font-size: 42px; margin-bottom: 10px;">📋</div>
+          <h3 style="font-size: 18px; margin-bottom: 6px;">Nenhum repertório criado ainda</h3>
+          <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 18px;">
+            Crie repertórios com a ordem das músicas para shows, cultos ou ensaios e compartilhe com sua banda!
+          </p>
+          <button class="btn btn-primary" onclick="App.openSetlistModal()">+ Criar Novo Repertório</button>
+        </div>
+      `;
+      return;
+    }
+
+    const songMap = new Map(state.songs.map((s) => [s.id, s]));
+
+    grid.innerHTML = state.setlists
+      .map((sl) => {
+        const validItems = (sl.items || []).filter((item) => songMap.has(item.songId));
+        const previewHtml =
+          validItems.length === 0
+            ? '<div style="color:var(--text-muted);font-size:12.5px;">Nenhuma música adicionada</div>'
+            : validItems
+                .map((item, idx) => {
+                  const s = songMap.get(item.songId);
+                  return `
+                    <div class="setlist-preview-item" style="cursor:pointer;" onclick="App.startSetlistStage('${sl.id}', ${idx})">
+                      <div style="display:flex;align-items:center;gap:6px;min-width:0;">
+                        <span class="setlist-preview-num">${idx + 1}.</span>
+                        <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600;">${escapeHtml(s.title)}</span>
+                      </div>
+                      <span class="badge" style="font-family:var(--font-mono);color:var(--accent);">${escapeHtml(item.customKey || s.key || 'C')}</span>
+                    </div>
+                  `;
+                })
+                .join('');
+
+        return `
+          <div class="setlist-card">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+              <div>
+                <h3 style="font-size:17px;font-weight:800;">${escapeHtml(sl.title)}</h3>
+                <div style="font-size:12.5px;color:var(--text-secondary);margin-top:2px;">
+                  📅 ${escapeHtml(sl.date || 'Sem data')} • ${validItems.length} música(s)
+                </div>
+              </div>
+              <div style="display:flex;gap:4px;">
+                <button class="icon-btn" title="Compartilhar Repertório" onclick="App.shareSetlistPackage('${sl.id}')">📤</button>
+                <button class="icon-btn" title="Editar Repertório" onclick="App.openSetlistModal('${sl.id}')">✏️</button>
+                <button class="icon-btn" title="Excluir Repertório" onclick="App.deleteSetlist('${sl.id}')">🗑️</button>
+              </div>
+            </div>
+            ${sl.description ? `<p style="font-size:13px;color:var(--text-secondary);">${escapeHtml(sl.description)}</p>` : ''}
+            <div class="setlist-songs-preview">${previewHtml}</div>
+            <div style="display:flex;gap:8px;margin-top:auto;">
+              <button class="btn btn-primary" style="flex:1;" onclick="App.startSetlistStage('${sl.id}', 0)" ${validItems.length === 0 ? 'disabled' : ''}>
+                ▶️ Iniciar Modo Palco
+              </button>
+              <button class="btn btn-secondary" onclick="App.shareSetlistPackage('${sl.id}')">
+                Compartilhar
+              </button>
+            </div>
+          </div>
+        `;
+      })
+      .join('');
+  }
+
+  // Open Song Reader View
+  async function openSongReader(songId, fromSetlist = null, setlistIndex = 0) {
+    const song = await global.CifraDB.getSong(songId);
+    if (!song) {
+      showToast('Música não encontrada.');
+      return;
+    }
+
+    state.currentView = 'reader';
+    state.activeSong = song;
+    state.transposeSemitones = 0;
+    state.useFlats = undefined;
+    state.showMediaPlayer = false;
+    state.activeSetlist = fromSetlist;
+    state.activeSetlistIndex = setlistIndex;
+
+    // If opened from a setlist with a custom key, calculate semitone offset automatically
+    if (fromSetlist && fromSetlist.items && fromSetlist.items[setlistIndex]) {
+      const targetKey = fromSetlist.items[setlistIndex].customKey;
+      if (targetKey && song.key && targetKey !== song.key) {
+        const diff = calculateSemitoneDiff(song.key, targetKey);
+        state.transposeSemitones = diff;
+      }
+    }
+
+    const hasText = Boolean(song.content && song.content.trim());
+    const hasPdf = Boolean(song.pdfData);
+    if (hasText && hasPdf) {
+      state.activeReaderTab = 'both';
+    } else if (hasPdf) {
+      state.activeReaderTab = 'pdf';
+    } else {
+      state.activeReaderTab = 'text';
+    }
+
+    $('libraryView').style.display = 'none';
+    $('setlistsView').style.display = 'none';
+    $('readerView').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    renderReaderContent();
+  }
+
+  function calculateSemitoneDiff(fromKey, toKey) {
+    const extractRoot = (k) => {
+      const m = String(k || '').trim().match(/^([A-G][#b]?)/);
+      return m ? m[1] : 'C';
+    };
+    const r1 = extractRoot(fromKey);
+    const r2 = extractRoot(toKey);
+    const idx1 = global.ChordEngine.NOTES_SHARP.indexOf(r1) !== -1
+      ? global.ChordEngine.NOTES_SHARP.indexOf(r1)
+      : global.ChordEngine.NOTES_FLAT.indexOf(r1);
+    const idx2 = global.ChordEngine.NOTES_SHARP.indexOf(r2) !== -1
+      ? global.ChordEngine.NOTES_SHARP.indexOf(r2)
+      : global.ChordEngine.NOTES_FLAT.indexOf(r2);
+    if (idx1 === -1 || idx2 === -1) return 0;
+    return ((idx2 - idx1) % 12 + 12) % 12;
+  }
+
+  function renderReaderContent() {
+    const song = state.activeSong;
+    if (!song) return;
+
+    const currentKey = global.ChordEngine.transposeKeyName(
+      song.key || 'C',
+      state.transposeSemitones,
+      state.useFlats
+    );
+
+    // Stage Banner (Setlist navigation)
+    const stageBanner = $('stageModeBanner');
+    if (state.activeSetlist) {
+      const items = state.activeSetlist.items || [];
+      const idx = state.activeSetlistIndex;
+      stageBanner.style.display = 'flex';
+      $('stageSetlistTitle').textContent = `📋 ${state.activeSetlist.title} (${idx + 1} de ${items.length})`;
+      $('stagePrevBtn').disabled = idx <= 0;
+      $('stageNextBtn').disabled = idx >= items.length - 1;
+    } else {
+      stageBanner.style.display = 'none';
+    }
+
+    // Toolbar controls
+    $('readerCurrentKey').textContent = currentKey;
+    $('readerSaveKeyBtn').style.display = state.transposeSemitones !== 0 ? 'inline-flex' : 'none';
+    $('readerColumnsBtn').classList.toggle('btn-accent-outline', state.twoColumns);
+
+    // Header info
+    $('readerTitle').textContent = song.title;
+    $('readerArtist').textContent = song.artist || 'Artista não informado';
+
+    const metaPills = [];
+    metaPills.push(`<span class="meta-pill">🎼 Tom: <strong>${escapeHtml(currentKey)}</strong>${state.transposeSemitones !== 0 ? ` (Orig: ${escapeHtml(song.key)})` : ''}</span>`);
+    if (song.capo && Number(song.capo) > 0) {
+      metaPills.push(`<span class="meta-pill">🎸 Capotraste: <strong>${song.capo}ª casa</strong></span>`);
+    }
+    if (song.bpm) {
+      metaPills.push(`<span class="meta-pill">⏱️ BPM: <strong>${escapeHtml(song.bpm)}</strong></span>`);
+    }
+    if (song.timeSignature) {
+      metaPills.push(`<span class="meta-pill">🥁 Compasso: <strong>${escapeHtml(song.timeSignature)}</strong></span>`);
+    }
+    metaPills.push(`<span class="meta-pill">📁 Categoria: <strong>${escapeHtml(song.category || 'Geral')}</strong></span>`);
+    $('readerMetaPills').innerHTML = metaPills.join('');
+
+    // Notes box
+    const notesBox = $('readerNotesBox');
+    if (song.notes && song.notes.trim()) {
+      notesBox.style.display = 'block';
+      notesBox.innerHTML = `<strong>📌 Observações:</strong> ${escapeHtml(song.notes)}`;
+    } else {
+      notesBox.style.display = 'none';
+    }
+
+    // YouTube & Spotify links and embedded players
+    const ytId = global.ChordEngine.extractYouTubeId(song.youtubeUrl);
+    const spEmbedUrl = global.ChordEngine.extractSpotifyEmbedUrl(song.spotifyUrl);
+    const hasAnyMedia = Boolean(song.youtubeUrl || song.spotifyUrl);
+
+    const mediaBar = $('readerMediaLinksBar');
+    if (!hasAnyMedia) {
+      mediaBar.innerHTML = `<span style="font-size:12.5px;color:var(--text-muted);">Sem links de YouTube/Spotify anexados</span>`;
+      $('readerMediaDrawer').style.display = 'none';
+    } else {
+      const buttons = [];
+      if (ytId || spEmbedUrl) {
+        buttons.push(`
+          <button class="btn btn-sm ${state.showMediaPlayer ? 'btn-primary' : 'btn-accent-outline'}" onclick="App.toggleMediaPlayer()">
+            ${state.showMediaPlayer ? '🔽 Ocultar Player na Tela' : '▶️ Ouvir / Assistir na Tela'}
+          </button>
+        `);
+      }
+      if (song.youtubeUrl) {
+        buttons.push(`
+          <a href="${escapeHtml(song.youtubeUrl)}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-youtube">
+            ▶ Abrir YouTube
+          </a>
+        `);
+      }
+      if (song.spotifyUrl) {
+        buttons.push(`
+          <a href="${escapeHtml(song.spotifyUrl)}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-spotify">
+            🎧 Abrir Spotify
+          </a>
+        `);
+      }
+      mediaBar.innerHTML = buttons.join('');
+
+      const drawer = $('readerMediaDrawer');
+      if (state.showMediaPlayer && (ytId || spEmbedUrl)) {
+        drawer.style.display = 'grid';
+        let embedsHtml = '';
+        if (ytId) {
+          embedsHtml += `
+            <div class="media-embed-box">
+              <div class="media-embed-header">
+                <span style="color:#f87171;">▶ Vídeo do YouTube</span>
+                <a href="${escapeHtml(song.youtubeUrl)}" target="_blank" rel="noopener" style="font-size:12px;color:var(--text-secondary);">Abrir no app ↗</a>
+              </div>
+              <div class="yt-iframe-wrap">
+                <iframe src="https://www.youtube.com/embed/${ytId}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+              </div>
+            </div>
+          `;
+        }
+        if (spEmbedUrl) {
+          embedsHtml += `
+            <div class="media-embed-box">
+              <div class="media-embed-header">
+                <span style="color:#34d399;">🎧 Player do Spotify</span>
+                <a href="${escapeHtml(song.spotifyUrl)}" target="_blank" rel="noopener" style="font-size:12px;color:var(--text-secondary);">Abrir no Spotify ↗</a>
+              </div>
+              <iframe style="border-radius:12px" src="${spEmbedUrl}" width="100%" height="152" frameBorder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+            </div>
+          `;
+        }
+        drawer.innerHTML = embedsHtml;
+      } else {
+        drawer.style.display = 'none';
+        drawer.innerHTML = '';
+      }
+    }
+
+    // Content sections (Typed Cipher & Attached PDF)
+    const hasText = Boolean(song.content && song.content.trim());
+    const hasPdf = Boolean(song.pdfData);
+
+    const modeSwitcher = $('readerModeSwitcher');
+    if (hasText && hasPdf) {
+      modeSwitcher.style.display = 'flex';
+      document.querySelectorAll('[data-reader-tab]').forEach((b) => {
+        b.classList.toggle('active', b.getAttribute('data-reader-tab') === state.activeReaderTab);
+      });
+    } else {
+      modeSwitcher.style.display = 'none';
+    }
+
+    // Typed cipher sheet
+    const cipherSheet = $('readerCipherSheet');
+    const cipherContent = $('readerCipherContent');
+    document.documentElement.style.setProperty('--cipher-font-size', `${state.fontSize}px`);
+
+    if (hasText && (state.activeReaderTab === 'both' || state.activeReaderTab === 'text')) {
+      cipherSheet.style.display = 'block';
+      cipherContent.classList.toggle('two-columns', state.twoColumns);
+      cipherContent.innerHTML = global.ChordEngine.renderCipherHtml(
+        song.content,
+        state.transposeSemitones,
+        state.useFlats
+      );
+    } else {
+      cipherSheet.style.display = 'none';
+    }
+
+    // PDF sheet
+    const pdfSheet = $('readerPdfSheet');
+    if (hasPdf && (state.activeReaderTab === 'both' || state.activeReaderTab === 'pdf')) {
+      pdfSheet.style.display = 'flex';
+      $('readerPdfFilename').textContent = `📄 ${song.pdfName || 'cifra.pdf'}`;
+      $('readerPdfZoomLabel').textContent = `${Math.round((state.pdfScale / 1.35) * 100)}%`;
+      global.ShareEngine.renderPdfToContainer(song.pdfData, $('readerPdfPagesContainer'), state.pdfScale);
+    } else {
+      pdfSheet.style.display = 'none';
+    }
+  }
+
+  // Auto-Scroll Engine (Smooth sub-pixel requestAnimationFrame)
+  function toggleAutoScroll() {
+    if (state.autoScrollActive) {
+      stopAutoScroll();
+    } else {
+      startAutoScroll();
+    }
+  }
+
+  function startAutoScroll() {
+    state.autoScrollActive = true;
+    state.autoScrollAccumulator = 0;
+    updateAutoScrollUI();
+
+    let lastTime = performance.now();
+    function step(now) {
+      if (!state.autoScrollActive) return;
+      const dt = (now - lastTime) / 1000;
+      lastTime = now;
+
+      // Speed 1..10 maps to ~12px/sec .. ~95px/sec
+      const pixelsPerSecond = 8 + state.autoScrollSpeed * 8.5;
+      state.autoScrollAccumulator += pixelsPerSecond * dt;
+
+      if (state.autoScrollAccumulator >= 1) {
+        const movePx = Math.floor(state.autoScrollAccumulator);
+        state.autoScrollAccumulator -= movePx;
+        window.scrollBy(0, movePx);
+
+        // Stop if reached bottom
+        if (window.innerHeight + window.scrollY >= document.body.scrollHeight - 2) {
+          stopAutoScroll();
+          return;
+        }
+      }
+      state.autoScrollRaf = requestAnimationFrame(step);
+    }
+    state.autoScrollRaf = requestAnimationFrame(step);
+  }
+
+  function stopAutoScroll() {
+    state.autoScrollActive = false;
+    if (state.autoScrollRaf) {
+      cancelAnimationFrame(state.autoScrollRaf);
+      state.autoScrollRaf = null;
+    }
+    updateAutoScrollUI();
+  }
+
+  function updateAutoScrollUI() {
+    const btn = $('autoScrollToggleBtn');
+    const label = $('autoScrollSpeedLabel');
+    if (btn) {
+      btn.innerHTML = state.autoScrollActive ? '⏸ Pausar Rolagem' : '▶️ Auto-Scroll';
+      btn.classList.toggle('btn-primary', state.autoScrollActive);
+      btn.classList.toggle('btn-secondary', !state.autoScrollActive);
+    }
+    if (label) {
+      label.textContent = `${state.autoScrollSpeed}x`;
+    }
+  }
+
+  // Song Create / Edit Modal
+  function populateCategoryDatalist() {
+    const datalist = $('categoryOptionsList');
+    if (!datalist) return;
+    datalist.innerHTML = state.categories
+      .map((c) => `<option value="${escapeHtml(c)}"></option>`)
+      .join('');
+  }
+
+  async function openSongModal(songId = null) {
+    populateCategoryDatalist();
+    state.editingSongId = songId;
+    state.editorPdfData = null;
+    state.editorPdfName = null;
+
+    if (songId) {
+      const song = await global.CifraDB.getSong(songId);
+      if (!song) return;
+      $('songModalTitle').textContent = '✏️ Editar Cifra';
+      $('songTitleInput').value = song.title || '';
+      $('songArtistInput').value = song.artist || '';
+      $('songCategoryInput').value = song.category || 'Repertório Geral';
+      $('songKeyInput').value = song.key || 'C';
+      $('songCapoInput').value = song.capo || 0;
+      $('songBpmInput').value = song.bpm || '';
+      $('songTimeSigInput').value = song.timeSignature || '4/4';
+      $('songYoutubeInput').value = song.youtubeUrl || '';
+      $('songSpotifyInput').value = song.spotifyUrl || '';
+      $('songNotesInput').value = song.notes || '';
+      $('songContentInput').value = song.content || '';
+      state.editorPdfData = song.pdfData || null;
+      state.editorPdfName = song.pdfName || null;
+      $('deleteSongModalBtn').style.display = 'inline-flex';
+    } else {
+      $('songModalTitle').textContent = '🎵 Nova Cifra / PDF';
+      $('songTitleInput').value = '';
+      $('songArtistInput').value = '';
+      $('songCategoryInput').value = state.filterCategory !== 'ALL' ? state.filterCategory : 'Repertório Geral';
+      $('songKeyInput').value = 'C';
+      $('songCapoInput').value = 0;
+      $('songBpmInput').value = '';
+      $('songTimeSigInput').value = '4/4';
+      $('songYoutubeInput').value = '';
+      $('songSpotifyInput').value = '';
+      $('songNotesInput').value = '';
+      $('songContentInput').value = '';
+      $('deleteSongModalBtn').style.display = 'none';
+    }
+
+    updateEditorPdfStatus();
+    updateMediaDetectionBadges();
+    $('songModalBackdrop').classList.add('open');
+  }
+
+  function updateEditorPdfStatus() {
+    const statusEl = $('pdfUploadStatus');
+    const clearBtn = $('clearPdfBtn');
+    if (state.editorPdfData) {
+      statusEl.innerHTML = `<span style="color:var(--accent);font-weight:700;">✔ PDF Anexado: ${escapeHtml(state.editorPdfName || 'cifra.pdf')}</span>`;
+      clearBtn.style.display = 'inline-flex';
+    } else {
+      statusEl.innerHTML = `Clique aqui ou arraste um arquivo <strong>.PDF</strong> de cifra do seu celular ou computador`;
+      clearBtn.style.display = 'none';
+    }
+  }
+
+  function updateMediaDetectionBadges() {
+    const ytVal = $('songYoutubeInput').value;
+    const spVal = $('songSpotifyInput').value;
+    const ytId = global.ChordEngine.extractYouTubeId(ytVal);
+    const spEmbed = global.ChordEngine.extractSpotifyEmbedUrl(spVal);
+
+    $('ytDetectHint').textContent = ytVal
+      ? ytId
+        ? '✔ Vídeo do YouTube reconhecido (player embutido disponível)'
+        : 'Link externo salvo'
+      : '';
+    $('spDetectHint').textContent = spVal
+      ? spEmbed
+        ? '✔ Música/Álbum do Spotify reconhecido (player embutido disponível)'
+        : 'Link externo salvo'
+      : '';
+  }
+
+  function handlePdfFileSelect(file) {
+    if (!file) return;
+    if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+      showToast('Por favor, selecione um arquivo no formato PDF.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      state.editorPdfData = e.target.result;
+      state.editorPdfName = file.name;
+      updateEditorPdfStatus();
+      // If song title is still empty, auto-fill from PDF filename
+      const titleInput = $('songTitleInput');
+      if (!titleInput.value.trim()) {
+        titleInput.value = file.name.replace(/\.pdf$/i, '').replace(/[_-]+/g, ' ');
+      }
+      showToast(`PDF "${file.name}" anexado com sucesso!`);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  async function saveSongFromModal() {
+    const title = $('songTitleInput').value.trim();
+    if (!title) {
+      showToast('Informe o título da música.');
+      $('songTitleInput').focus();
+      return;
+    }
+
+    const content = $('songContentInput').value;
+    if (!content.trim() && !state.editorPdfData) {
+      showToast('Digite a cifra ou anexe um arquivo PDF.');
+      return;
+    }
+
+    let existing = null;
+    if (state.editingSongId) {
+      existing = await global.CifraDB.getSong(state.editingSongId);
+    }
+
+    const songData = {
+      id: state.editingSongId || undefined,
+      title,
+      artist: $('songArtistInput').value.trim(),
+      category: $('songCategoryInput').value.trim() || 'Repertório Geral',
+      key: $('songKeyInput').value.trim() || 'C',
+      capo: parseInt($('songCapoInput').value || '0', 10),
+      bpm: $('songBpmInput').value.trim(),
+      timeSignature: $('songTimeSigInput').value,
+      youtubeUrl: $('songYoutubeInput').value.trim(),
+      spotifyUrl: $('songSpotifyInput').value.trim(),
+      notes: $('songNotesInput').value.trim(),
+      content,
+      pdfData: state.editorPdfData,
+      pdfName: state.editorPdfName,
+      favorite: existing ? existing.favorite : false,
+      createdAt: existing ? existing.createdAt : Date.now()
+    };
+
+    const saved = await global.CifraDB.saveSong(songData);
+    $('songModalBackdrop').classList.remove('open');
+    await refreshData();
+    showToast('Cifra salva com sucesso!');
+
+    if (state.currentView === 'reader' && state.activeSong && state.activeSong.id === saved.id) {
+      openSongReader(saved.id, state.activeSetlist, state.activeSetlistIndex);
+    }
+  }
+
+  async function deleteCurrentEditingSong() {
+    if (!state.editingSongId) return;
+    if (!confirm('Tem certeza que deseja excluir esta cifra permanentemente?')) return;
+    const deletedId = state.editingSongId;
+    await global.CifraDB.deleteSong(deletedId);
+    $('songModalBackdrop').classList.remove('open');
+    if (state.currentView === 'reader' && state.activeSong && state.activeSong.id === deletedId) {
+      state.currentView = 'library';
+    }
+    await refreshData();
+    showToast('Cifra excluída.');
+  }
+
+  // Setlist (Repertório) Modal
+  async function openSetlistModal(setlistId = null) {
+    state.editingSetlistId = setlistId;
+    if (setlistId) {
+      const sl = await global.CifraDB.getSetlist(setlistId);
+      if (!sl) return;
+      $('setlistModalTitle').textContent = '✏️ Editar Repertório';
+      $('setlistTitleInput').value = sl.title || '';
+      $('setlistDateInput').value = sl.date || '';
+      $('setlistDescInput').value = sl.description || '';
+      state.setlistDraftItems = (sl.items || []).map((i) => ({ ...i }));
+    } else {
+      $('setlistModalTitle').textContent = '📋 Novo Repertório / Setlist';
+      $('setlistTitleInput').value = '';
+      $('setlistDateInput').value = new Date().toISOString().slice(0, 10);
+      $('setlistDescInput').value = '';
+      state.setlistDraftItems = [];
+    }
+
+    renderSetlistSongPicker();
+    renderSetlistDraftItems();
+    $('setlistModalBackdrop').classList.add('open');
+  }
+
+  function renderSetlistSongPicker() {
+    const select = $('setlistAddSongSelect');
+    if (!select) return;
+    select.innerHTML =
+      `<option value="">+ Selecione uma música da biblioteca para adicionar...</option>` +
+      state.songs
+        .map(
+          (s) =>
+            `<option value="${s.id}">${escapeHtml(s.title)} — ${escapeHtml(s.artist || 'Artista')} (${escapeHtml(s.key || 'C')})</option>`
+        )
+        .join('');
+  }
+
+  function renderSetlistDraftItems() {
+    const container = $('setlistDraftList');
+    if (!container) return;
+    const songMap = new Map(state.songs.map((s) => [s.id, s]));
+
+    if (state.setlistDraftItems.length === 0) {
+      container.innerHTML = `<div style="padding:14px;text-align:center;color:var(--text-muted);font-size:13px;">Nenhuma música adicionada a este repertório ainda.</div>`;
+      return;
+    }
+
+    container.innerHTML = state.setlistDraftItems
+      .map((item, idx) => {
+        const song = songMap.get(item.songId);
+        if (!song) return '';
+        return `
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;background:var(--bg-surface);border:1px solid var(--border-color);border-radius:8px;">
+            <div style="display:flex;align-items:center;gap:8px;min-width:0;flex:1;">
+              <span style="font-family:var(--font-mono);font-size:12px;color:var(--text-muted);width:22px;">${idx + 1}.</span>
+              <div style="min-width:0;">
+                <div style="font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(song.title)}</div>
+                <div style="font-size:11.5px;color:var(--text-secondary);">${escapeHtml(song.artist || '')}</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <label style="font-size:11.5px;color:var(--text-secondary);">Tom:</label>
+              <input type="text" value="${escapeHtml(item.customKey || song.key || 'C')}" style="width:52px;padding:4px 6px;border-radius:6px;background:var(--bg-secondary);border:1px solid var(--border-color);color:var(--accent);font-family:var(--font-mono);font-weight:700;text-align:center;" onchange="App.updateSetlistDraftKey(${idx}, this.value)" />
+              <button type="button" class="icon-btn" onclick="App.moveSetlistDraftItem(${idx}, -1)" ${idx === 0 ? 'disabled' : ''}>⬆️</button>
+              <button type="button" class="icon-btn" onclick="App.moveSetlistDraftItem(${idx}, 1)" ${idx === state.setlistDraftItems.length - 1 ? 'disabled' : ''}>⬇️</button>
+              <button type="button" class="icon-btn" onclick="App.removeSetlistDraftItem(${idx})">✖</button>
+            </div>
+          </div>
+        `;
+      })
+      .join('');
+  }
+
+  async function saveSetlistFromModal() {
+    const title = $('setlistTitleInput').value.trim();
+    if (!title) {
+      showToast('Informe um nome para o repertório.');
+      $('setlistTitleInput').focus();
+      return;
+    }
+
+    const record = {
+      id: state.editingSetlistId || undefined,
+      title,
+      date: $('setlistDateInput').value,
+      description: $('setlistDescInput').value.trim(),
+      items: state.setlistDraftItems
+    };
+
+    await global.CifraDB.saveSetlist(record);
+    $('setlistModalBackdrop').classList.remove('open');
+    await refreshData();
+    showToast('Repertório salvo com sucesso!');
+  }
+
+  // Share Modal for Song / Library
+  async function openShareModalForSong(songId = null) {
+    let song = state.activeSong;
+    if (songId) {
+      song = await global.CifraDB.getSong(songId);
+    }
+    if (!song) return;
+
+    state.activeSong = song;
+    const semitones = state.currentView === 'reader' ? state.transposeSemitones : 0;
+    const shareLink = global.ShareEngine.createSongShareLink(song, semitones);
+
+    $('shareSongTitleLabel').textContent = `${song.title} (${song.artist || 'Artista'})`;
+    $('shareInstantLinkInput').value = shareLink;
+
+    // QR Code display (using api.qrserver.com with offline fallback note)
+    const qrImg = $('shareQrCodeImg');
+    if (shareLink.length < 2200) {
+      qrImg.style.display = 'inline-block';
+      qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&margin=8&data=${encodeURIComponent(shareLink)}`;
+      $('shareQrHint').textContent = 'Aponte a câmera de outro celular para abrir esta cifra na hora';
+    } else {
+      qrImg.style.display = 'none';
+      $('shareQrHint').textContent = 'Para cifras muito longas ou com PDF, use o botão "Enviar Arquivo Completo (.cifra)" abaixo.';
+    }
+
+    $('sharePdfWarning').style.display = song.pdfData ? 'block' : 'none';
+    $('shareModalBackdrop').classList.add('open');
+  }
+
+  // Check URL hash for incoming shared song (#share=...)
+  function checkIncomingShareLink() {
+    const parsed = global.ShareEngine.parseShareHash(window.location.hash);
+    if (!parsed || !parsed.d) return;
+
+    state.incomingSharedSong = parsed.d;
+    $('incomingSongTitle').textContent = parsed.d.title;
+    $('incomingSongArtist').textContent = `${parsed.d.artist || 'Artista'} • Tom: ${parsed.d.key || 'C'} • Categoria: ${parsed.d.category || 'Geral'}`;
+    $('incomingSongPreview').innerHTML = global.ChordEngine.renderCipherHtml(parsed.d.content || '', 0);
+    $('incomingShareModalBackdrop').classList.add('open');
+  }
+
+  async function acceptIncomingSharedSong() {
+    if (!state.incomingSharedSong) return;
+    const saved = await global.CifraDB.saveSong({
+      ...state.incomingSharedSong,
+      id: undefined
+    });
+    state.incomingSharedSong = null;
+    history.replaceState(null, document.title, window.location.pathname + window.location.search);
+    $('incomingShareModalBackdrop').classList.remove('open');
+    await refreshData();
+    openSongReader(saved.id);
+    showToast('Cifra importada para sua biblioteca!');
+  }
+
+  // Import .cifra.json package
+  function handleImportFile(file) {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const pkg = JSON.parse(e.target.result);
+        if (!pkg || (!Array.isArray(pkg.songs) && !pkg.title)) {
+          throw new Error('Formato inválido');
+        }
+
+        let importedSongs = 0;
+        let importedSetlists = 0;
+
+        if (Array.isArray(pkg.categories)) {
+          for (const cat of pkg.categories) {
+            await global.CifraDB.ensureCategory(cat);
+          }
+        }
+
+        if (Array.isArray(pkg.songs)) {
+          for (const s of pkg.songs) {
+            await global.CifraDB.saveSong(s);
+            importedSongs++;
+          }
+        }
+
+        if (Array.isArray(pkg.setlists)) {
+          for (const sl of pkg.setlists) {
+            await global.CifraDB.saveSetlist(sl);
+            importedSetlists++;
+          }
+        }
+
+        await refreshData();
+        $('shareModalBackdrop').classList.remove('open');
+        showToast(`Importado com sucesso: ${importedSongs} cifra(s) e ${importedSetlists} repertório(s)!`);
+      } catch (err) {
+        console.error(err);
+        showToast('Erro ao importar arquivo. Verifique se é um arquivo .cifra.json válido.');
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  // Public API exposed on window.App
+  const App = {
+    async init() {
+      applyTheme(state.theme);
+      await global.CifraDB.init();
+      await refreshData();
+      checkIncomingShareLink();
+
+      window.addEventListener('hashchange', () => {
+        checkIncomingShareLink();
+      });
+
+      // Setup search input
+      const searchInput = $('globalSearchInput');
+      const clearBtn = $('searchClearBtn');
+      if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+          state.searchQuery = e.target.value;
+          clearBtn.style.display = state.searchQuery ? 'block' : 'none';
+          if (state.currentView !== 'library') {
+            state.currentView = 'library';
+          }
+          renderLibraryView();
+        });
+      }
+
+      // Setup PDF drag & drop in Song Modal
+      const dropzone = $('pdfDropzone');
+      if (dropzone) {
+        dropzone.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          dropzone.classList.add('dragover');
+        });
+        dropzone.addEventListener('dragleave', () => {
+          dropzone.classList.remove('dragover');
+        });
+        dropzone.addEventListener('drop', (e) => {
+          e.preventDefault();
+          dropzone.classList.remove('dragover');
+          if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+            handlePdfFileSelect(e.dataTransfer.files[0]);
+          }
+        });
+      }
+
+      // Keyboard shortcuts in reader view
+      window.addEventListener('keydown', (e) => {
+        if (state.currentView !== 'reader') return;
+        const tag = (e.target && e.target.tagName) || '';
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+        if (document.querySelector('.modal-backdrop.open')) return;
+
+        if (e.code === 'Space') {
+          e.preventDefault();
+          toggleAutoScroll();
+        }
+      });
+
+      // PWA beforeinstallprompt listener
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        state.deferredInstallPrompt = e;
+        const installBtn = $('topInstallBtn');
+        if (installBtn) installBtn.classList.add('btn-primary');
+      });
+
+      // Register Service Worker if on http/https
+      if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      }
+    },
+
+    // Navigation & Filtering
+    showAllSongs() {
+      state.currentView = 'library';
+      state.filterCategory = 'ALL';
+      state.filterFavorites = false;
+      $('sidebar').classList.remove('mobile-open');
+      renderSidebar();
+      renderLibraryView();
+    },
+
+    showFavorites() {
+      state.currentView = 'library';
+      state.filterFavorites = true;
+      $('sidebar').classList.remove('mobile-open');
+      renderSidebar();
+      renderLibraryView();
+    },
+
+    showSetlists() {
+      state.currentView = 'setlists';
+      $('sidebar').classList.remove('mobile-open');
+      renderSidebar();
+      renderSetlistsView();
+    },
+
+    selectCategory(cat) {
+      state.currentView = 'library';
+      state.filterFavorites = false;
+      state.filterCategory = cat;
+      $('sidebar').classList.remove('mobile-open');
+      renderSidebar();
+      renderLibraryView();
+    },
+
+    setTypeFilter(type) {
+      state.filterType = type;
+      renderLibraryView();
+    },
+
+    setSortBy(sortVal) {
+      state.sortBy = sortVal;
+      renderLibraryView();
+    },
+
+    clearSearch() {
+      state.searchQuery = '';
+      $('globalSearchInput').value = '';
+      $('searchClearBtn').style.display = 'none';
+      renderLibraryView();
+    },
+
+    toggleMobileSidebar() {
+      $('sidebar').classList.toggle('mobile-open');
+    },
+
+    toggleTheme() {
+      applyTheme(state.theme === 'dark' ? 'light' : 'dark');
+    },
+
+    async toggleFavorite(songId) {
+      const song = await global.CifraDB.getSong(songId);
+      if (!song) return;
+      song.favorite = !song.favorite;
+      await global.CifraDB.saveSong(song);
+      await refreshData();
+      showToast(song.favorite ? 'Adicionada às favoritas ★' : 'Removida das favoritas');
+    },
+
+    // Reader controls
+    openSongReader,
+
+    backFromReader() {
+      stopAutoScroll();
+      if (state.activeSetlist) {
+        state.activeSetlist = null;
+        this.showSetlists();
+      } else {
+        state.currentView = 'library';
+        renderSidebar();
+        renderLibraryView();
+      }
+    },
+
+    transpose(delta) {
+      state.transposeSemitones = (state.transposeSemitones + delta) % 12;
+      renderReaderContent();
+    },
+
+    resetTranspose() {
+      state.transposeSemitones = 0;
+      state.useFlats = undefined;
+      renderReaderContent();
+    },
+
+    toggleAccidentals() {
+      state.useFlats = !state.useFlats;
+      renderReaderContent();
+    },
+
+    async saveTransposedKeyPermanently() {
+      if (!state.activeSong || state.transposeSemitones === 0) return;
+      const newKey = global.ChordEngine.transposeKeyName(
+        state.activeSong.key || 'C',
+        state.transposeSemitones,
+        state.useFlats
+      );
+      const newContent = global.ChordEngine.transposeCipherText(
+        state.activeSong.content || '',
+        state.transposeSemitones,
+        state.useFlats
+      );
+      state.activeSong.key = newKey;
+      state.activeSong.content = newContent;
+      state.transposeSemitones = 0;
+      await global.CifraDB.saveSong(state.activeSong);
+      await refreshData();
+      renderReaderContent();
+      showToast(`Novo tom (${newKey}) salvo como padrão nesta cifra!`);
+    },
+
+    changeFontSize(delta) {
+      state.fontSize = Math.max(12, Math.min(28, state.fontSize + delta));
+      localStorage.setItem('cifraflow_fontsize', String(state.fontSize));
+      document.documentElement.style.setProperty('--cipher-font-size', `${state.fontSize}px`);
+    },
+
+    toggleTwoColumns() {
+      state.twoColumns = !state.twoColumns;
+      renderReaderContent();
+    },
+
+    setReaderTab(tab) {
+      state.activeReaderTab = tab;
+      renderReaderContent();
+    },
+
+    changePdfZoom(delta) {
+      state.pdfScale = Math.max(0.75, Math.min(2.6, Number((state.pdfScale + delta).toFixed(2))));
+      renderReaderContent();
+    },
+
+    openCurrentPdfExternal() {
+      if (state.activeSong && state.activeSong.pdfData) {
+        global.ShareEngine.openPdfInNewTab(state.activeSong.pdfData, state.activeSong.pdfName || 'cifra.pdf');
+      }
+    },
+
+    toggleMediaPlayer() {
+      state.showMediaPlayer = !state.showMediaPlayer;
+      renderReaderContent();
+    },
+
+    // Auto-scroll controls
+    toggleAutoScroll,
+    setAutoScrollSpeed(val) {
+      state.autoScrollSpeed = parseInt(val, 10) || 3;
+      updateAutoScrollUI();
+    },
+
+    // Stage Mode (Setlists playback)
+    async startSetlistStage(setlistId, startIndex = 0) {
+      const sl = await global.CifraDB.getSetlist(setlistId);
+      if (!sl || !sl.items || sl.items.length === 0) return;
+      const item = sl.items[startIndex];
+      if (!item) return;
+      openSongReader(item.songId, sl, startIndex);
+    },
+
+    stageNavigate(delta) {
+      if (!state.activeSetlist || !state.activeSetlist.items) return;
+      const nextIdx = state.activeSetlistIndex + delta;
+      if (nextIdx < 0 || nextIdx >= state.activeSetlist.items.length) return;
+      const nextItem = state.activeSetlist.items[nextIdx];
+      openSongReader(nextItem.songId, state.activeSetlist, nextIdx);
+    },
+
+    // Song Modal actions
+    openSongModal,
+    editActiveSong() {
+      if (state.activeSong && state.activeSong.id) {
+        openSongModal(state.activeSong.id);
+      }
+    },
+    closeSongModal() {
+      $('songModalBackdrop').classList.remove('open');
+    },
+    saveSongFromModal,
+    deleteCurrentEditingSong,
+    onPdfInputChanged(input) {
+      if (input.files && input.files[0]) {
+        handlePdfFileSelect(input.files[0]);
+        input.value = '';
+      }
+    },
+    clearAttachedPdf() {
+      state.editorPdfData = null;
+      state.editorPdfName = null;
+      updateEditorPdfStatus();
+    },
+    insertCipherSnippet(snippet) {
+      const textarea = $('songContentInput');
+      if (!textarea) return;
+      const start = textarea.selectionStart || 0;
+      const end = textarea.selectionEnd || 0;
+      const val = textarea.value;
+      textarea.value = val.slice(0, start) + snippet + val.slice(end);
+      textarea.focus();
+      textarea.selectionStart = textarea.selectionEnd = start + snippet.length;
+    },
+    updateMediaDetectionBadges,
+
+    // Setlist Modal actions
+    openSetlistModal,
+    closeSetlistModal() {
+      $('setlistModalBackdrop').classList.remove('open');
+    },
+    addSongToSetlistDraft() {
+      const select = $('setlistAddSongSelect');
+      const songId = select.value;
+      if (!songId) return;
+      const song = state.songs.find((s) => s.id === songId);
+      if (!song) return;
+      state.setlistDraftItems.push({
+        songId: song.id,
+        customKey: song.key || 'C'
+      });
+      select.value = '';
+      renderSetlistDraftItems();
+    },
+    updateSetlistDraftKey(idx, newKey) {
+      if (state.setlistDraftItems[idx]) {
+        state.setlistDraftItems[idx].customKey = newKey.trim() || 'C';
+      }
+    },
+    moveSetlistDraftItem(idx, dir) {
+      const target = idx + dir;
+      if (target < 0 || target >= state.setlistDraftItems.length) return;
+      const temp = state.setlistDraftItems[idx];
+      state.setlistDraftItems[idx] = state.setlistDraftItems[target];
+      state.setlistDraftItems[target] = temp;
+      renderSetlistDraftItems();
+    },
+    removeSetlistDraftItem(idx) {
+      state.setlistDraftItems.splice(idx, 1);
+      renderSetlistDraftItems();
+    },
+    saveSetlistFromModal,
+    async deleteSetlist(id) {
+      if (!confirm('Deseja excluir este repertório? (As músicas continuarão salvas na sua biblioteca)')) return;
+      await global.CifraDB.deleteSetlist(id);
+      await refreshData();
+      showToast('Repertório excluído.');
+    },
+
+    // Share & Export / Import actions
+    openShareModalForSong,
+    closeShareModal() {
+      $('shareModalBackdrop').classList.remove('open');
+    },
+    copyShareLink() {
+      const input = $('shareInstantLinkInput');
+      navigator.clipboard.writeText(input.value).then(() => {
+        showToast('Link da cifra copiado! Envie no WhatsApp ou grupo.');
+      });
+    },
+    async shareTextOnWhatsApp() {
+      if (!state.activeSong) return;
+      const semitones = state.currentView === 'reader' ? state.transposeSemitones : 0;
+      const text = global.ShareEngine.formatSongForWhatsApp(state.activeSong, semitones);
+      if (navigator.share) {
+        try {
+          await navigator.share({
+            title: state.activeSong.title,
+            text
+          });
+          return;
+        } catch (e) {}
+      }
+      const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
+      window.open(waUrl, '_blank');
+    },
+    async exportCurrentSongPackage(useNativeShare = false) {
+      if (!state.activeSong) return;
+      const pkg = global.ShareEngine.buildExportPackage({
+        type: 'single-song',
+        title: `Cifra: ${state.activeSong.title}`,
+        categories: [state.activeSong.category || 'Repertório Geral'],
+        songs: [state.activeSong]
+      });
+      const res = await global.ShareEngine.exportPackageFile(pkg, state.activeSong.title, useNativeShare);
+      if (res.downloaded) {
+        showToast(`Arquivo "${res.fileName}" baixado! Envie para seus amigos.`);
+      }
+    },
+    async shareSetlistPackage(setlistId) {
+      const sl = await global.CifraDB.getSetlist(setlistId);
+      if (!sl) return;
+      const songIds = new Set((sl.items || []).map((i) => i.songId));
+      const includedSongs = state.songs.filter((s) => songIds.has(s.id));
+      const pkg = global.ShareEngine.buildExportPackage({
+        type: 'setlist',
+        title: `Repertório: ${sl.title}`,
+        categories: [...new Set(includedSongs.map((s) => s.category || 'Repertório Geral'))],
+        songs: includedSongs,
+        setlists: [sl]
+      });
+      const res = await global.ShareEngine.exportPackageFile(pkg, `repertorio-${sl.title}`, true);
+      if (res.downloaded) {
+        showToast(`Pacote do repertório "${res.fileName}" exportado com todas as cifras e PDFs!`);
+      }
+    },
+    async exportFullLibraryBackup() {
+      const pkg = global.ShareEngine.buildExportPackage({
+        type: 'full-backup',
+        title: 'Biblioteca Completa CifraFlow',
+        categories: state.categories,
+        songs: state.songs,
+        setlists: state.setlists
+      });
+      const res = await global.ShareEngine.exportPackageFile(pkg, 'biblioteca-cifraflow', false);
+      if (res.downloaded) {
+        showToast('Backup completo da biblioteca (.cifra.json) baixado!');
+      }
+    },
+    triggerImportFileDialog() {
+      $('importPackageInput').click();
+    },
+    onImportFileSelected(input) {
+      if (input.files && input.files[0]) {
+        handleImportFile(input.files[0]);
+        input.value = '';
+      }
+    },
+    acceptIncomingSharedSong,
+    closeIncomingShareModal() {
+      history.replaceState(null, document.title, window.location.pathname + window.location.search);
+      $('incomingShareModalBackdrop').classList.remove('open');
+    },
+
+    // PWA Installation & App Sharing Modal
+    async openInstallModal() {
+      if (state.deferredInstallPrompt) {
+        state.deferredInstallPrompt.prompt();
+        const choice = await state.deferredInstallPrompt.userChoice;
+        if (choice.outcome === 'accepted') {
+          state.deferredInstallPrompt = null;
+          showToast('Aplicativo instalado com sucesso!');
+          return;
+        }
+      }
+      $('installAppUrlInput').value = window.location.href.split('#')[0];
+      $('installModalBackdrop').classList.add('open');
+    },
+    closeInstallModal() {
+      $('installModalBackdrop').classList.remove('open');
+    },
+    copyAppUrl() {
+      const url = $('installAppUrlInput').value;
+      navigator.clipboard.writeText(url).then(() => {
+        showToast('Link do aplicativo copiado!');
+      });
+    },
+
+    // Categories / Folders Management
+    openCategoriesModal() {
+      $('newCategoryNameInput').value = '';
+      this.renderCategoriesManagerList();
+      $('categoriesModalBackdrop').classList.add('open');
+      setTimeout(() => $('newCategoryNameInput').focus(), 80);
+    },
+
+    closeCategoriesModal() {
+      $('categoriesModalBackdrop').classList.remove('open');
+    },
+
+    renderCategoriesManagerList() {
+      const listEl = $('categoriesManagerList');
+      if (!listEl) return;
+
+      listEl.innerHTML = state.categories
+        .map((cat, idx) => {
+          const count = state.songs.filter((s) => (s.category || 'Repertório Geral') === cat).length;
+          const safeCat = escapeHtml(cat).replace(/'/g, "\\'");
+          return `
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;background:var(--bg-surface);border:1px solid var(--border-color);border-radius:8px;">
+              <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">
+                <span>📁</span>
+                <input
+                  type="text"
+                  id="catEditInput_${idx}"
+                  value="${escapeHtml(cat)}"
+                  class="form-input"
+                  style="padding:5px 8px;font-size:13.5px;font-weight:600;"
+                  onkeydown="if(event.key==='Enter'){event.preventDefault();App.saveCategoryRenameFromInput('${safeCat}', ${idx});}"
+                />
+                <span class="nav-badge" title="Músicas nesta pasta">${count}</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px;">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="App.saveCategoryRenameFromInput('${safeCat}', ${idx})" title="Salvar novo nome">
+                  💾 Salvar Nome
+                </button>
+                <button type="button" class="btn btn-danger btn-sm" onclick="App.confirmDeleteCategory('${safeCat}')" title="Excluir pasta">
+                  🗑️
+                </button>
+              </div>
+            </div>
+          `;
+        })
+        .join('');
+    },
+
+    async createNewCategoryFromModal() {
+      const input = $('newCategoryNameInput');
+      const name = (input.value || '').trim();
+      if (!name) {
+        showToast('Digite um nome para a nova pasta.');
+        input.focus();
+        return;
+      }
+      if (state.categories.includes(name)) {
+        showToast('Já existe uma pasta com esse nome.');
+        return;
+      }
+      await global.CifraDB.ensureCategory(name);
+      input.value = '';
+      await refreshData();
+      this.renderCategoriesManagerList();
+      showToast(`Pasta "${name}" criada com sucesso!`);
+    },
+
+    async saveCategoryRenameFromInput(oldName, idx) {
+      const input = $(`catEditInput_${idx}`);
+      if (!input) return;
+      const newName = (input.value || '').trim();
+      if (!newName) {
+        showToast('O nome da pasta não pode ficar vazio.');
+        input.value = oldName;
+        return;
+      }
+      if (newName === oldName) {
+        showToast('Nome mantido.');
+        return;
+      }
+      await global.CifraDB.renameCategory(oldName, newName);
+      if (state.filterCategory === oldName) {
+        state.filterCategory = newName;
+      }
+      await refreshData();
+      this.renderCategoriesManagerList();
+      showToast(`Pasta renomeada para "${newName}"!`);
+    },
+
+    async promptRenameCategory(oldName) {
+      const newName = prompt(`Digite o novo nome para a pasta "${oldName}":`, oldName);
+      if (newName === null) return;
+      const clean = newName.trim();
+      if (!clean) {
+        showToast('O nome da pasta não pode ficar vazio.');
+        return;
+      }
+      if (clean === oldName) return;
+      await global.CifraDB.renameCategory(oldName, clean);
+      if (state.filterCategory === oldName) {
+        state.filterCategory = clean;
+      }
+      await refreshData();
+      this.renderCategoriesManagerList();
+      showToast(`Pasta renomeada para "${clean}"!`);
+    },
+
+    async confirmDeleteCategory(categoryName) {
+      const count = state.songs.filter((s) => (s.category || 'Repertório Geral') === categoryName).length;
+      const msg =
+        count > 0
+          ? `Deseja excluir a pasta "${categoryName}"?\n\nAs ${count} música(s) dentro dela NÃO serão apagadas — elas serão movidas para outra pasta.`
+          : `Deseja excluir a pasta "${categoryName}"?`;
+
+      if (!confirm(msg)) return;
+      const fallback = await global.CifraDB.deleteCategory(categoryName);
+      if (state.filterCategory === categoryName) {
+        state.filterCategory = 'ALL';
+      }
+      await refreshData();
+      this.renderCategoriesManagerList();
+      showToast(
+        count > 0
+          ? `Pasta excluída! As músicas foram movidas para "${fallback}".`
+          : `Pasta "${categoryName}" excluída.`
+      );
+    }
+  };
+
+  global.App = App;
+  document.addEventListener('DOMContentLoaded', () => App.init());
+})(window);
+
+  </script>
 </body>
 </html>

@@ -1,17 +1,12 @@
-const CACHE_NAME = 'cifraflow-v2';
+const CACHE_NAME = 'cifraflow-v3';
 const STATIC_ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './css/styles.css',
-  './js/db.js',
-  './js/chord-engine.js',
-  './js/share.js',
-  './js/app.js',
-  './icons/icon-192.png',
-  './icons/icon-512.png',
-  './icons/apple-touch-icon.png',
-  './icons/icon.svg'
+  './icon-192.png',
+  './icon-512.png',
+  './apple-touch-icon.png',
+  './icon.svg'
 ];
 
 self.addEventListener('install', (event) => {
@@ -38,7 +33,6 @@ self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;
 
-  // Never cache YouTube or Spotify embeds
   const url = new URL(req.url);
   if (
     url.hostname.includes('youtube.com') ||
