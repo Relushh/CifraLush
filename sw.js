@@ -1,4 +1,5 @@
-const CACHE_NAME = 'cifralush-v6';
+const CACHE_NAME = 'cifralush-v7';
+const USER_VAULT_CACHE = 'cifralush-user-vault-permanent';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -22,7 +23,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((keys) => {
       return Promise.all(
         keys
-          .filter((key) => key !== CACHE_NAME)
+          .filter((key) => key !== CACHE_NAME && key !== USER_VAULT_CACHE)
           .map((key) => caches.delete(key))
       );
     }).then(() => self.clients.claim())
