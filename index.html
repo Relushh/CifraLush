@@ -723,6 +723,45 @@ body {
   font-family: inherit;
 }
 
+/* View Mode Toggle (Grade / Lista) */
+.view-mode-toggle {
+  display: inline-flex;
+  align-items: center;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+  gap: 2px;
+}
+
+.view-mode-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 12.5px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.view-mode-btn:hover {
+  color: var(--text-primary);
+}
+
+.view-mode-btn.active {
+  background-color: var(--accent);
+  color: #ffffff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
 /* Song Grid & Cards */
 .songs-grid {
   display: grid;
@@ -730,6 +769,71 @@ body {
   gap: 14px;
   width: 100%;
   min-width: 0;
+}
+
+/* Song List View Mode */
+.songs-grid.list-view {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.songs-grid.list-view .song-card {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  gap: 12px;
+}
+
+.songs-grid.list-view .song-card:hover {
+  transform: translateY(-1px);
+}
+
+.songs-grid.list-view .song-card-top {
+  display: contents;
+}
+
+.songs-grid.list-view .song-key-badge {
+  order: 1;
+  min-width: 36px;
+  height: 36px;
+  font-size: 13.5px;
+  border-radius: 8px;
+}
+
+.songs-grid.list-view .song-info {
+  order: 2;
+  flex: 1 1 0%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.songs-grid.list-view .song-title {
+  font-size: 15px;
+  line-height: 1.25;
+}
+
+.songs-grid.list-view .song-artist {
+  font-size: 12.5px;
+  margin-top: 1px;
+}
+
+.songs-grid.list-view .song-card-meta {
+  order: 3;
+  padding-top: 0;
+  border-top: none;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.songs-grid.list-view .song-card-actions {
+  order: 4;
+  flex-shrink: 0;
 }
 
 .song-card {
@@ -1807,6 +1911,30 @@ body.reader-fullscreen .autoscroll-bar {
   .setlists-grid {
     grid-template-columns: 1fr;
   }
+  .songs-grid.list-view .song-card {
+    padding: 9px 11px;
+    gap: 8px;
+  }
+  .songs-grid.list-view .song-key-badge {
+    min-width: 32px;
+    height: 32px;
+    font-size: 12.5px;
+    padding: 0 5px;
+  }
+  .songs-grid.list-view .song-title {
+    font-size: 14px;
+  }
+  .songs-grid.list-view .song-artist {
+    font-size: 11.5px;
+  }
+  .songs-grid.list-view .song-card-meta .badge-text {
+    display: none;
+  }
+  .songs-grid.list-view .song-card-meta .badge {
+    max-width: 90px;
+    padding: 2px 6px;
+    font-size: 10.5px;
+  }
   .cipher-sheet {
     padding: 16px 14px;
   }
@@ -1889,7 +2017,10 @@ body.reader-fullscreen .autoscroll-bar {
         <button class="btn btn-primary" style="width: 100%;" onclick="App.closeMobileSidebar(); App.openSongModal()">
           + Nova Cifra / PDF
         </button>
-        <button class="btn btn-accent-outline btn-sm" style="width: 100%;" onclick="App.closeMobileSidebar(); App.openOnlineSearchModal()">
+        <button class="btn btn-accent-outline btn-sm" style="width: 100%;" onclick="App.closeMobileSidebar(); App.triggerBulkPdfDialog()" title="Selecionar vários PDFs de uma vez e salvar direto na biblioteca sem cadastrar um por um">
+          📚 + Vários PDFs de Uma Vez
+        </button>
+        <button class="btn btn-secondary btn-sm" style="width: 100%;" onclick="App.closeMobileSidebar(); App.openOnlineSearchModal()">
           🌐 Buscar Cifra Online
         </button>
         <div style="display: flex; gap: 6px;">
@@ -1900,7 +2031,8 @@ body.reader-fullscreen .autoscroll-bar {
             💾 Backup
           </button>
         </div>
-        <input type="file" id="importPackageInput" accept=".json,.cifra,.pdf,.txt,application/pdf,text/plain" style="display: none;" onchange="App.onImportFileSelected(this)" />
+        <input type="file" id="importPackageInput" accept=".json,.cifra,.pdf,.txt,application/pdf,text/plain" multiple style="display: none;" onchange="App.onImportFileSelected(this)" />
+        <input type="file" id="bulkPdfInput" accept="application/pdf,text/plain,.pdf,.txt,.cifra,.md" multiple style="display: none;" onchange="App.onBulkPdfInputChanged(this)" />
       </div>
 
       <nav class="nav-section">
@@ -1983,6 +2115,9 @@ body.reader-fullscreen .autoscroll-bar {
           <button id="topInstallBtn" class="btn btn-secondary btn-sm" onclick="App.openInstallModal()">
             📲 Instalar / Compartilhar
           </button>
+          <button class="btn btn-accent-outline btn-sm" onclick="App.triggerBulkPdfDialog()" title="Adicionar vários PDFs de uma só vez direto na biblioteca">
+            📚 + Vários PDFs
+          </button>
           <button class="btn btn-primary btn-sm" onclick="App.openSongModal()">
             + Nova Cifra
           </button>
@@ -2005,6 +2140,9 @@ body.reader-fullscreen .autoscroll-bar {
             <button class="btn btn-secondary btn-sm" onclick="App.openCategoriesModal()">
               📁 Gerenciar Pastas
             </button>
+            <button class="btn btn-accent-outline btn-sm" onclick="App.triggerBulkPdfDialog()" title="Selecionar vários arquivos PDF de uma só vez e salvar direto na biblioteca">
+              📚 + Vários PDFs
+            </button>
             <button class="btn btn-secondary btn-sm" onclick="App.triggerImportFileDialog()">
               📥 Importar Cifra / PDF
             </button>
@@ -2017,7 +2155,7 @@ body.reader-fullscreen .autoscroll-bar {
         <!-- Category Chips -->
         <div id="categoryChipsBar" class="filter-chips" style="margin-bottom: 14px;"></div>
 
-        <!-- Type Filter & Sorting -->
+        <!-- Type Filter, View Mode Toggle & Sorting -->
         <div class="filter-bar">
           <div class="filter-chips">
             <button class="chip active" data-type-filter="ALL" onclick="App.setTypeFilter('ALL')">Todos os Formatos</button>
@@ -2025,14 +2163,25 @@ body.reader-fullscreen .autoscroll-bar {
             <button class="chip" data-type-filter="PDF" onclick="App.setTypeFilter('PDF')">📄 Com PDF Original</button>
           </div>
 
-          <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
-            <span style="font-size: 12.5px; color: var(--text-secondary);">Ordenar:</span>
-            <select class="filter-select" onchange="App.setSortBy(this.value)">
-              <option value="recent">Recentes</option>
-              <option value="title">Ordem Alfabética (A-Z)</option>
-              <option value="artist">Artista / Banda</option>
-              <option value="key">Tom Musical</option>
-            </select>
+          <div style="display: flex; align-items: center; gap: 10px; margin-left: auto; flex-wrap: wrap;">
+            <div class="view-mode-toggle" role="group" aria-label="Visualização em Grade ou Lista">
+              <button type="button" class="view-mode-btn active" data-view-mode="grid" onclick="App.setViewMode('grid')" title="Visualizar em Grade (Cards)">
+                ⊞ Grade
+              </button>
+              <button type="button" class="view-mode-btn" data-view-mode="list" onclick="App.setViewMode('list')" title="Visualizar em Lista Compacta">
+                ☰ Lista
+              </button>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <span style="font-size: 12.5px; color: var(--text-secondary);">Ordenar:</span>
+              <select class="filter-select" onchange="App.setSortBy(this.value)">
+                <option value="recent">Recentes</option>
+                <option value="title">Ordem Alfabética (A-Z)</option>
+                <option value="artist">Artista / Banda</option>
+                <option value="key">Tom Musical</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -2328,12 +2477,17 @@ body.reader-fullscreen .autoscroll-bar {
 
         <!-- Option A: Attach PDF or Text File (Auto-converts into App Text!) -->
         <div class="form-group">
-          <label class="form-label">📄 Anexar Arquivo de Cifra em PDF ou Texto (.pdf, .txt, .cifra) — O app lê o arquivo e converte automaticamente em texto da cifra abaixo!</label>
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;">
+            <label class="form-label">📄 Anexar Arquivo de Cifra em PDF ou Texto (.pdf, .txt, .cifra) — Você também pode selecionar vários PDFs de uma vez!</label>
+            <button type="button" class="btn btn-accent-outline btn-sm" onclick="App.triggerBulkPdfDialog($('songCategoryInput') ? $('songCategoryInput').value : null)" title="Selecionar vários PDFs de uma vez e salvar todos direto na biblioteca">
+              📚 Selecionar Vários PDFs (Salvar Direto)
+            </button>
+          </div>
           <div id="pdfDropzone" class="pdf-dropzone" onclick="document.getElementById('pdfFileInput').click()">
             <div id="pdfUploadStatus" style="font-size: 13.5px; color: var(--text-secondary);">
-              Clique aqui ou arraste um arquivo <strong>.PDF</strong> ou <strong>.TXT</strong> para ler e converter a cifra automaticamente para o texto do app
+              Clique aqui ou arraste <strong>1 ou vários arquivos .PDF / .TXT</strong> (se selecionar vários, todos serão salvos direto na biblioteca sem precisar cadastrar um por um!)
             </div>
-            <input type="file" id="pdfFileInput" accept="application/pdf,text/plain,.pdf,.txt,.cifra,.md" style="display: none;" onchange="App.onPdfInputChanged(this)" />
+            <input type="file" id="pdfFileInput" accept="application/pdf,text/plain,.pdf,.txt,.cifra,.md" multiple style="display: none;" onchange="App.onPdfInputChanged(this)" />
           </div>
           <div style="margin-top: 4px; display: flex; gap: 8px; flex-wrap: wrap;">
             <button type="button" id="clearPdfBtn" class="btn btn-danger btn-sm" style="display: none;" onclick="App.clearAttachedPdf()">
@@ -2909,7 +3063,8 @@ body.reader-fullscreen .autoscroll-bar {
       const setlists = await this.getAllSetlists();
       const settings = {
         theme: localStorage.getItem('cifraflow_theme') || 'dark',
-        fontSize: parseInt(localStorage.getItem('cifraflow_fontsize') || '16', 10) || 16
+        fontSize: parseInt(localStorage.getItem('cifraflow_fontsize') || '16', 10) || 16,
+        viewMode: localStorage.getItem('cifraflow_viewmode') === 'list' ? 'list' : 'grid'
       };
 
       return {
@@ -3085,6 +3240,9 @@ body.reader-fullscreen .autoscroll-bar {
         if (pkg.settings.fontSize) {
           localStorage.setItem('cifraflow_fontsize', String(pkg.settings.fontSize));
         }
+        if (pkg.settings.viewMode === 'list' || pkg.settings.viewMode === 'grid') {
+          localStorage.setItem('cifraflow_viewmode', pkg.settings.viewMode);
+        }
       }
 
       if (Array.isArray(pkg.categories)) {
@@ -3178,7 +3336,7 @@ body.reader-fullscreen .autoscroll-bar {
       return txStore('songs', 'readonly', (store) => store.get(id));
     },
 
-    async saveSong(song) {
+    async saveSong(song, skipSync = false) {
       const now = Date.now();
       const cleanCategory = (song.category || '').trim();
       const record = {
@@ -3190,8 +3348,8 @@ body.reader-fullscreen .autoscroll-bar {
       };
       await txStore('songs', 'readwrite', (store) => store.put(record));
       if (cleanCategory) {
-        await this.ensureCategory(cleanCategory);
-      } else {
+        await this.ensureCategory(cleanCategory, skipSync);
+      } else if (!skipSync) {
         await this.syncToDeviceVault();
       }
       return record;
@@ -3251,7 +3409,7 @@ body.reader-fullscreen .autoscroll-bar {
       return Array.isArray(cats) ? cats : [];
     },
 
-    async ensureCategory(categoryName) {
+    async ensureCategory(categoryName, skipSync = false) {
       const clean = (categoryName || '').trim();
       if (!clean) return;
       const cats = await this.getCategories();
@@ -3259,7 +3417,9 @@ body.reader-fullscreen .autoscroll-bar {
         cats.push(clean);
         await this.setMeta('categories', cats);
       }
-      await this.syncToDeviceVault();
+      if (!skipSync) {
+        await this.syncToDeviceVault();
+      }
     },
 
     async renameCategory(oldName, newName) {
@@ -4251,7 +4411,9 @@ body.reader-fullscreen .autoscroll-bar {
     filterType: 'ALL', // 'ALL' | 'TEXT' | 'PDF'
     searchQuery: '',
     sortBy: 'recent', // 'recent' | 'title' | 'artist' | 'key'
+    viewMode: localStorage.getItem('cifraflow_viewmode') === 'list' ? 'list' : 'grid', // 'grid' | 'list'
     theme: localStorage.getItem('cifraflow_theme') || 'dark',
+    bulkTargetCategory: null,
 
     // Reader state
     activeSong: null,
@@ -4540,8 +4702,16 @@ body.reader-fullscreen .autoscroll-bar {
       btn.classList.toggle('active', btn.getAttribute('data-type-filter') === state.filterType);
     });
 
+    // View mode toggle buttons (Grade / Lista)
+    document.querySelectorAll('[data-view-mode]').forEach((btn) => {
+      btn.classList.toggle('active', btn.getAttribute('data-view-mode') === state.viewMode);
+    });
+
     const songs = getFilteredSongs();
     const grid = $('songsGrid');
+    if (grid) {
+      grid.classList.toggle('list-view', state.viewMode === 'list');
+    }
 
     if (songs.length === 0) {
       grid.innerHTML = `
@@ -4549,11 +4719,12 @@ body.reader-fullscreen .autoscroll-bar {
           <div style="font-size: 42px; margin-bottom: 10px;">🎸</div>
           <h3 style="font-size: 18px; margin-bottom: 6px;">Nenhuma cifra cadastrada ainda</h3>
           <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 18px;">
-            Adicione uma cifra digitada, busque online (padrão cifras.com.br) ou anexe um arquivo PDF/TXT que será convertido automaticamente em texto no app!
+            Adicione uma cifra digitada, adicione vários PDFs de uma só vez, busque online (padrão cifras.com.br) ou anexe um arquivo PDF/TXT!
           </p>
           <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
             <button class="btn btn-primary" onclick="App.openSongModal()">+ Adicionar Nova Cifra / PDF</button>
-            <button class="btn btn-accent-outline" onclick="App.openOnlineSearchModal()">🌐 Buscar Cifra Online</button>
+            <button class="btn btn-accent-outline" onclick="App.triggerBulkPdfDialog()">📚 + Adicionar Vários PDFs de Uma Vez</button>
+            <button class="btn btn-secondary" onclick="App.openOnlineSearchModal()">🌐 Buscar Cifra Online</button>
           </div>
         </div>
       `;
@@ -5409,6 +5580,201 @@ body.reader-fullscreen .autoscroll-bar {
     showToast('Cifra importada para sua biblioteca!');
   }
 
+  function parseFilenameMeta(filename) {
+    let base = String(filename || '')
+      .replace(/\.(pdf|txt|cifra|md|json)$/i, '')
+      .replace(/_/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    // Strip leading track numbers like "01 - ", "01. ", "1 - "
+    base = base.replace(/^\d{1,3}\s*[-.)]\s*/, '').trim();
+
+    // If formatted as "Artista - Música", extract both
+    if (base.includes(' - ')) {
+      const parts = base.split(/\s+-\s+/);
+      if (parts.length >= 2) {
+        const possibleArtist = parts[0].trim();
+        const possibleTitle = parts.slice(1).join(' - ').trim();
+        if (possibleArtist && possibleTitle) {
+          return { title: possibleTitle, artist: possibleArtist };
+        }
+      }
+    }
+
+    return {
+      title: base.replace(/[-]+/g, ' ').replace(/\s+/g, ' ').trim() || 'Cifra Importada',
+      artist: ''
+    };
+  }
+
+  function readFileAsDataURL(file) {
+    return new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = (e) => resolve(e.target.result);
+      r.onerror = (err) => reject(err);
+      r.readAsDataURL(file);
+    });
+  }
+
+  function readFileAsText(file) {
+    return new Promise((resolve, reject) => {
+      const r = new FileReader();
+      r.onload = (e) => resolve(String(e.target.result || ''));
+      r.onerror = (err) => reject(err);
+      r.readAsText(file);
+    });
+  }
+
+  /**
+   * Batch imports multiple PDF/TXT/Cifra files at once directly into the library,
+   * skipping manual song-by-song registration.
+   */
+  async function importMultipleFilesBatch(fileList, customCategory = null) {
+    const files = Array.from(fileList || []).filter(Boolean);
+    if (files.length === 0) return;
+
+    const targetCategory =
+      customCategory !== null && customCategory !== undefined
+        ? String(customCategory).trim()
+        : state.filterCategory !== 'ALL'
+        ? state.filterCategory
+        : '';
+
+    const container = $('toastContainer');
+    let progressToast = null;
+    if (container) {
+      progressToast = document.createElement('div');
+      progressToast.className = 'toast';
+      progressToast.textContent = `⏳ Importando ${files.length} arquivo(s)...`;
+      container.appendChild(progressToast);
+    }
+
+    let importedSongsCount = 0;
+    let importedSetlistsCount = 0;
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const lowerName = (file.name || '').toLowerCase();
+
+      if (progressToast) {
+        progressToast.textContent = `⏳ Importando (${i + 1}/${files.length}): ${file.name}...`;
+      }
+
+      try {
+        if (file.type === 'application/pdf' || lowerName.endsWith('.pdf')) {
+          const pdfDataUrl = await readFileAsDataURL(file);
+          const extractedText = await global.ShareEngine.extractCipherTextFromPdf(pdfDataUrl);
+          const parsed = global.ShareEngine.parseCipherMetadataAndCleanText(extractedText);
+          const meta = parseFilenameMeta(file.name);
+
+          await global.CifraDB.saveSong(
+            {
+              title: meta.title,
+              artist: meta.artist,
+              category: targetCategory,
+              key: parsed.key || 'C',
+              capo: parsed.capo || 0,
+              content: parsed.text || '',
+              pdfData: pdfDataUrl,
+              pdfName: file.name
+            },
+            true
+          );
+          importedSongsCount++;
+        } else {
+          const rawText = await readFileAsText(file);
+          let handledAsJson = false;
+          try {
+            const pkg = JSON.parse(rawText);
+            if (pkg && (Array.isArray(pkg.songs) || pkg.title)) {
+              handledAsJson = true;
+              if (pkg.account && typeof pkg.account === 'object') {
+                await global.CifraDB.saveUserAccount(pkg.account);
+              }
+              if (pkg.settings && typeof pkg.settings === 'object') {
+                if (pkg.settings.theme) applyTheme(pkg.settings.theme);
+                if (pkg.settings.fontSize) {
+                  state.fontSize = parseInt(pkg.settings.fontSize, 10) || 16;
+                  localStorage.setItem('cifraflow_fontsize', String(state.fontSize));
+                  document.documentElement.style.setProperty('--cipher-font-size', `${state.fontSize}px`);
+                }
+                if (pkg.settings.viewMode === 'list' || pkg.settings.viewMode === 'grid') {
+                  state.viewMode = pkg.settings.viewMode;
+                  localStorage.setItem('cifraflow_viewmode', state.viewMode);
+                }
+              }
+              if (Array.isArray(pkg.categories)) {
+                for (const cat of pkg.categories) {
+                  await global.CifraDB.ensureCategory(cat, true);
+                }
+              }
+              if (Array.isArray(pkg.songs)) {
+                for (const s of pkg.songs) {
+                  if (s.pdfData && !(s.content && s.content.trim())) {
+                    const ext = await global.ShareEngine.extractCipherTextFromPdf(s.pdfData);
+                    if (ext) s.content = ext;
+                  }
+                  await global.CifraDB.saveSong(s, true);
+                  importedSongsCount++;
+                }
+              }
+              if (Array.isArray(pkg.setlists)) {
+                for (const sl of pkg.setlists) {
+                  await global.CifraDB.saveSetlist(sl);
+                  importedSetlistsCount++;
+                }
+              }
+            }
+          } catch (e) {}
+
+          if (!handledAsJson && rawText.trim()) {
+            const parsed = global.ShareEngine.parseCipherMetadataAndCleanText(rawText);
+            const meta = parseFilenameMeta(file.name);
+            await global.CifraDB.saveSong(
+              {
+                title: meta.title,
+                artist: meta.artist,
+                category: targetCategory,
+                key: parsed.key || 'C',
+                capo: parsed.capo || 0,
+                content: parsed.text
+              },
+              true
+            );
+            importedSongsCount++;
+          }
+        }
+      } catch (fileErr) {
+        console.warn('Erro ao importar arquivo em lote:', file.name, fileErr);
+      }
+    }
+
+    if (targetCategory) {
+      await global.CifraDB.ensureCategory(targetCategory, false);
+    } else {
+      await global.CifraDB.syncToDeviceVault();
+    }
+
+    if (progressToast) {
+      progressToast.remove();
+    }
+
+    $('songModalBackdrop').classList.remove('open');
+    $('shareModalBackdrop').classList.remove('open');
+    state.currentView = 'library';
+    await refreshData();
+
+    if (importedSongsCount > 0 || importedSetlistsCount > 0) {
+      const catSuffix = targetCategory ? ` na pasta "${targetCategory}"` : '';
+      showToast(
+        `✅ ${importedSongsCount} cifra(s)/PDF(s)${importedSetlistsCount ? ` e ${importedSetlistsCount} repertório(s)` : ''} adicionados de uma vez${catSuffix}!`
+      );
+    } else {
+      showToast('Nenhum arquivo válido (.PDF, .TXT ou .cifra.json) pôde ser importado.');
+    }
+  }
+
   // Import .cifra.json package OR direct .pdf / .txt cipher file
   function handleImportFile(file) {
     if (!file) return;
@@ -5536,6 +5902,10 @@ body.reader-fullscreen .autoscroll-bar {
         const restoredFont = parseInt(localStorage.getItem('cifraflow_fontsize') || '16', 10) || 16;
         state.fontSize = restoredFont;
         document.documentElement.style.setProperty('--cipher-font-size', `${state.fontSize}px`);
+        const restoredViewMode = localStorage.getItem('cifraflow_viewmode');
+        if (restoredViewMode === 'list' || restoredViewMode === 'grid') {
+          state.viewMode = restoredViewMode;
+        }
       }
       await refreshData();
       if (global.CifraDB.wasAutoRestored) {
@@ -5689,7 +6059,10 @@ body.reader-fullscreen .autoscroll-bar {
         dropzone.addEventListener('drop', (e) => {
           e.preventDefault();
           dropzone.classList.remove('dragover');
-          if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+          if (e.dataTransfer.files && e.dataTransfer.files.length > 1) {
+            const modalCat = $('songCategoryInput') ? $('songCategoryInput').value : null;
+            importMultipleFilesBatch(e.dataTransfer.files, modalCat);
+          } else if (e.dataTransfer.files && e.dataTransfer.files[0]) {
             handlePdfFileSelect(e.dataTransfer.files[0]);
           }
         });
@@ -5859,6 +6232,13 @@ body.reader-fullscreen .autoscroll-bar {
     setSortBy(sortVal) {
       state.sortBy = sortVal;
       renderLibraryView();
+    },
+
+    setViewMode(mode) {
+      state.viewMode = mode === 'list' ? 'list' : 'grid';
+      localStorage.setItem('cifraflow_viewmode', state.viewMode);
+      renderLibraryView();
+      global.CifraDB.syncToDeviceVault();
     },
 
     clearSearch() {
@@ -6431,8 +6811,28 @@ body.reader-fullscreen .autoscroll-bar {
     saveSongFromModal,
     deleteCurrentEditingSong,
     onPdfInputChanged(input) {
-      if (input.files && input.files[0]) {
+      if (input.files && input.files.length > 1) {
+        const modalCat = $('songCategoryInput') ? $('songCategoryInput').value : null;
+        importMultipleFilesBatch(input.files, modalCat);
+        input.value = '';
+      } else if (input.files && input.files[0]) {
         handlePdfFileSelect(input.files[0]);
+        input.value = '';
+      }
+    },
+    triggerBulkPdfDialog(customCategory = null) {
+      state.bulkTargetCategory = customCategory;
+      const input = $('bulkPdfInput');
+      if (input) {
+        input.value = '';
+        input.click();
+      }
+    },
+    onBulkPdfInputChanged(input) {
+      if (input.files && input.files.length > 0) {
+        const targetCat = state.bulkTargetCategory;
+        state.bulkTargetCategory = null;
+        importMultipleFilesBatch(input.files, targetCat);
         input.value = '';
       }
     },
@@ -6697,7 +7097,10 @@ body.reader-fullscreen .autoscroll-bar {
       $('importPackageInput').click();
     },
     onImportFileSelected(input) {
-      if (input.files && input.files[0]) {
+      if (input.files && input.files.length > 1) {
+        importMultipleFilesBatch(input.files, null);
+        input.value = '';
+      } else if (input.files && input.files[0]) {
         handleImportFile(input.files[0]);
         input.value = '';
       }
