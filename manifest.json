@@ -1,7 +1,7 @@
 {
-  "name": "CifraFlow — Cifras, PDFs e Repertórios",
-  "short_name": "CifraFlow",
-  "description": "Aplicativo de cifras musicais em texto e PDF com transposição de tom, auto-scroll, links de YouTube/Spotify, repertórios e compartilhamento.",
+  "name": "CifraLush — Cifras, PDFs e Repertórios",
+  "short_name": "CifraLush",
+  "description": "CifraLush — Aplicativo de cifras musicais em texto e PDF com busca online, conversão de PDF/TXT, transposição de tom, tela cheia com auto-scroll e repertórios.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

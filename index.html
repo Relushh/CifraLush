@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
-  <title>CifraFlow — App de Cifras, PDFs e Repertórios</title>
-  <meta name="description" content="Aplicativo completo de cifras musicais em texto e PDF, com transposição de tom, auto-scroll, links de YouTube e Spotify, repertórios e compartilhamento." />
+  <title>CifraLush — App de Cifras, PDFs e Repertórios</title>
+  <meta name="description" content="CifraLush — Aplicativo completo de cifras musicais em texto e PDF, busca online de cifras, transposição de tom, tela cheia com auto-scroll e repertórios." />
 
   <!-- PWA & Mobile Install Meta Tags (Android / iOS / Desktop) -->
   <meta name="theme-color" content="#0f172a" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="CifraFlow" />
+  <meta name="apple-mobile-web-app-title" content="CifraLush" />
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" type="image/svg+xml" href="icon.svg" />
   <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png" />
@@ -93,24 +93,56 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-html, body {
-  height: 100%;
+html {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+  max-width: 100%;
   background-color: var(--bg-primary);
   color: var(--text-primary);
   font-family: var(--font-sans);
   line-height: 1.5;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* App Shell Layout */
 .app-shell {
   display: flex;
+  width: 100%;
+  max-width: 100%;
   min-height: 100vh;
+  min-height: 100dvh;
+  position: relative;
+}
+
+/* Sidebar Backdrop (Mobile & Drawer Click-Outside) */
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  background-color: rgba(2, 6, 23, 0.65);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.sidebar-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 /* Sidebar Navigation */
 .sidebar {
   width: 270px;
+  max-width: 85vw;
   background-color: var(--bg-secondary);
   border-right: 1px solid var(--border-color);
   display: flex;
@@ -119,15 +151,41 @@ html, body {
   top: 0;
   bottom: 0;
   left: 0;
-  z-index: 40;
+  z-index: 60;
   transition: transform 0.25s ease;
 }
 
+.app-shell.sidebar-collapsed .sidebar {
+  transform: translateX(-100%);
+}
+
+.app-shell.sidebar-collapsed .main-area {
+  margin-left: 0;
+  width: 100%;
+  max-width: 100%;
+}
+
+.sidebar-close-btn {
+  display: none;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
 .brand-header {
-  padding: 20px 18px;
+  padding: 18px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 10px;
   border-bottom: 1px solid var(--border-color);
 }
 
@@ -333,12 +391,17 @@ html, body {
 
 /* Main Content Area */
 .main-area {
-  flex: 1;
+  flex: 1 1 0%;
+  min-width: 0;
+  width: calc(100% - 270px);
+  max-width: calc(100% - 270px);
   margin-left: 270px;
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  padding-bottom: 85px;
+  padding-bottom: calc(90px + env(safe-area-inset-bottom, 0px));
+  transition: margin-left 0.25s ease, width 0.25s ease, max-width 0.25s ease;
 }
 
 /* Topbar */
@@ -353,12 +416,16 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
+  gap: 12px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .search-box {
   position: relative;
-  flex: 1;
+  flex: 1 1 0%;
+  min-width: 0;
   max-width: 520px;
 }
 
@@ -406,6 +473,7 @@ html, body {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 /* Buttons */
@@ -478,6 +546,7 @@ html, body {
 .btn-icon {
   padding: 8px;
   border-radius: var(--radius-sm);
+  flex-shrink: 0;
 }
 
 /* Content Container */
@@ -485,6 +554,7 @@ html, body {
   padding: 24px;
   max-width: 1240px;
   width: 100%;
+  min-width: 0;
   margin: 0 auto;
 }
 
@@ -493,20 +563,30 @@ html, body {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 20px;
+  gap: 14px;
+  margin-bottom: 18px;
+  width: 100%;
+  min-width: 0;
+}
+
+.view-header-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .view-title {
   font-size: 23px;
   font-weight: 800;
   letter-spacing: -0.02em;
+  word-break: break-word;
 }
 
 .view-subtitle {
   font-size: 13.5px;
   color: var(--text-secondary);
   margin-top: 2px;
+  word-break: break-word;
 }
 
 /* Filter Bar */
@@ -517,6 +597,8 @@ html, body {
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 20px;
+  width: 100%;
+  min-width: 0;
 }
 
 .filter-chips {
@@ -524,10 +606,21 @@ html, body {
   align-items: center;
   gap: 8px;
   overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
+  max-width: 100%;
+  min-width: 0;
   padding-bottom: 4px;
+  scrollbar-width: none;
+}
+
+.filter-chips::-webkit-scrollbar {
+  display: none;
 }
 
 .chip {
+  flex-shrink: 0;
   padding: 6px 13px;
   border-radius: 99px;
   font-size: 12.5px;
@@ -565,8 +658,10 @@ html, body {
 /* Song Grid & Cards */
 .songs-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  gap: 14px;
+  width: 100%;
+  min-width: 0;
 }
 
 .song-card {
@@ -581,6 +676,10 @@ html, body {
   transition: all 0.18s ease;
   cursor: pointer;
   position: relative;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .song-card:hover {
@@ -594,6 +693,7 @@ html, body {
   align-items: flex-start;
   justify-content: space-between;
   gap: 10px;
+  min-width: 0;
 }
 
 .song-key-badge {
@@ -640,6 +740,7 @@ html, body {
   display: flex;
   align-items: center;
   gap: 4px;
+  flex-shrink: 0;
 }
 
 .icon-btn {
@@ -672,6 +773,7 @@ html, body {
   gap: 8px;
   padding-top: 10px;
   border-top: 1px solid var(--border-color);
+  min-width: 0;
 }
 
 .badge-group {
@@ -679,6 +781,7 @@ html, body {
   flex-wrap: wrap;
   align-items: center;
   gap: 6px;
+  min-width: 0;
 }
 
 .badge {
@@ -691,6 +794,10 @@ html, body {
   border-radius: 6px;
   background-color: var(--bg-secondary);
   color: var(--text-secondary);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .badge-pdf {
@@ -716,8 +823,10 @@ html, body {
 /* Setlists (Repertórios) Grid */
 .setlists-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
   gap: 16px;
+  width: 100%;
+  min-width: 0;
 }
 
 .setlist-card {
@@ -728,6 +837,10 @@ html, body {
   display: flex;
   flex-direction: column;
   gap: 14px;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .setlist-songs-preview {
@@ -747,6 +860,7 @@ html, body {
   justify-content: space-between;
   font-size: 13px;
   gap: 8px;
+  min-width: 0;
 }
 
 .setlist-preview-num {
@@ -754,9 +868,20 @@ html, body {
   font-family: var(--font-mono);
   font-size: 11.5px;
   width: 20px;
+  flex-shrink: 0;
 }
 
 /* Reader / Song Viewer */
+#readerView {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+#readerView > .view-container {
+  padding-bottom: 50vh;
+}
+
 .reader-toolbar {
   position: sticky;
   top: 61px;
@@ -768,18 +893,34 @@ html, body {
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
   box-shadow: var(--shadow-sm);
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.reader-fullscreen-title {
+  display: none;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--accent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
 }
 
 .stage-banner {
   background: linear-gradient(90deg, rgba(245, 158, 11, 0.18), rgba(234, 88, 12, 0.18));
   border-bottom: 1px solid var(--accent-border);
-  padding: 8px 20px;
+  padding: 8px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
+  width: 100%;
+  max-width: 100%;
 }
 
 .control-pill {
@@ -789,6 +930,7 @@ html, body {
   border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .control-pill button {
@@ -830,13 +972,17 @@ html, body {
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .reader-song-title {
-  font-size: 26px;
+  font-size: 24px;
   font-weight: 800;
   letter-spacing: -0.02em;
   line-height: 1.2;
+  word-break: break-word;
 }
 
 .reader-song-artist {
@@ -898,9 +1044,11 @@ html, body {
 /* Media Embed Drawer */
 .media-drawer {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
   gap: 16px;
   margin-bottom: 18px;
+  width: 100%;
+  min-width: 0;
 }
 
 .media-embed-box {
@@ -909,6 +1057,7 @@ html, body {
   border-radius: var(--radius-md);
   overflow: hidden;
   padding: 12px;
+  min-width: 0;
 }
 
 .media-embed-header {
@@ -944,9 +1093,14 @@ html, body {
   background-color: var(--bg-surface);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  padding: 26px;
+  padding: 24px;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x pan-y;
   box-shadow: var(--shadow-sm);
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .cipher-content {
@@ -996,6 +1150,9 @@ html, body {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 .pdf-toolbar {
@@ -1014,7 +1171,11 @@ html, body {
   align-items: center;
   gap: 18px;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x pan-y;
   padding: 8px 0;
+  width: 100%;
+  max-width: 100%;
 }
 
 .pdf-page-canvas {
@@ -1030,28 +1191,73 @@ html, body {
   position: fixed;
   bottom: 24px;
   right: 24px;
-  z-index: 35;
+  z-index: 80;
   background-color: var(--bg-elevated);
   border: 1px solid var(--accent-border);
   border-radius: 99px;
-  padding: 8px 16px;
+  padding: 8px 14px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   box-shadow: var(--shadow-lg);
+  max-width: calc(100vw - 24px);
 }
 
 .autoscroll-bar input[type="range"] {
-  width: 90px;
+  width: 85px;
   accent-color: var(--accent);
   cursor: pointer;
+}
+
+/* Fullscreen Cipher Mode */
+body.reader-fullscreen .sidebar,
+body.reader-fullscreen .sidebar-backdrop,
+body.reader-fullscreen .topbar,
+body.reader-fullscreen .mobile-bottom-nav,
+body.reader-fullscreen .reader-header-card,
+body.reader-fullscreen .media-drawer,
+body.reader-fullscreen .hide-in-fullscreen {
+  display: none !important;
+}
+
+body.reader-fullscreen .main-area {
+  margin-left: 0 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  padding-bottom: 0 !important;
+}
+
+body.reader-fullscreen .reader-toolbar {
+  top: 0 !important;
+  z-index: 85;
+  padding: 8px 14px;
+}
+
+body.reader-fullscreen .reader-fullscreen-title {
+  display: inline-block;
+}
+
+body.reader-fullscreen #readerView > .view-container {
+  max-width: 100%;
+  padding: 12px 12px 55vh;
+}
+
+body.reader-fullscreen .cipher-sheet {
+  border-radius: var(--radius-sm);
+  min-height: calc(100vh - 70px);
+}
+
+body.reader-fullscreen .autoscroll-bar {
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important;
+  right: 16px;
+  z-index: 95;
 }
 
 /* Modals */
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 60;
+  z-index: 70;
   background-color: rgba(2, 6, 23, 0.75);
   backdrop-filter: blur(4px);
   display: none;
@@ -1084,6 +1290,7 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 10px;
 }
 
 .modal-title {
@@ -1103,6 +1310,7 @@ html, body {
   padding: 14px 22px;
   border-top: 1px solid var(--border-color);
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: flex-end;
   gap: 10px;
@@ -1112,7 +1320,7 @@ html, body {
 /* Forms */
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
   gap: 14px;
 }
 
@@ -1120,6 +1328,7 @@ html, body {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-width: 0;
 }
 
 .form-label {
@@ -1201,27 +1410,47 @@ html, body {
   bottom: 0;
   left: 0;
   right: 0;
+  width: 100%;
+  max-width: 100vw;
   z-index: 45;
   background-color: var(--bg-secondary);
   border-top: 1px solid var(--border-color);
-  padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
-  justify-content: space-around;
+  padding: 6px 4px calc(6px + env(safe-area-inset-bottom, 0px));
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.25);
 }
 
 .mob-nav-btn {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 3px;
+  width: 100%;
+  min-width: 0;
   background: none;
   border: none;
   color: var(--text-secondary);
   font-size: 11px;
   font-weight: 600;
-  padding: 6px 12px;
+  padding: 6px 2px;
   border-radius: 8px;
   cursor: pointer;
   font-family: inherit;
+  text-align: center;
+}
+
+.mob-nav-btn span:first-child {
+  font-size: 16px;
+  line-height: 1.1;
+}
+
+.mob-nav-btn span:last-child {
+  display: block;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
 }
 
 .mob-nav-btn.active {
@@ -1231,7 +1460,7 @@ html, body {
 /* Empty State */
 .empty-state {
   text-align: center;
-  padding: 50px 20px;
+  padding: 44px 18px;
   background-color: var(--bg-surface);
   border: 1px dashed var(--border-strong);
   border-radius: var(--radius-lg);
@@ -1243,11 +1472,12 @@ html, body {
   bottom: 24px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 90;
+  z-index: 100;
   display: flex;
   flex-direction: column;
   gap: 8px;
   pointer-events: none;
+  max-width: 92vw;
 }
 
 .toast {
@@ -1260,6 +1490,7 @@ html, body {
   font-weight: 600;
   box-shadow: var(--shadow-lg);
   animation: fadeInUp 0.2s ease;
+  text-align: center;
 }
 
 @keyframes fadeInUp {
@@ -1276,35 +1507,90 @@ html, body {
     transform: translateX(0);
     box-shadow: var(--shadow-lg);
   }
+  .sidebar-close-btn {
+    display: inline-flex;
+  }
   .main-area {
-    margin-left: 0;
+    margin-left: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
   }
   .mobile-bottom-nav {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    align-items: center;
   }
   .autoscroll-bar {
-    bottom: 74px;
-    right: 14px;
+    bottom: calc(74px + env(safe-area-inset-bottom, 0px));
+    right: 12px;
   }
   .cipher-content.two-columns {
     column-count: 1;
   }
   .view-container {
-    padding: 16px;
+    padding: 16px 14px;
   }
   .topbar {
     padding: 10px 14px;
+  }
+  .reader-toolbar {
+    top: 57px;
+    padding: 8px 14px;
+  }
+}
+
+@media (max-width: 680px) {
+  .topbar-actions {
+    display: none;
+  }
+  .search-box {
+    max-width: none;
+  }
+  .view-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .view-header-actions {
+    width: 100%;
+  }
+  .view-header-actions .btn {
+    flex: 1 1 auto;
+  }
+  .songs-grid,
+  .setlists-grid {
+    grid-template-columns: 1fr;
+  }
+  .cipher-sheet {
+    padding: 16px 14px;
+  }
+  .reader-header-card {
+    padding: 16px;
+  }
+  .reader-song-title {
+    font-size: 20px;
+  }
+  .modal-backdrop {
+    padding: 10px;
+  }
+  .modal-header,
+  .modal-body,
+  .modal-footer {
+    padding-left: 14px;
+    padding-right: 14px;
   }
 }
 
 /* Print Stylesheet */
 @media print {
-  .sidebar, .topbar, .reader-toolbar, .stage-banner, .autoscroll-bar, .mobile-bottom-nav, .media-links-bar, .media-drawer {
+  .sidebar, .sidebar-backdrop, .topbar, .reader-toolbar, .stage-banner, .autoscroll-bar, .mobile-bottom-nav, .media-links-bar, .media-drawer {
     display: none !important;
   }
   .main-area {
     margin: 0 !important;
     padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
   }
   body, .cipher-sheet, .reader-header-card {
     background: #fff !important;
@@ -1324,32 +1610,41 @@ html, body {
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
 <body>
-  <div class="app-shell">
+  <div id="appShell" class="app-shell">
+    <!-- Sidebar Backdrop for Mobile / Touch Outside -->
+    <div id="sidebarBackdrop" class="sidebar-backdrop" onclick="App.closeMobileSidebar()"></div>
+
     <!-- Sidebar (Desktop & Mobile Drawer) -->
     <aside id="sidebar" class="sidebar">
       <div class="brand-header">
         <a href="#" class="brand-logo" onclick="App.showAllSongs(); return false;">
           <div class="brand-icon">C#</div>
           <div>
-            <div class="brand-title">CifraFlow</div>
+            <div class="brand-title">CifraLush</div>
             <div class="brand-subtitle">Cifras • PDFs • Palco</div>
           </div>
         </a>
+        <button type="button" class="sidebar-close-btn" onclick="App.closeMobileSidebar()" title="Fechar menu" aria-label="Fechar menu">
+          ✖
+        </button>
       </div>
 
       <div class="sidebar-actions">
-        <button class="btn btn-primary" style="width: 100%;" onclick="App.openSongModal()">
+        <button class="btn btn-primary" style="width: 100%;" onclick="App.closeMobileSidebar(); App.openSongModal()">
           + Nova Cifra / PDF
         </button>
+        <button class="btn btn-accent-outline btn-sm" style="width: 100%;" onclick="App.closeMobileSidebar(); App.openOnlineSearchModal()">
+          🌐 Buscar Cifra Online
+        </button>
         <div style="display: flex; gap: 6px;">
-          <button class="btn btn-secondary btn-sm" style="flex: 1;" onclick="App.triggerImportFileDialog()">
+          <button class="btn btn-secondary btn-sm" style="flex: 1;" onclick="App.closeMobileSidebar(); App.triggerImportFileDialog()">
             📥 Importar
           </button>
-          <button class="btn btn-secondary btn-sm" style="flex: 1;" onclick="App.exportFullLibraryBackup()">
+          <button class="btn btn-secondary btn-sm" style="flex: 1;" onclick="App.closeMobileSidebar(); App.exportFullLibraryBackup()">
             💾 Backup
           </button>
         </div>
-        <input type="file" id="importPackageInput" accept=".json,.cifra" style="display: none;" onchange="App.onImportFileSelected(this)" />
+        <input type="file" id="importPackageInput" accept=".json,.cifra,.pdf,.txt,application/pdf,text/plain" style="display: none;" onchange="App.onImportFileSelected(this)" />
       </div>
 
       <nav class="nav-section">
@@ -1386,7 +1681,7 @@ html, body {
 
         <div class="nav-label">
           <span>Categorias / Pastas</span>
-          <button type="button" class="nav-header-btn" onclick="App.openCategoriesModal()" title="Criar, editar ou excluir pastas">
+          <button type="button" class="nav-header-btn" onclick="App.closeMobileSidebar(); App.openCategoriesModal()" title="Criar, editar ou excluir pastas">
             + Nova / Editar
           </button>
         </div>
@@ -1394,7 +1689,7 @@ html, body {
       </nav>
 
       <div class="sidebar-footer">
-        <button class="btn btn-accent-outline btn-sm" style="width: 100%;" onclick="App.openInstallModal()">
+        <button class="btn btn-accent-outline btn-sm" style="width: 100%;" onclick="App.closeMobileSidebar(); App.openInstallModal()">
           📲 Instalar / Compartilhar App
         </button>
         <button id="themeToggleBtn" class="btn btn-secondary btn-sm" style="width: 100%;" onclick="App.toggleTheme()">
@@ -1407,7 +1702,7 @@ html, body {
     <main class="main-area">
       <!-- Top Search & Quick Actions Bar -->
       <header class="topbar">
-        <button class="btn btn-secondary btn-icon" style="display: inline-flex;" onclick="App.toggleMobileSidebar()" title="Menu">
+        <button id="mobileMenuBtn" class="btn btn-secondary btn-icon" style="display: inline-flex;" onclick="App.toggleMobileSidebar(event)" title="Menu" aria-label="Menu">
           ☰
         </button>
 
@@ -1423,6 +1718,9 @@ html, body {
         </div>
 
         <div class="topbar-actions">
+          <button class="btn btn-accent-outline btn-sm" onclick="App.openOnlineSearchModal()">
+            🌐 Buscar Cifra Online
+          </button>
           <button id="topInstallBtn" class="btn btn-secondary btn-sm" onclick="App.openInstallModal()">
             📲 Instalar / Compartilhar
           </button>
@@ -1438,15 +1736,18 @@ html, body {
           <div>
             <h1 id="libraryTitle" class="view-title">Minhas Cifras</h1>
             <p id="librarySubtitle" class="view-subtitle">
-              Organize cifras digitadas, arquivos PDF e links de YouTube e Spotify
+              Organize cifras digitadas, buscadas online, arquivos PDF/Texto convertidos e links de YouTube e Spotify
             </p>
           </div>
-          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <div class="view-header-actions">
+            <button class="btn btn-accent-outline btn-sm" onclick="App.openOnlineSearchModal()">
+              🌐 Buscar Cifra Online
+            </button>
             <button class="btn btn-secondary btn-sm" onclick="App.openCategoriesModal()">
               📁 Gerenciar Pastas
             </button>
             <button class="btn btn-secondary btn-sm" onclick="App.triggerImportFileDialog()">
-              📥 Importar Cifra / Pacote
+              📥 Importar Cifra / PDF
             </button>
             <button class="btn btn-primary btn-sm" onclick="App.openSongModal()">
               + Adicionar Música
@@ -1461,11 +1762,11 @@ html, body {
         <div class="filter-bar">
           <div class="filter-chips">
             <button class="chip active" data-type-filter="ALL" onclick="App.setTypeFilter('ALL')">Todos os Formatos</button>
-            <button class="chip" data-type-filter="TEXT" onclick="App.setTypeFilter('TEXT')">📝 Cifras Digitadas</button>
-            <button class="chip" data-type-filter="PDF" onclick="App.setTypeFilter('PDF')">📄 Arquivos PDF</button>
+            <button class="chip" data-type-filter="TEXT" onclick="App.setTypeFilter('TEXT')">📝 Cifras em Texto</button>
+            <button class="chip" data-type-filter="PDF" onclick="App.setTypeFilter('PDF')">📄 Com PDF Original</button>
           </div>
 
-          <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="display: flex; align-items: center; gap: 8px; margin-left: auto;">
             <span style="font-size: 12.5px; color: var(--text-secondary);">Ordenar:</span>
             <select class="filter-select" onchange="App.setSortBy(this.value)">
               <option value="recent">Recentes</option>
@@ -1489,11 +1790,11 @@ html, body {
               Monte a ordem das músicas para apresentações, ensaios ou cultos e use o Modo Palco
             </p>
           </div>
-          <div style="display: flex; gap: 8px;">
+          <div class="view-header-actions">
             <button class="btn btn-secondary btn-sm" onclick="App.triggerImportFileDialog()">
               📥 Importar Repertório
             </button>
-            <button class="btn btn-primary" onclick="App.openSetlistModal()">
+            <button class="btn btn-primary btn-sm" onclick="App.openSetlistModal()">
               + Novo Repertório
             </button>
           </div>
@@ -1517,23 +1818,25 @@ html, body {
 
         <!-- Sticky Reader Toolbar -->
         <div class="reader-toolbar">
-          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-            <button class="btn btn-secondary btn-sm" onclick="App.backFromReader()">
+          <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; min-width: 0;">
+            <button class="btn btn-secondary btn-sm hide-in-fullscreen" onclick="App.backFromReader()">
               ← Voltar
             </button>
 
+            <span id="readerFullscreenTitle" class="reader-fullscreen-title"></span>
+
             <!-- Transpose Pill -->
             <div class="control-pill" title="Transpor Tom (-1/2 ou +1/2 semitom)">
-              <button onclick="App.transpose(-1)">-½</button>
+              <button type="button" onclick="App.transpose(-1)">-½</button>
               <span id="readerCurrentKey" class="pill-value" onclick="App.resetTranspose()" style="cursor: pointer;" title="Clique para voltar ao tom original">C</span>
-              <button onclick="App.transpose(1)">+½</button>
+              <button type="button" onclick="App.transpose(1)">+½</button>
             </div>
 
-            <button class="btn btn-secondary btn-sm" onclick="App.toggleAccidentals()" title="Alternar entre Sustenidos (#) e Bemóis (b)">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="App.toggleAccidentals()" title="Alternar entre Sustenidos (#) e Bemóis (b)">
               ♯/♭
             </button>
 
-            <button id="readerSaveKeyBtn" class="btn btn-accent-outline btn-sm" style="display: none;" onclick="App.saveTransposedKeyPermanently()">
+            <button type="button" id="readerSaveKeyBtn" class="btn btn-accent-outline btn-sm" style="display: none;" onclick="App.saveTransposedKeyPermanently()">
               💾 Fixar Tom
             </button>
           </div>
@@ -1541,23 +1844,27 @@ html, body {
           <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
             <!-- Font size Pill -->
             <div class="control-pill" title="Tamanho da Letra">
-              <button onclick="App.changeFontSize(-2)">A-</button>
-              <button onclick="App.changeFontSize(2)">A+</button>
+              <button type="button" onclick="App.changeFontSize(-2)">A-</button>
+              <button type="button" onclick="App.changeFontSize(2)">A+</button>
             </div>
 
-            <button id="readerColumnsBtn" class="btn btn-secondary btn-sm" onclick="App.toggleTwoColumns()" title="Alternar 1 ou 2 colunas">
+            <button type="button" id="readerFullscreenBtn" class="btn btn-accent-outline btn-sm" onclick="App.toggleFullscreen()" title="Tela Cheia (Fullscreen)">
+              ⛶ Tela Cheia
+            </button>
+
+            <button type="button" id="readerColumnsBtn" class="btn btn-secondary btn-sm hide-in-fullscreen" onclick="App.toggleTwoColumns()" title="Alternar 1 ou 2 colunas">
               ☷ 2 Colunas
             </button>
 
-            <button class="btn btn-secondary btn-sm" onclick="window.print()" title="Imprimir ou Salvar em PDF">
+            <button type="button" class="btn btn-secondary btn-sm hide-in-fullscreen" onclick="window.print()" title="Imprimir ou Salvar em PDF">
               🖨️ Imprimir
             </button>
 
-            <button class="btn btn-secondary btn-sm" onclick="App.editActiveSong()">
+            <button type="button" class="btn btn-secondary btn-sm hide-in-fullscreen" onclick="App.editActiveSong()">
               ✏️ Editar
             </button>
 
-            <button class="btn btn-primary btn-sm" onclick="App.openShareModalForSong()">
+            <button type="button" class="btn btn-primary btn-sm hide-in-fullscreen" onclick="App.openShareModalForSong()">
               📤 Compartilhar
             </button>
           </div>
@@ -1566,7 +1873,7 @@ html, body {
         <div class="view-container">
           <!-- Song Header Card -->
           <div class="reader-header-card">
-            <div>
+            <div style="min-width: 0; flex: 1;">
               <h1 id="readerTitle" class="reader-song-title">Título da Música</h1>
               <div id="readerArtist" class="reader-song-artist">Artista</div>
               <div id="readerMetaPills" class="reader-meta-pills"></div>
@@ -1582,9 +1889,9 @@ html, body {
 
           <!-- Switcher if song has BOTH Typed Cipher and Attached PDF -->
           <div id="readerModeSwitcher" class="filter-chips" style="display: none; margin-bottom: 14px;">
-            <button class="chip active" data-reader-tab="both" onclick="App.setReaderTab('both')">📝+📄 Mostrar Cifra e PDF</button>
-            <button class="chip" data-reader-tab="text" onclick="App.setReaderTab('text')">📝 Apenas Cifra Digitada</button>
-            <button class="chip" data-reader-tab="pdf" onclick="App.setReaderTab('pdf')">📄 Apenas PDF</button>
+            <button class="chip active" data-reader-tab="text" onclick="App.setReaderTab('text')">📝 Cifra no App (Texto)</button>
+            <button class="chip" data-reader-tab="pdf" onclick="App.setReaderTab('pdf')">📄 Ver PDF Original</button>
+            <button class="chip" data-reader-tab="both" onclick="App.setReaderTab('both')">📝+📄 Mostrar Ambos</button>
           </div>
 
           <!-- Typed Cipher Sheet -->
@@ -1598,11 +1905,11 @@ html, body {
               <strong id="readerPdfFilename" style="font-size: 14px;">📄 cifra.pdf</strong>
               <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                 <div class="control-pill">
-                  <button onclick="App.changePdfZoom(-0.2)">🔍 -</button>
+                  <button type="button" onclick="App.changePdfZoom(-0.2)">🔍 -</button>
                   <span id="readerPdfZoomLabel" class="pill-value">100%</span>
-                  <button onclick="App.changePdfZoom(0.2)">🔍 +</button>
+                  <button type="button" onclick="App.changePdfZoom(0.2)">🔍 +</button>
                 </div>
-                <button class="btn btn-secondary btn-sm" onclick="App.openCurrentPdfExternal()">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="App.openCurrentPdfExternal()">
                   ↗ Abrir PDF Original
                 </button>
               </div>
@@ -1613,10 +1920,11 @@ html, body {
 
         <!-- Floating Auto-Scroll Bar -->
         <div class="autoscroll-bar">
-          <button id="autoScrollToggleBtn" class="btn btn-secondary btn-sm" onclick="App.toggleAutoScroll()">
+          <button type="button" id="autoScrollToggleBtn" class="btn btn-secondary btn-sm" onclick="App.toggleAutoScroll()">
             ▶️ Auto-Scroll
           </button>
           <input
+            id="autoScrollSpeedRange"
             type="range"
             min="1"
             max="10"
@@ -1631,37 +1939,59 @@ html, body {
 
     <!-- Mobile Bottom Navigation -->
     <nav class="mobile-bottom-nav">
-      <button class="mob-nav-btn active" data-mob-nav="library" onclick="App.showAllSongs()">
+      <button type="button" class="mob-nav-btn active" data-mob-nav="library" onclick="App.closeMobileSidebar(); App.showAllSongs()">
         <span>🎵</span>
         <span>Cifras</span>
       </button>
-      <button class="mob-nav-btn" data-mob-nav="favorites" onclick="App.showFavorites()">
+      <button type="button" class="mob-nav-btn" data-mob-nav="favorites" onclick="App.closeMobileSidebar(); App.showFavorites()">
         <span>⭐</span>
         <span>Favoritas</span>
       </button>
-      <button class="mob-nav-btn" onclick="App.openSongModal()" style="color: var(--accent);">
+      <button type="button" class="mob-nav-btn" onclick="App.closeMobileSidebar(); App.openSongModal()" style="color: var(--accent);">
         <span>➕</span>
         <span>Adicionar</span>
       </button>
-      <button class="mob-nav-btn" data-mob-nav="setlists" onclick="App.showSetlists()">
+      <button type="button" class="mob-nav-btn" data-mob-nav="setlists" onclick="App.closeMobileSidebar(); App.showSetlists()">
         <span>📋</span>
         <span>Repertórios</span>
       </button>
-      <button class="mob-nav-btn" onclick="App.openInstallModal()">
+      <button type="button" class="mob-nav-btn" onclick="App.closeMobileSidebar(); App.openInstallModal()">
         <span>📲</span>
         <span>Compartilhar</span>
       </button>
     </nav>
   </div>
 
-  <!-- MODAL 1: ADD / EDIT SONG (Cifra Digitada + Anexo PDF + YouTube/Spotify) -->
+  <!-- MODAL 1: ADD / EDIT SONG (Cifra Digitada + Busca Online + Anexo PDF/Texto Convertido + YouTube/Spotify) -->
   <div id="songModalBackdrop" class="modal-backdrop">
     <div class="modal-dialog">
       <div class="modal-header">
         <h2 id="songModalTitle" class="modal-title">🎵 Nova Cifra / PDF</h2>
-        <button class="icon-btn" onclick="App.closeSongModal()">✖</button>
+        <button type="button" class="icon-btn" onclick="App.closeSongModal()">✖</button>
       </div>
       <div class="modal-body">
+        <!-- Quick Online Cipher Search / Parameter Import inside Song Modal -->
+        <div style="background: var(--accent-soft); border: 1px solid var(--accent-border); border-radius: 12px; padding: 12px;">
+          <label class="form-label" style="color: var(--accent); margin-bottom: 6px; display: block;">
+            🌐 Buscar Cifra Online ou Colar Link / Parâmetro (Ex: <code>fernandinho/galileu</code> ou <code>https://www.cifras.com.br/cifra/fernandinho/galileu</code>)
+          </label>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <input
+              type="text"
+              id="editorOnlineQueryInput"
+              class="form-input"
+              style="flex: 1; min-width: 200px; background: var(--bg-secondary);"
+              placeholder="Digite artista/música (ex: fernandinho/galileu), nome da música ou cole o link..."
+              onkeydown="if(event.key==='Enter'){event.preventDefault();App.runEditorOnlineSearch();}"
+            />
+            <button type="button" id="editorOnlineSearchBtn" class="btn btn-primary btn-sm" onclick="App.runEditorOnlineSearch()">
+              🔍 Buscar / Importar
+            </button>
+          </div>
+          <div id="editorOnlineStatus" style="font-size: 12px; color: var(--text-secondary); margin-top: 6px; display: none;"></div>
+          <div id="editorOnlineResultsList" style="display: none; flex-direction: column; gap: 6px; margin-top: 8px; max-height: 210px; overflow-y: auto;"></div>
+        </div>
+
         <div class="form-grid">
           <div class="form-group">
             <label class="form-label">Nome da Música *</label>
@@ -1672,8 +2002,8 @@ html, body {
             <input type="text" id="songArtistInput" class="form-input" placeholder="Ex: Legião Urbana" />
           </div>
           <div class="form-group">
-            <label class="form-label">Categoria / Pasta</label>
-            <input type="text" id="songCategoryInput" list="categoryOptionsList" class="form-input" placeholder="Selecione ou digite uma nova..." />
+            <label class="form-label">Categoria / Pasta (Opcional)</label>
+            <input type="text" id="songCategoryInput" list="categoryOptionsList" class="form-input" placeholder="Deixe vazio ou digite/escolha uma pasta..." />
             <datalist id="categoryOptionsList"></datalist>
           </div>
         </div>
@@ -1737,18 +2067,18 @@ html, body {
           </div>
         </div>
 
-        <!-- Option A: Attach PDF -->
+        <!-- Option A: Attach PDF or Text File (Auto-converts into App Text!) -->
         <div class="form-group">
-          <label class="form-label">📄 Anexo de Cifra em PDF (Opcional — Você pode anexar PDF, digitar a cifra abaixo, ou usar ambos)</label>
+          <label class="form-label">📄 Anexar Arquivo de Cifra em PDF ou Texto (.pdf, .txt, .cifra) — O app lê o arquivo e converte automaticamente em texto da cifra abaixo!</label>
           <div id="pdfDropzone" class="pdf-dropzone" onclick="document.getElementById('pdfFileInput').click()">
             <div id="pdfUploadStatus" style="font-size: 13.5px; color: var(--text-secondary);">
-              Clique aqui ou arraste um arquivo <strong>.PDF</strong> de cifra do seu celular ou computador
+              Clique aqui ou arraste um arquivo <strong>.PDF</strong> ou <strong>.TXT</strong> para ler e converter a cifra automaticamente para o texto do app
             </div>
-            <input type="file" id="pdfFileInput" accept="application/pdf,.pdf" style="display: none;" onchange="App.onPdfInputChanged(this)" />
+            <input type="file" id="pdfFileInput" accept="application/pdf,text/plain,.pdf,.txt,.cifra,.md" style="display: none;" onchange="App.onPdfInputChanged(this)" />
           </div>
-          <div style="margin-top: 4px;">
+          <div style="margin-top: 4px; display: flex; gap: 8px; flex-wrap: wrap;">
             <button type="button" id="clearPdfBtn" class="btn btn-danger btn-sm" style="display: none;" onclick="App.clearAttachedPdf()">
-              🗑️ Remover PDF Anexado
+              🗑️ Remover Arquivo Anexado
             </button>
           </div>
         </div>
@@ -1756,7 +2086,7 @@ html, body {
         <!-- Option B: Typed Cipher -->
         <div class="form-group">
           <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
-            <label class="form-label">📝 Cifra Digitada (Cole do Cifra Club ou digite os acordes acima da letra)</label>
+            <label class="form-label">📝 Texto da Cifra no App (Gerado automaticamente do PDF/TXT ou digitado/colado)</label>
           </div>
           <div class="quick-insert-bar">
             <span style="font-size: 11.5px; color: var(--text-muted); align-self: center; margin-right: 4px;">Inserir rápido:</span>
@@ -1771,7 +2101,7 @@ html, body {
           <textarea
             id="songContentInput"
             class="form-textarea mono"
-            placeholder="[Intro] C  G  Am  F&#10;&#10;C                 G&#10;Digite ou cole os acordes na linha acima da letra&#10;Am                F&#10;O app destaca e transpõe todos os acordes automaticamente!"
+            placeholder="[Intro] C  G  Am  F&#10;&#10;C                 G&#10;Anexe um PDF/TXT acima ou digite/cole os acordes na linha acima da letra&#10;Am                F&#10;O app destaca e transpõe todos os acordes automaticamente!"
           ></textarea>
         </div>
 
@@ -1796,7 +2126,7 @@ html, body {
     <div class="modal-dialog" style="max-width: 650px;">
       <div class="modal-header">
         <h2 id="setlistModalTitle" class="modal-title">📋 Novo Repertório</h2>
-        <button class="icon-btn" onclick="App.closeSetlistModal()">✖</button>
+        <button type="button" class="icon-btn" onclick="App.closeSetlistModal()">✖</button>
       </div>
       <div class="modal-body">
         <div class="form-grid">
@@ -1836,7 +2166,7 @@ html, body {
     <div class="modal-dialog" style="max-width: 600px;">
       <div class="modal-header">
         <h2 class="modal-title">📤 Compartilhar Cifra</h2>
-        <button class="icon-btn" onclick="App.closeShareModal()">✖</button>
+        <button type="button" class="icon-btn" onclick="App.closeShareModal()">✖</button>
       </div>
       <div class="modal-body">
         <div style="font-size: 15px; font-weight: 700; color: var(--accent);" id="shareSongTitleLabel"></div>
@@ -1846,7 +2176,7 @@ html, body {
           <div style="font-size: 13.5px; font-weight: 700; margin-bottom: 8px;">🔗 1. Link Direto e QR Code (Abre a cifra com 1 clique)</div>
           <div style="display: flex; gap: 8px; margin-bottom: 12px;">
             <input type="text" id="shareInstantLinkInput" class="form-input" readonly />
-            <button class="btn btn-primary" onclick="App.copyShareLink()">Copiar Link</button>
+            <button type="button" class="btn btn-primary" onclick="App.copyShareLink()">Copiar Link</button>
           </div>
           <div style="text-align: center;">
             <img id="shareQrCodeImg" alt="QR Code da Cifra" style="border-radius: 8px; background: #fff; padding: 6px; max-width: 170px;" />
@@ -1864,10 +2194,10 @@ html, body {
             💡 Esta música possui um PDF anexado! Use o botão abaixo para enviar a cifra com o PDF incluso.
           </div>
           <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-            <button class="btn btn-primary btn-sm" onclick="App.exportCurrentSongPackage(true)">
+            <button type="button" class="btn btn-primary btn-sm" onclick="App.exportCurrentSongPackage(true)">
               📲 Enviar Arquivo no Celular / WhatsApp
             </button>
-            <button class="btn btn-secondary btn-sm" onclick="App.exportCurrentSongPackage(false)">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="App.exportCurrentSongPackage(false)">
               ⬇️ Baixar Arquivo (.cifra.json)
             </button>
           </div>
@@ -1876,13 +2206,13 @@ html, body {
         <!-- Option 3: Share Formatted Text on WhatsApp -->
         <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px;">
           <div style="font-size: 13.5px; font-weight: 700; margin-bottom: 6px;">💬 3. Enviar Cifra em Texto no WhatsApp</div>
-          <button class="btn btn-secondary btn-sm" onclick="App.shareTextOnWhatsApp()">
+          <button type="button" class="btn btn-secondary btn-sm" onclick="App.shareTextOnWhatsApp()">
             Enviar Cifra Formatada em Texto + Links YouTube/Spotify
           </button>
         </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="App.closeShareModal()">Fechar</button>
+        <button type="button" class="btn btn-secondary" onclick="App.closeShareModal()">Fechar</button>
       </div>
     </div>
   </div>
@@ -1892,7 +2222,7 @@ html, body {
     <div class="modal-dialog" style="max-width: 620px;">
       <div class="modal-header">
         <h2 class="modal-title">🎁 Cifra Compartilhada com Você!</h2>
-        <button class="icon-btn" onclick="App.closeIncomingShareModal()">✖</button>
+        <button type="button" class="icon-btn" onclick="App.closeIncomingShareModal()">✖</button>
       </div>
       <div class="modal-body">
         <div>
@@ -1902,27 +2232,27 @@ html, body {
         <div id="incomingSongPreview" class="cipher-sheet cipher-content" style="max-height: 300px; overflow-y: auto; padding: 16px;"></div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="App.closeIncomingShareModal()">Ignorar</button>
-        <button class="btn btn-primary" onclick="App.acceptIncomingSharedSong()">
+        <button type="button" class="btn btn-secondary" onclick="App.closeIncomingShareModal()">Ignorar</button>
+        <button type="button" class="btn btn-primary" onclick="App.acceptIncomingSharedSong()">
           💾 Salvar na Minha Biblioteca
         </button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL 5: INSTALL ON ANDROID / IOS & SHARE APP ONLINE -->
+  <!-- MODAL 5: INSTALL ON ANDROID / IOS & SHARE APP -->
   <div id="installModalBackdrop" class="modal-backdrop">
     <div class="modal-dialog" style="max-width: 640px;">
       <div class="modal-header">
         <h2 class="modal-title">📲 Instalar no Android, iOS ou PC e Compartilhar</h2>
-        <button class="icon-btn" onclick="App.closeInstallModal()">✖</button>
+        <button type="button" class="icon-btn" onclick="App.closeInstallModal()">✖</button>
       </div>
       <div class="modal-body">
         <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px;">
           <div style="font-size: 14px; font-weight: 700; margin-bottom: 8px;">🔗 Link do Aplicativo</div>
           <div style="display: flex; gap: 8px;">
             <input type="text" id="installAppUrlInput" class="form-input" readonly />
-            <button class="btn btn-primary" onclick="App.copyAppUrl()">Copiar</button>
+            <button type="button" class="btn btn-primary" onclick="App.copyAppUrl()">Copiar</button>
           </div>
         </div>
 
@@ -1945,17 +2275,9 @@ html, body {
             </ol>
           </div>
         </div>
-
-        <div style="background: var(--accent-soft); border: 1px solid var(--accent-border); border-radius: 12px; padding: 14px;">
-          <h4 style="font-size: 14px; font-weight: 800; color: var(--accent); margin-bottom: 6px;">🌐 Como deixar online grátis PARA SEMPRE?</h4>
-          <p style="font-size: 13px; color: var(--text-primary); line-height: 1.55;">
-            • <strong>Opção 1 — Cloudflare Pages (Ilimitado e Grátis para sempre):</strong> Acesse <a href="https://dash.cloudflare.com/" target="_blank" rel="noopener" style="color: var(--accent); font-weight: 700;">dash.cloudflare.com</a> → <em>Workers &amp; Pages</em> → <em>Pages</em> → <em>Upload assets</em> e arraste esta pasta.<br />
-            • <strong>Opção 2 — Netlify (Grátis para sempre com login Google):</strong> Em <a href="https://app.netlify.com/drop" target="_blank" rel="noopener" style="color: var(--accent); font-weight: 700;">app.netlify.com/drop</a>, faça login gratuito com sua conta Google (sem login o link dura apenas 1h; <strong>com login gratuito ele fica ativo para sempre!</strong>).
-          </p>
-        </div>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-primary" onclick="App.closeInstallModal()">Entendi</button>
+        <button type="button" class="btn btn-primary" onclick="App.closeInstallModal()">Entendi</button>
       </div>
     </div>
   </div>
@@ -1965,17 +2287,18 @@ html, body {
     <div class="modal-dialog" style="max-width: 560px;">
       <div class="modal-header">
         <h2 class="modal-title">📁 Gerenciar Categorias / Pastas</h2>
-        <button class="icon-btn" onclick="App.closeCategoriesModal()">✖</button>
+        <button type="button" class="icon-btn" onclick="App.closeCategoriesModal()">✖</button>
       </div>
       <div class="modal-body">
         <div class="form-group">
           <label class="form-label">Criar Nova Pasta / Categoria</label>
-          <div style="display: flex; gap: 8px;">
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
             <input
               type="text"
               id="newCategoryNameInput"
               class="form-input"
-              placeholder="Ex: Repertório Casamento, Pagode, Bossa Nova..."
+              style="flex: 1; min-width: 180px;"
+              placeholder="Digite o nome da sua pasta ou categoria..."
               onkeydown="if(event.key==='Enter'){event.preventDefault();App.createNewCategoryFromModal();}"
             />
             <button type="button" class="btn btn-primary" onclick="App.createNewCategoryFromModal()">
@@ -1985,12 +2308,52 @@ html, body {
         </div>
 
         <div class="form-group">
-          <label class="form-label">Pastas Existentes (Clique em ✏️ para renomear ou 🗑️ para excluir)</label>
+          <label class="form-label">Suas Pastas Criadas (Clique em 💾 para salvar novo nome ou 🗑️ para excluir)</label>
           <div id="categoriesManagerList" style="display: flex; flex-direction: column; gap: 8px; max-height: 340px; overflow-y: auto;"></div>
         </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-primary" onclick="App.closeCategoriesModal()">Concluído</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 7: ONLINE CIPHER SEARCH & PARAMETER IMPORT (cifras.com.br/cifra/{artista}/{musica}) -->
+  <div id="onlineSearchModalBackdrop" class="modal-backdrop">
+    <div class="modal-dialog" style="max-width: 680px;">
+      <div class="modal-header">
+        <h2 class="modal-title">🌐 Buscar e Importar Cifra Online</h2>
+        <button type="button" class="icon-btn" onclick="App.closeOnlineSearchModal()">✖</button>
+      </div>
+      <div class="modal-body">
+        <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px;">
+          <label class="form-label" style="display: block; margin-bottom: 6px;">
+            Pesquise pelo Nome da Música / Artista ou informe o parâmetro/link no padrão <code>cifras.com.br/cifra/artista/musica</code>
+          </label>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <input
+              type="text"
+              id="onlineModalQueryInput"
+              class="form-input"
+              style="flex: 1; min-width: 200px;"
+              placeholder="Ex: fernandinho/galileu, https://www.cifras.com.br/cifra/fernandinho/galileu ou nome da música..."
+              onkeydown="if(event.key==='Enter'){event.preventDefault();App.runModalOnlineSearch();}"
+            />
+            <button type="button" id="onlineModalSearchBtn" class="btn btn-primary" onclick="App.runModalOnlineSearch()">
+              🔍 Pesquisar / Importar
+            </button>
+          </div>
+          <div style="font-size: 12px; color: var(--text-secondary); margin-top: 8px;">
+            💡 <strong>Dica:</strong> Você pode digitar o nome da música (ex: <em>Galileu Fernandinho</em>), o parâmetro direto <code>artista/musica</code> (ex: <code>fernandinho/galileu</code>) ou colar a URL completa de <code>cifras.com.br/cifra/...</code>. A cifra será convertida automaticamente para o texto interativo do CifraLush!
+          </div>
+        </div>
+
+        <div id="onlineModalStatus" style="font-size: 13.5px; color: var(--accent); font-weight: 600; display: none; padding: 6px 2px;"></div>
+
+        <div id="onlineModalResultsContainer" style="display: flex; flex-direction: column; gap: 8px; max-height: 380px; overflow-y: auto;"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="App.closeOnlineSearchModal()">Fechar</button>
       </div>
     </div>
   </div>
@@ -2001,7 +2364,7 @@ html, body {
   <!-- App Scripts (Self-Contained) -->
   <script>
 /**
- * CifraFlow — Camada de Persistência Local (IndexedDB)
+ * CifraLush — Camada de Persistência Local (IndexedDB)
  * Suporta armazenamento de cifras digitadas, arquivos PDF completos,
  * categorias personalizadas e repertórios (setlists) sem limite de 5MB.
  */
@@ -2009,211 +2372,22 @@ html, body {
   const DB_NAME = 'CifraFlowDB';
   const DB_VERSION = 1;
 
-  const DEFAULT_CATEGORIES = [
+  // Inicia completamente zerado (sem pastas modelo, sem músicas modelo e sem repertório modelo)
+  const DEFAULT_CATEGORIES = [];
+  const INITIAL_SONGS = [];
+  const INITIAL_SETLISTS = [];
+
+  const LEGACY_DEMO_SONG_IDS = ['song-demo-1', 'song-demo-2', 'song-demo-3'];
+  const LEGACY_DEMO_SETLIST_IDS = ['setlist-demo-1'];
+  const LEGACY_MODEL_CATEGORIES = new Set([
     'Repertório Geral',
     'Acústico / Voz e Violão',
     'Louvor / Gospel',
     'MPB / Nacional',
     'Pop / Rock',
-    'Sertanejo / Forró'
-  ];
-
-  const INITIAL_SONGS = [
-    {
-      id: 'song-demo-1',
-      title: 'Tempo Perdido',
-      artist: 'Legião Urbana',
-      category: 'Pop / Rock',
-      key: 'Em',
-      capo: 0,
-      bpm: 122,
-      timeSignature: '4/4',
-      favorite: true,
-      youtubeUrl: 'https://www.youtube.com/watch?v=2hr7Uqu6G80',
-      spotifyUrl: 'https://open.spotify.com/track/7C2iU2be2fE3A17C8zD9iR',
-      notes: 'Batida rock balada constante. Crescer dinâmica no refrão final ("Somos tão jovens").',
-      content: `[Intro] C  Am7  Bm7  Em
-        C  Am7  Bm7  Em
-
-[Primeira Parte]
-C                     Am7
-  Todos os dias quando acordo
-Bm7                        Em
-  Não tenho mais o tempo que passou
-C                   Am7
-  Mas tenho muito tempo
-Bm7                        Em
-  Temos todo o tempo do mundo
-
-[Segunda Parte]
-C                 Am7
-  Todos os dias antes de dormir
-Bm7                            Em
-  Lembro e esqueço como foi o dia
-C                Am7
-  Sempre em frente
-Bm7                     Em
-  Não temos tempo a perder
-
-[Refrão]
-C                  Am7
-  Nosso suor sagrado
-            Bm7
-É bem mais belo que esse sangue amargo
-      Em
-E tão sério
-      C        Am7
-E selvagem! Selvagem!
-   Bm7        Em
-Selvagem!
-
-[Final]
-           C                Am7
-Temos nosso próprio tempo
-           Bm7              Em
-Temos nosso próprio tempo
-           C                Am7
-Temos nosso próprio tempo
-       Bm7         Em
-Somos tão jovens!`,
-      pdfData: null,
-      pdfName: null,
-      createdAt: Date.now() - 86400000 * 2,
-      updatedAt: Date.now() - 3600000
-    },
-    {
-      id: 'song-demo-2',
-      title: 'Anunciação',
-      artist: 'Alceu Valença',
-      category: 'MPB / Nacional',
-      key: 'G',
-      capo: 0,
-      bpm: 108,
-      timeSignature: '4/4',
-      favorite: true,
-      youtubeUrl: 'https://www.youtube.com/watch?v=OR74idpsweg',
-      spotifyUrl: 'https://open.spotify.com/track/43M2L963G50M6i1U6jX9B4',
-      notes: 'Ótima para abrir apresentação acústica. Melodia da introdução pode ser feita no violão.',
-      content: `[Intro] G  Em  C  D7  G
-
-[Primeira Parte]
-               G
-Na bruma leve das paixões
-                 Em
-Que vêm de dentro
-                   C
-Tu vens chegando pra brincar
-              D7
-No meu quintal
-            G
-No teu cavalo
-                     Em
-Peito nu, cabelo ao vento
-                 C
-E o sol quarando nossas roupas
-         D7          G
-No varal
-
-[Refrão]
-Tu vens, tu vens!
-   Em           C
-Eu já escuto os teus sinais!
-         D7          G
-Tu vens, tu vens!
-   Em           C            D7
-Eu já escuto os teus sinais!
-
-[Segunda Parte]
-          Em
-A voz do anjo
-                     Bm
-Sussurrou no meu ouvido
-          C
-Eu não duvido
-                    G
-Já escuto os teus sinais
-            C
-Que tu virias
-                   G
-Numa manhã de domingo
-          Am7       D7         G
-Eu te anuncio nos sinos das catedrais`,
-      pdfData: null,
-      pdfName: null,
-      createdAt: Date.now() - 86400000,
-      updatedAt: Date.now() - 1800000
-    },
-    {
-      id: 'song-demo-3',
-      title: 'Bondade de Deus (Goodness of God)',
-      artist: 'Isaías Saad',
-      category: 'Louvor / Gospel',
-      key: 'G',
-      capo: 1,
-      bpm: 68,
-      timeSignature: '4/4',
-      favorite: false,
-      youtubeUrl: 'https://www.youtube.com/watch?v=mZ9yZ3d1f8k',
-      spotifyUrl: 'https://open.spotify.com/track/1M2G1k8p8iK4B2i4G0n5L2',
-      notes: 'Capotraste na 1ª casa para soar em Ab (Lá bemol), usando formas de Sol Maior (G).',
-      content: `[Intro] G  C  G  C
-
-[Primeira Parte]
-         G
-Te amo, Deus
-       C               G
-Tua graça nunca falha
-      D/F#          Em
-Todos os dias
-          C              D4  D
-Eu estou em Tuas mãos
-              Em
-Desde quando me levanto
-        C            G  D/F#  Em
-Até eu me deitar
-        C            D           G
-Eu cantarei da bondade de Deus
-
-[Refrão]
-  C                     G
-És fiel em todo tempo
-  C                     G     D/F#  Em
-És fiel em todo tempo
-  C                        G          D/F#  Em
-Com todo fôlego que há em mim
-        C            D           G
-Eu cantarei da bondade de Deus
-
-[Ponte]
-G/B              C
-Tua bondade me perseguirá
-    D                G
-Me perseguirá, Senhor
-G/B              C
-Tua bondade me perseguirá
-    D                G
-Me perseguirá, Senhor`,
-      pdfData: null,
-      pdfName: null,
-      createdAt: Date.now() - 40000000,
-      updatedAt: Date.now()
-    }
-  ];
-
-  const INITIAL_SETLISTS = [
-    {
-      id: 'setlist-demo-1',
-      title: 'Repertório de Sexta (Exemplo)',
-      date: new Date().toISOString().slice(0, 10),
-      description: 'Sequência principal para ensaio e apresentação ao vivo.',
-      items: [
-        { songId: 'song-demo-2', customKey: 'G' },
-        { songId: 'song-demo-1', customKey: 'Em' },
-        { songId: 'song-demo-3', customKey: 'G' }
-      ],
-      createdAt: Date.now()
-    }
-  ];
+    'Sertanejo / Forró',
+    'Geral'
+  ]);
 
   let dbInstance = null;
 
@@ -2263,19 +2437,34 @@ Me perseguirá, Senhor`,
   const CifraDB = {
     async init() {
       await openDB();
-      const seeded = await this.getMeta('seeded_v1');
-      if (!seeded) {
-        const existingSongs = await this.getAllSongs();
-        if (existingSongs.length === 0) {
-          for (const song of INITIAL_SONGS) {
-            await this.saveSong(song);
-          }
-          for (const setlist of INITIAL_SETLISTS) {
-            await this.saveSetlist(setlist);
+      const cleanedV2 = await this.getMeta('cleaned_models_v2');
+      if (!cleanedV2) {
+        // Remove músicas de exemplo antigas caso já tenham sido salvas no navegador
+        for (const demoId of LEGACY_DEMO_SONG_IDS) {
+          await txStore('songs', 'readwrite', (store) => store.delete(demoId));
+        }
+        // Remove repertórios de exemplo antigos
+        for (const demoSlId of LEGACY_DEMO_SETLIST_IDS) {
+          await txStore('setlists', 'readwrite', (store) => store.delete(demoSlId));
+        }
+        // Remove todas as categorias/pastas modelo pré-existentes
+        const existingCats = await this.getMeta('categories');
+        if (Array.isArray(existingCats)) {
+          const userCreatedCats = existingCats.filter((c) => !LEGACY_MODEL_CATEGORIES.has(c));
+          await this.setMeta('categories', userCreatedCats);
+        } else {
+          await this.setMeta('categories', []);
+        }
+        // Limpa categorias modelo que tenham ficado associadas a alguma música
+        const remainingSongs = await this.getAllSongs();
+        for (const s of remainingSongs) {
+          if (s.category && LEGACY_MODEL_CATEGORIES.has(s.category)) {
+            s.category = '';
+            await txStore('songs', 'readwrite', (store) => store.put(s));
           }
         }
-        await this.setMeta('categories', DEFAULT_CATEGORIES);
         await this.setMeta('seeded_v1', true);
+        await this.setMeta('cleaned_models_v2', true);
       }
     },
 
@@ -2290,15 +2479,17 @@ Me perseguirá, Senhor`,
 
     async saveSong(song) {
       const now = Date.now();
+      const cleanCategory = (song.category || '').trim();
       const record = {
         ...song,
+        category: cleanCategory,
         id: song.id || 'song-' + now + '-' + Math.random().toString(36).slice(2, 7),
         createdAt: song.createdAt || now,
         updatedAt: now
       };
       await txStore('songs', 'readwrite', (store) => store.put(record));
-      if (record.category) {
-        await this.ensureCategory(record.category);
+      if (cleanCategory) {
+        await this.ensureCategory(cleanCategory);
       }
       return record;
     },
@@ -2352,7 +2543,7 @@ Me perseguirá, Senhor`,
 
     async getCategories() {
       const cats = await this.getMeta('categories');
-      return Array.isArray(cats) && cats.length > 0 ? cats : [...DEFAULT_CATEGORIES];
+      return Array.isArray(cats) ? cats : [];
     },
 
     async ensureCategory(categoryName) {
@@ -2372,14 +2563,13 @@ Me perseguirá, Senhor`,
 
       const cats = await this.getCategories();
       const updatedCats = cats.map((c) => (c === cleanOld ? cleanNew : c));
-      // Deduplicate if renamed into an existing category
       const uniqueCats = [...new Set(updatedCats)];
       await this.setMeta('categories', uniqueCats);
 
       // Update all songs in this category
       const songs = await this.getAllSongs();
       for (const s of songs) {
-        if ((s.category || 'Repertório Geral') === cleanOld) {
+        if ((s.category || '').trim() === cleanOld) {
           s.category = cleanNew;
           await txStore('songs', 'readwrite', (store) => store.put(s));
         }
@@ -2388,24 +2578,20 @@ Me perseguirá, Senhor`,
 
     async deleteCategory(categoryName) {
       const clean = (categoryName || '').trim();
-      if (!clean) return;
+      if (!clean) return '';
 
       let cats = await this.getCategories();
       cats = cats.filter((c) => c !== clean);
-      if (cats.length === 0) {
-        cats = ['Geral'];
-      }
       await this.setMeta('categories', cats);
 
-      const fallbackCategory = cats[0];
       const songs = await this.getAllSongs();
       for (const s of songs) {
-        if ((s.category || 'Repertório Geral') === clean) {
-          s.category = fallbackCategory;
+        if ((s.category || '').trim() === clean) {
+          s.category = '';
           await txStore('songs', 'readwrite', (store) => store.put(s));
         }
       }
-      return fallbackCategory;
+      return '';
     }
   };
 
@@ -2713,7 +2899,8 @@ Me perseguirá, Senhor`,
   </script>
   <script>
 /**
- * CifraFlow — Motor de Compartilhamento, Exportação/Importação (.cifra.json) e Renderização PDF
+ * CifraLush — Motor de Compartilhamento, Exportação/Importação (.cifra.json),
+ * Conversão de PDF/TXT em Texto de Cifra e Busca Online (padrão cifras.com.br/cifra/artista/musica)
  */
 (function (global) {
   // Configure PDF.js worker if loaded
@@ -2762,6 +2949,19 @@ Me perseguirá, Senhor`,
       .toLowerCase() || 'cifra';
   }
 
+  function slugToDisplayTitle(slug) {
+    return String(slug || '')
+      .replace(/[-_]+/g, ' ')
+      .replace(/\b\w/g, (c) => c.toUpperCase())
+      .trim();
+  }
+
+  function decodeHtmlEntities(html) {
+    const txt = document.createElement('textarea');
+    txt.innerHTML = html;
+    return txt.value;
+  }
+
   const ShareEngine = {
     /**
      * Generates a self-contained share link for a song (excluding heavy PDF binary so URL stays compact)
@@ -2776,7 +2976,7 @@ Me perseguirá, Senhor`,
         d: {
           title: song.title,
           artist: song.artist || '',
-          category: song.category || 'Repertório Geral',
+          category: song.category || '',
           key: transposedKey,
           capo: song.capo || 0,
           bpm: song.bpm || '',
@@ -2837,9 +3037,9 @@ Me perseguirá, Senhor`,
     /**
      * Builds a portable .cifra.json package (supports single song with PDF, setlist with songs+PDFs, or full library)
      */
-    buildExportPackage({ type, songs = [], setlists = [], categories = [], title = 'Pacote CifraFlow' }) {
+    buildExportPackage({ type, songs = [], setlists = [], categories = [], title = 'Pacote CifraLush' }) {
       return {
-        app: 'CifraFlow',
+        app: 'CifraLush',
         version: 1,
         exportType: type,
         title,
@@ -2863,8 +3063,8 @@ Me perseguirá, Senhor`,
           const file = new File([blob], fileName, { type: 'application/json' });
           if (navigator.canShare({ files: [file] })) {
             await navigator.share({
-              title: pkg.title || 'CifraFlow',
-              text: `Compartilhando "${pkg.title}" pelo app CifraFlow. Importe este arquivo no app para abrir as cifras e PDFs!`,
+              title: pkg.title || 'CifraLush',
+              text: `Compartilhando "${pkg.title}" pelo app CifraLush. Importe este arquivo no app para abrir as cifras e PDFs!`,
               files: [file]
             });
             return { sharedNatively: true };
@@ -2886,6 +3086,379 @@ Me perseguirá, Senhor`,
         URL.revokeObjectURL(url);
       }, 400);
       return { downloaded: true, fileName };
+    },
+
+    /**
+     * Extracts structured cipher text from an attached PDF DataURL using PDF.js,
+     * preserving horizontal spacing so chords stay aligned above lyrics.
+     */
+    async extractCipherTextFromPdf(pdfDataUrl) {
+      if (!pdfDataUrl || !global.pdfjsLib) return '';
+      try {
+        const pdfBytes = dataUrlToUint8Array(pdfDataUrl);
+        const loadingTask = global.pdfjsLib.getDocument({ data: pdfBytes });
+        const pdfDoc = await loadingTask.promise;
+        const pageTexts = [];
+
+        for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
+          const page = await pdfDoc.getPage(pageNum);
+          const textContent = await page.getTextContent();
+          const rawItems = (textContent.items || []).filter(
+            (it) => it && typeof it.str === 'string' && it.str.replace(/[\u200B-\u200D\uFEFF]/g, '').length > 0
+          );
+
+          if (rawItems.length === 0) continue;
+
+          // Estimate average character width and left margin on this page
+          const charWidthSamples = [];
+          let minX = Infinity;
+
+          const items = rawItems.map((it) => {
+            const tr = it.transform || [1, 0, 0, 1, 0, 0];
+            const x = Number(tr[4]) || 0;
+            const y = Number(tr[5]) || 0;
+            const h = Math.abs(Number(it.height) || Number(tr[3]) || 10);
+            const cleanStr = it.str.replace(/[\u200B-\u200D\uFEFF]/g, '');
+            const w = Number(it.width) || cleanStr.length * (h * 0.55);
+
+            if (cleanStr.trim().length > 0 && x < minX) {
+              minX = x;
+            }
+            if (cleanStr.trim().length >= 2 && w > 0) {
+              charWidthSamples.push(w / cleanStr.length);
+            }
+            return { str: cleanStr, x, y, w, h };
+          });
+
+          if (!isFinite(minX)) minX = 0;
+          charWidthSamples.sort((a, b) => a - b);
+          const medianCharW = charWidthSamples.length > 0
+            ? charWidthSamples[Math.floor(charWidthSamples.length / 2)]
+            : 6.0;
+          const charW = Math.max(3.8, Math.min(11.5, medianCharW));
+
+          // Group items into horizontal lines (sorted top-to-bottom: higher Y first in PDF coordinates)
+          items.sort((a, b) => b.y - a.y || a.x - b.x);
+          const lines = [];
+
+          for (const item of items) {
+            let matchedLine = null;
+            for (const line of lines) {
+              const tol = Math.max(3.5, line.avgH * 0.45);
+              if (Math.abs(item.y - line.y) <= tol) {
+                matchedLine = line;
+                break;
+              }
+            }
+            if (matchedLine) {
+              matchedLine.items.push(item);
+              // Update running average Y and H
+              const n = matchedLine.items.length;
+              matchedLine.y = (matchedLine.y * (n - 1) + item.y) / n;
+              matchedLine.avgH = (matchedLine.avgH * (n - 1) + item.h) / n;
+            } else {
+              lines.push({
+                y: item.y,
+                avgH: item.h || 10,
+                items: [item]
+              });
+            }
+          }
+
+          lines.sort((a, b) => b.y - a.y);
+
+          const renderedLines = [];
+          let prevY = null;
+
+          for (const line of lines) {
+            line.items.sort((a, b) => a.x - b.x);
+
+            // Insert blank line when vertical distance indicates a stanza break
+            if (prevY !== null) {
+              const dy = prevY - line.y;
+              if (dy > Math.max(18, line.avgH * 1.75)) {
+                renderedLines.push('');
+              }
+            }
+            prevY = line.y;
+
+            let lineStr = '';
+            let currentEndX = minX;
+
+            for (let idx = 0; idx < line.items.length; idx++) {
+              const it = line.items[idx];
+              if (idx === 0) {
+                const leadingSpaces = Math.max(0, Math.min(40, Math.round((it.x - minX) / charW)));
+                if (leadingSpaces > 1) {
+                  lineStr += ' '.repeat(leadingSpaces);
+                }
+                lineStr += it.str;
+                currentEndX = it.x + it.w;
+              } else {
+                const gapX = it.x - currentEndX;
+                const spaces = Math.round(gapX / charW);
+                if (spaces >= 1) {
+                  lineStr += ' '.repeat(Math.min(40, spaces));
+                } else if (gapX > 1.2 && !lineStr.endsWith(' ') && !it.str.startsWith(' ')) {
+                  lineStr += ' ';
+                }
+                lineStr += it.str;
+                currentEndX = Math.max(currentEndX, it.x + it.w);
+              }
+            }
+
+            renderedLines.push(lineStr.replace(/\s+$/g, ''));
+          }
+
+          pageTexts.push(renderedLines.join('\n'));
+        }
+
+        return pageTexts.join('\n\n').trim();
+      } catch (err) {
+        console.warn('Erro ao extrair texto do PDF:', err);
+        return '';
+      }
+    },
+
+    /**
+     * Parses metadata (Tom, Capotraste) from extracted or imported cipher text
+     */
+    parseCipherMetadataAndCleanText(rawText) {
+      const clean = String(rawText || '')
+        .replace(/\r\n/g, '\n')
+        .replace(/\r/g, '\n')
+        .replace(/[\u200B-\u200D\uFEFF]/g, '');
+
+      let detectedKey = '';
+      let detectedCapo = 0;
+
+      // Detect "Tom: X"
+      const tomMatch = clean.match(/(?:^|\n)\s*(?:\[?\s*Tom\s*[:\-]\s*([A-G][#b♯♭]?(?:m|maj|min|dim|aug|sus|add|[0-9])*)\s*\]?)/i);
+      if (tomMatch && tomMatch[1]) {
+        detectedKey = tomMatch[1].replace(/♯/g, '#').replace(/♭/g, 'b').trim();
+      }
+
+      // Detect "Capotraste na Xª casa" or "Capo: X"
+      const capoMatch = clean.match(/(?:capotraste|capo)\s*(?:na\s*)?([1-9])\s*(?:ª|a|º)?\s*(?:casa|traste)?/i);
+      if (capoMatch && capoMatch[1]) {
+        detectedCapo = parseInt(capoMatch[1], 10) || 0;
+      }
+
+      // If no explicit Tom: line, infer from first chord line
+      if (!detectedKey && global.ChordEngine) {
+        const lines = clean.split('\n');
+        for (const line of lines) {
+          const withoutSection = line.replace(/^\s*\[[^\]]+\]\s*/, '');
+          if (global.ChordEngine.isChordLine(withoutSection)) {
+            const firstToken = withoutSection.trim().split(/\s+/)[0];
+            if (firstToken && global.ChordEngine.isChordToken(firstToken)) {
+              const rootMatch = firstToken.match(/^([A-G][#b]?m?)/);
+              if (rootMatch) {
+                detectedKey = rootMatch[1];
+                break;
+              }
+            }
+          }
+        }
+      }
+
+      return {
+        text: clean.trim(),
+        key: detectedKey,
+        capo: detectedCapo
+      };
+    },
+
+    /**
+     * Parses user input to check if it's a direct cifras.com.br / cifraclub URL or artist/song slug
+     * Examples supported:
+     * - https://www.cifras.com.br/cifra/fernandinho/galileu
+     * - https://www.cifraclub.com.br/fernandinho/galileu/
+     * - cifras.com.br/cifra/fernandinho/galileu
+     * - fernandinho/galileu
+     */
+    parseOnlineCipherInput(rawInput) {
+      const str = String(rawInput || '').trim();
+      if (!str) return { isDirectSlug: false, query: '' };
+
+      // Match cifras.com.br/cifra/{artist}/{song}
+      const cifrasBrMatch = str.match(/cifras\.com\.br\/(?:cifra|tablatura)\/([a-z0-9_-]+)\/([a-z0-9_-]+)/i);
+      if (cifrasBrMatch) {
+        return {
+          isDirectSlug: true,
+          artistSlug: cifrasBrMatch[1].toLowerCase(),
+          songSlug: cifrasBrMatch[2].toLowerCase()
+        };
+      }
+
+      // Match cifraclub.com.br/{artist}/{song}
+      const cifraClubMatch = str.match(/cifraclub\.com\.br\/([a-z0-9_-]+)\/([a-z0-9_-]+)/i);
+      if (cifraClubMatch) {
+        return {
+          isDirectSlug: true,
+          artistSlug: cifraClubMatch[1].toLowerCase(),
+          songSlug: cifraClubMatch[2].toLowerCase()
+        };
+      }
+
+      // Match "/cifra/artista/musica" or "artista/musica"
+      const cleanedPath = str.replace(/^https?:\/\/[^/]+\//i, '').replace(/^\/+|\/+$/g, '').replace(/^cifra\//i, '');
+      const slugPairMatch = cleanedPath.match(/^([a-zA-Z0-9_-]{2,})\/([a-zA-Z0-9_-]{2,})$/);
+      if (slugPairMatch) {
+        return {
+          isDirectSlug: true,
+          artistSlug: sanitizeFilename(slugPairMatch[1]),
+          songSlug: sanitizeFilename(slugPairMatch[2])
+        };
+      }
+
+      return {
+        isDirectSlug: false,
+        query: str
+      };
+    },
+
+    /**
+     * Searches online ciphers by song/artist query and returns results with cifras.com.br/cifra/{artist}/{song} parameters
+     */
+    async searchOnlineCiphers(query) {
+      const cleanQ = String(query || '').trim();
+      if (!cleanQ) return [];
+
+      const url = `https://solr.sscdn.co/cc/h2/?q=${encodeURIComponent(cleanQ)}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Falha na pesquisa online');
+      const rawText = (await res.text()).trim();
+      const jsonStr = rawText.replace(/^\(|\);?$/g, '');
+      const data = JSON.parse(jsonStr);
+      const docs = (data && data.response && Array.isArray(data.response.docs)) ? data.response.docs : [];
+
+      const results = [];
+      const seen = new Set();
+
+      for (const doc of docs) {
+        if (doc && doc.m && doc.a && doc.d && doc.u) {
+          const key = `${doc.d}/${doc.u}`;
+          if (seen.has(key)) continue;
+          seen.add(key);
+          results.push({
+            title: doc.m,
+            artist: doc.a,
+            artistSlug: doc.d,
+            songSlug: doc.u,
+            slugParam: `${doc.d}/${doc.u}`,
+            cifrasUrl: `https://www.cifras.com.br/cifra/${doc.d}/${doc.u}`
+          });
+        }
+      }
+
+      return results;
+    },
+
+    /**
+     * Fetches and converts an online cipher by artistSlug and songSlug into CifraLush native text format
+     */
+    async fetchOnlineCipherBySlug(artistSlug, songSlug, knownTitle = '', knownArtist = '') {
+      const aSlug = sanitizeFilename(artistSlug);
+      const sSlug = sanitizeFilename(songSlug);
+      if (!aSlug || !sSlug) {
+        throw new Error('Parâmetro de artista/música inválido.');
+      }
+
+      let rawPreText = '';
+      let detectedTitle = knownTitle || slugToDisplayTitle(sSlug);
+      let detectedArtist = knownArtist || slugToDisplayTitle(aSlug);
+      let detectedKey = '';
+      let detectedCapo = 0;
+
+      // Primary: Jina Reader HTML selector extraction (CORS-enabled)
+      try {
+        const targetUrl = `https://r.jina.ai/https://www.cifraclub.com.br/${aSlug}/${sSlug}/`;
+        const response = await fetch(targetUrl, {
+          headers: {
+            'Accept': 'text/plain',
+            'X-Return-Format': 'html',
+            'X-Target-Selector': 'h1.t1, h2.t3, #cifra_tom, #cifra_capo, pre'
+          }
+        });
+
+        if (response.ok) {
+          const html = await response.text();
+          const h1Match = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
+          const h2Match = html.match(/<h2[^>]*>([\s\S]*?)<\/h2>/i);
+          if (h1Match && !knownTitle) {
+            detectedTitle = decodeHtmlEntities(h1Match[1].replace(/<[^>]+>/g, '').trim()) || detectedTitle;
+          }
+          if (h2Match && !knownArtist) {
+            detectedArtist = decodeHtmlEntities(h2Match[1].replace(/<[^>]+>/g, '').trim()) || detectedArtist;
+          }
+
+          const tomHtmlMatch = html.match(/id=["']cifra_tom["'][^>]*>[\s\S]*?<a[^>]*>([^<]+)<\/a>/i);
+          if (tomHtmlMatch && tomHtmlMatch[1]) {
+            detectedKey = tomHtmlMatch[1].trim();
+          }
+
+          const capoHtmlMatch = html.match(/id=["']cifra_capo["'][^>]*>([\s\S]*?)<\/span>/i);
+          if (capoHtmlMatch && capoHtmlMatch[1]) {
+            const cNum = capoHtmlMatch[1].match(/([1-9])/);
+            if (cNum) detectedCapo = parseInt(cNum[1], 10) || 0;
+          }
+
+          const preMatch = html.match(/<pre[^>]*>([\s\S]*?)<\/pre>/i);
+          if (preMatch && preMatch[1]) {
+            rawPreText = decodeHtmlEntities(
+              preMatch[1]
+                .replace(/<[^>]+>/g, '')
+                .replace(/[\u200B-\u200D\uFEFF]/g, '')
+            );
+          }
+        }
+      } catch (e) {
+        console.warn('Tentativa 1 falhou, tentando rota alternativa:', e);
+      }
+
+      // Fallback 2: cifras.com.br via Jina Reader
+      if (!rawPreText.trim()) {
+        try {
+          const fallbackUrl = `https://r.jina.ai/https://www.cifras.com.br/cifra/${aSlug}/${sSlug}`;
+          const res2 = await fetch(fallbackUrl, {
+            headers: {
+              'Accept': 'text/plain'
+            }
+          });
+          if (res2.ok) {
+            const text2 = await res2.text();
+            const clean2 = text2.replace(/[\u200B-\u200D\uFEFF]/g, '');
+            const lines2 = clean2.split('\n');
+            // Find where the cipher content starts
+            const startIdx = lines2.findIndex(
+              (l) => /^\[(Intro|Primeira|Refrão|Verso|Solo|Final)/i.test(l.trim()) || /^Tom\s*:/i.test(l.trim()) || (global.ChordEngine && global.ChordEngine.isChordLine(l))
+            );
+            if (startIdx !== -1) {
+              rawPreText = lines2.slice(startIdx).join('\n').trim();
+            }
+          }
+        } catch (e2) {
+          console.warn('Tentativa 2 falhou:', e2);
+        }
+      }
+
+      if (!rawPreText.trim()) {
+        throw new Error(`Não foi possível encontrar a cifra para "${aSlug}/${sSlug}". Verifique o nome ou parâmetro.`);
+      }
+
+      const parsedMeta = this.parseCipherMetadataAndCleanText(rawPreText);
+      const finalKey = detectedKey || parsedMeta.key || 'C';
+      const finalCapo = detectedCapo || parsedMeta.capo || 0;
+
+      return {
+        title: detectedTitle,
+        artist: detectedArtist,
+        key: finalKey,
+        capo: finalCapo,
+        content: parsedMeta.text,
+        sourceUrl: `https://www.cifras.com.br/cifra/${aSlug}/${sSlug}`
+      };
     },
 
     /**
@@ -2957,7 +3530,7 @@ Me perseguirá, Senhor`,
   </script>
   <script>
 /**
- * CifraFlow — Controlador Principal da Aplicação (UI, Leitor, Auto-Scroll, Repertórios e PWA)
+ * CifraLush — Controlador Principal da Aplicação (UI, Leitor, Tela Cheia, Auto-Scroll, Busca Online, Conversor PDF/TXT, Repertórios e PWA)
  */
 (function (global) {
   const state = {
@@ -2978,9 +3551,10 @@ Me perseguirá, Senhor`,
     useFlats: undefined,
     fontSize: parseInt(localStorage.getItem('cifraflow_fontsize') || '16', 10),
     twoColumns: false,
-    activeReaderTab: 'both', // 'both' | 'text' | 'pdf'
+    activeReaderTab: 'text', // 'text' | 'pdf' | 'both'
     pdfScale: 1.35,
     showMediaPlayer: false,
+    isFullscreen: false,
 
     // Stage / Setlist playback state
     activeSetlist: null,
@@ -3043,11 +3617,58 @@ Me perseguirá, Senhor`,
     }
   }
 
+  // Fullscreen management
+  function setFullscreenState(active) {
+    state.isFullscreen = Boolean(active);
+    document.body.classList.toggle('reader-fullscreen', state.isFullscreen);
+    const btn = $('readerFullscreenBtn');
+    if (btn) {
+      btn.innerHTML = state.isFullscreen ? '✕ Sair da Tela Cheia' : '⛶ Tela Cheia';
+      btn.classList.toggle('btn-primary', state.isFullscreen);
+      btn.classList.toggle('btn-accent-outline', !state.isFullscreen);
+    }
+  }
+
+  function toggleFullscreen() {
+    const nextState = !state.isFullscreen;
+    setFullscreenState(nextState);
+
+    if (nextState) {
+      const docEl = document.documentElement;
+      if (docEl.requestFullscreen && !document.fullscreenElement) {
+        docEl.requestFullscreen().catch(() => {});
+      } else if (docEl.webkitRequestFullscreen && !document.webkitFullscreenElement) {
+        try { docEl.webkitRequestFullscreen(); } catch (e) {}
+      }
+    } else {
+      if (document.fullscreenElement && document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      } else if (document.webkitFullscreenElement && document.webkitExitFullscreen) {
+        try { document.webkitExitFullscreen(); } catch (e) {}
+      }
+    }
+  }
+
+  function exitFullscreen() {
+    if (!state.isFullscreen) return;
+    setFullscreenState(false);
+    if (document.fullscreenElement && document.exitFullscreen) {
+      document.exitFullscreen().catch(() => {});
+    } else if (document.webkitFullscreenElement && document.webkitExitFullscreen) {
+      try { document.webkitExitFullscreen(); } catch (e) {}
+    }
+  }
+
   // Load all data from IndexedDB
   async function refreshData() {
     state.songs = await global.CifraDB.getAllSongs();
     state.setlists = await global.CifraDB.getAllSetlists();
     state.categories = await global.CifraDB.getCategories();
+
+    if (state.filterCategory !== 'ALL' && !state.categories.includes(state.filterCategory)) {
+      state.filterCategory = 'ALL';
+    }
+
     renderSidebar();
     if (state.currentView === 'library') {
       renderLibraryView();
@@ -3083,28 +3704,36 @@ Me perseguirá, Senhor`,
     // Categories list in sidebar
     const catListEl = $('sidebarCategoriesList');
     if (catListEl) {
-      catListEl.innerHTML = state.categories
-        .map((cat) => {
-          const count = state.songs.filter((s) => (s.category || 'Repertório Geral') === cat).length;
-          const isActive = state.currentView === 'library' && !state.filterFavorites && state.filterCategory === cat;
-          const safeCat = escapeHtml(cat).replace(/'/g, "\\'");
-          return `
-            <li class="nav-cat-row ${isActive ? 'active' : ''}">
-              <button class="nav-item ${isActive ? 'active' : ''}" onclick="App.selectCategory('${safeCat}')">
-                <div class="nav-item-left">
-                  <span>📁</span>
-                  <span>${escapeHtml(cat)}</span>
+      if (state.categories.length === 0) {
+        catListEl.innerHTML = `
+          <li style="padding: 8px 10px; font-size: 12px; color: var(--text-muted);">
+            Nenhuma pasta criada. Clique em <strong>+ Nova / Editar</strong> acima para criar suas pastas.
+          </li>
+        `;
+      } else {
+        catListEl.innerHTML = state.categories
+          .map((cat) => {
+            const count = state.songs.filter((s) => (s.category || '') === cat).length;
+            const isActive = state.currentView === 'library' && !state.filterFavorites && state.filterCategory === cat;
+            const safeCat = escapeHtml(cat).replace(/'/g, "\\'");
+            return `
+              <li class="nav-cat-row ${isActive ? 'active' : ''}">
+                <button class="nav-item ${isActive ? 'active' : ''}" onclick="App.selectCategory('${safeCat}')">
+                  <div class="nav-item-left">
+                    <span>📁</span>
+                    <span>${escapeHtml(cat)}</span>
+                  </div>
+                  <span class="nav-badge">${count}</span>
+                </button>
+                <div class="nav-cat-actions">
+                  <button type="button" class="nav-cat-btn" title="Renomear pasta" onclick="App.promptRenameCategory('${safeCat}')">✏️</button>
+                  <button type="button" class="nav-cat-btn" title="Excluir pasta" onclick="App.confirmDeleteCategory('${safeCat}')">🗑️</button>
                 </div>
-                <span class="nav-badge">${count}</span>
-              </button>
-              <div class="nav-cat-actions">
-                <button type="button" class="nav-cat-btn" title="Renomear pasta" onclick="App.promptRenameCategory('${safeCat}')">✏️</button>
-                <button type="button" class="nav-cat-btn" title="Excluir pasta" onclick="App.confirmDeleteCategory('${safeCat}')">🗑️</button>
-              </div>
-            </li>
-          `;
-        })
-        .join('');
+              </li>
+            `;
+          })
+          .join('');
+      }
     }
 
     // Mobile bottom nav active states
@@ -3125,7 +3754,7 @@ Me perseguirá, Senhor`,
     return state.songs
       .filter((song) => {
         if (state.filterFavorites && !song.favorite) return false;
-        if (state.filterCategory !== 'ALL' && (song.category || 'Repertório Geral') !== state.filterCategory) {
+        if (state.filterCategory !== 'ALL' && (song.category || '') !== state.filterCategory) {
           return false;
         }
         if (state.filterType === 'TEXT' && !(song.content && song.content.trim())) return false;
@@ -3147,6 +3776,7 @@ Me perseguirá, Senhor`,
 
   // Render Library View
   function renderLibraryView() {
+    exitFullscreen();
     $('libraryView').style.display = 'block';
     $('setlistsView').style.display = 'none';
     $('readerView').style.display = 'none';
@@ -3160,10 +3790,10 @@ Me perseguirá, Senhor`,
       subEl.textContent = 'Suas músicas marcadas para acesso rápido';
     } else if (state.filterCategory !== 'ALL') {
       titleEl.textContent = `📁 ${state.filterCategory}`;
-      subEl.textContent = 'Cifras organizadas nesta categoria';
+      subEl.textContent = 'Cifras organizadas nesta pasta';
     } else {
       titleEl.textContent = 'Minhas Cifras';
-      subEl.textContent = 'Organize cifras digitadas, arquivos PDF e links de YouTube e Spotify';
+      subEl.textContent = 'Organize cifras digitadas, buscadas online, arquivos PDF/Texto convertidos e links de YouTube e Spotify';
     }
 
     // Render category chips bar
@@ -3174,11 +3804,11 @@ Me perseguirá, Senhor`,
         allCats
           .map((cat) => {
             const active = state.filterCategory === cat && !state.filterFavorites;
-            const label = cat === 'ALL' ? 'Todas as Categorias' : cat;
+            const label = cat === 'ALL' ? 'Todas as Cifras' : `📁 ${cat}`;
             return `<button class="chip ${active ? 'active' : ''}" onclick="App.selectCategory('${escapeHtml(cat).replace(/'/g, "\\'")}')">${escapeHtml(label)}</button>`;
           })
           .join('') +
-        `<button class="chip" style="border-style:dashed;color:var(--accent);" onclick="App.openCategoriesModal()">+ Nova / Editar Pastas</button>`;
+        `<button class="chip" style="border-style:dashed;color:var(--accent);" onclick="App.openCategoriesModal()">+ Criar / Editar Pastas</button>`;
     }
 
     // Type filter chips
@@ -3193,11 +3823,14 @@ Me perseguirá, Senhor`,
       grid.innerHTML = `
         <div class="empty-state" style="grid-column: 1 / -1;">
           <div style="font-size: 42px; margin-bottom: 10px;">🎸</div>
-          <h3 style="font-size: 18px; margin-bottom: 6px;">Nenhuma cifra encontrada</h3>
+          <h3 style="font-size: 18px; margin-bottom: 6px;">Nenhuma cifra cadastrada ainda</h3>
           <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 18px;">
-            Adicione uma nova cifra digitada, anexe um PDF ou limpe os filtros de busca.
+            Adicione uma cifra digitada, busque online (padrão cifras.com.br) ou anexe um arquivo PDF/TXT que será convertido automaticamente em texto no app!
           </p>
-          <button class="btn btn-primary" onclick="App.openSongModal()">+ Adicionar Nova Cifra</button>
+          <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+            <button class="btn btn-primary" onclick="App.openSongModal()">+ Adicionar Nova Cifra / PDF</button>
+            <button class="btn btn-accent-outline" onclick="App.openOnlineSearchModal()">🌐 Buscar Cifra Online</button>
+          </div>
         </div>
       `;
       return;
@@ -3229,8 +3862,8 @@ Me perseguirá, Senhor`,
             </div>
             <div class="song-card-meta">
               <div class="badge-group">
-                <span class="badge">📁 ${escapeHtml(song.category || 'Geral')}</span>
-                ${hasText ? '<span class="badge badge-text">📝 Cifra</span>' : ''}
+                ${song.category ? `<span class="badge">📁 ${escapeHtml(song.category)}</span>` : ''}
+                ${hasText ? '<span class="badge badge-text">📝 Cifra no App</span>' : ''}
                 ${hasPdf ? '<span class="badge badge-pdf">📄 PDF</span>' : ''}
               </div>
               <div class="badge-group">
@@ -3246,6 +3879,7 @@ Me perseguirá, Senhor`,
 
   // Render Setlists (Repertórios) View
   function renderSetlistsView() {
+    exitFullscreen();
     $('libraryView').style.display = 'none';
     $('setlistsView').style.display = 'block';
     $('readerView').style.display = 'none';
@@ -3322,10 +3956,23 @@ Me perseguirá, Senhor`,
 
   // Open Song Reader View
   async function openSongReader(songId, fromSetlist = null, setlistIndex = 0) {
-    const song = await global.CifraDB.getSong(songId);
+    let song = await global.CifraDB.getSong(songId);
     if (!song) {
       showToast('Música não encontrada.');
       return;
+    }
+
+    // If song has an attached PDF but no extracted text yet, automatically convert the PDF into native app text!
+    if (song.pdfData && !(song.content && song.content.trim())) {
+      const extracted = await global.ShareEngine.extractCipherTextFromPdf(song.pdfData);
+      if (extracted && extracted.trim()) {
+        const meta = global.ShareEngine.parseCipherMetadataAndCleanText(extracted);
+        song.content = meta.text;
+        if (meta.key && (!song.key || song.key === 'C')) song.key = meta.key;
+        if (meta.capo && !song.capo) song.capo = meta.capo;
+        song = await global.CifraDB.saveSong(song);
+        state.songs = await global.CifraDB.getAllSongs();
+      }
     }
 
     state.currentView = 'reader';
@@ -3347,8 +3994,9 @@ Me perseguirá, Senhor`,
 
     const hasText = Boolean(song.content && song.content.trim());
     const hasPdf = Boolean(song.pdfData);
-    if (hasText && hasPdf) {
-      state.activeReaderTab = 'both';
+    // Prioritize native app text so chords can be transposed and scrolled smoothly
+    if (hasText) {
+      state.activeReaderTab = 'text';
     } else if (hasPdf) {
       state.activeReaderTab = 'pdf';
     } else {
@@ -3358,7 +4006,7 @@ Me perseguirá, Senhor`,
     $('libraryView').style.display = 'none';
     $('setlistsView').style.display = 'none';
     $('readerView').style.display = 'block';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: 'auto' });
 
     renderReaderContent();
   }
@@ -3408,6 +4056,11 @@ Me perseguirá, Senhor`,
     $('readerSaveKeyBtn').style.display = state.transposeSemitones !== 0 ? 'inline-flex' : 'none';
     $('readerColumnsBtn').classList.toggle('btn-accent-outline', state.twoColumns);
 
+    const fsTitleEl = $('readerFullscreenTitle');
+    if (fsTitleEl) {
+      fsTitleEl.textContent = `${song.title}${song.artist ? ` — ${song.artist}` : ''}`;
+    }
+
     // Header info
     $('readerTitle').textContent = song.title;
     $('readerArtist').textContent = song.artist || 'Artista não informado';
@@ -3423,7 +4076,9 @@ Me perseguirá, Senhor`,
     if (song.timeSignature) {
       metaPills.push(`<span class="meta-pill">🥁 Compasso: <strong>${escapeHtml(song.timeSignature)}</strong></span>`);
     }
-    metaPills.push(`<span class="meta-pill">📁 Categoria: <strong>${escapeHtml(song.category || 'Geral')}</strong></span>`);
+    if (song.category) {
+      metaPills.push(`<span class="meta-pill">📁 Pasta: <strong>${escapeHtml(song.category)}</strong></span>`);
+    }
     $('readerMetaPills').innerHTML = metaPills.join('');
 
     // Notes box
@@ -3547,7 +4202,32 @@ Me perseguirá, Senhor`,
     }
   }
 
-  // Auto-Scroll Engine (Smooth sub-pixel requestAnimationFrame)
+  // Auto-Scroll Engine (Works reliably both inside & outside Fullscreen on mobile and desktop)
+  function getScrollMetrics() {
+    const docEl = document.scrollingElement || document.documentElement || document.body;
+    const scrollTop = window.pageYOffset !== undefined ? window.pageYOffset : docEl.scrollTop;
+    const scrollHeight = Math.max(
+      document.body ? document.body.scrollHeight : 0,
+      document.documentElement ? document.documentElement.scrollHeight : 0,
+      docEl ? docEl.scrollHeight : 0
+    );
+    const clientHeight = window.innerHeight || document.documentElement.clientHeight || docEl.clientHeight;
+    return { docEl, scrollTop, scrollHeight, clientHeight };
+  }
+
+  function performVerticalScrollBy(deltaPx) {
+    const { docEl, scrollTop } = getScrollMetrics();
+    const before = scrollTop;
+    window.scrollBy(0, deltaPx);
+    const afterWin = window.pageYOffset !== undefined ? window.pageYOffset : docEl.scrollTop;
+    if (Math.abs(afterWin - before) < 0.5 && docEl) {
+      docEl.scrollTop = before + deltaPx;
+    }
+    if (document.body && document.body.scrollTop > 0) {
+      document.body.scrollTop += deltaPx;
+    }
+  }
+
   function toggleAutoScroll() {
     if (state.autoScrollActive) {
       stopAutoScroll();
@@ -3557,6 +4237,16 @@ Me perseguirá, Senhor`,
   }
 
   function startAutoScroll() {
+    const initialMetrics = getScrollMetrics();
+    // If user is already at the bottom when clicking Auto-Scroll, rewind to top first so it starts scrolling cleanly
+    if (
+      initialMetrics.scrollHeight > initialMetrics.clientHeight + 10 &&
+      initialMetrics.scrollTop + initialMetrics.clientHeight >= initialMetrics.scrollHeight - 6
+    ) {
+      window.scrollTo({ top: 0, behavior: 'auto' });
+      if (initialMetrics.docEl) initialMetrics.docEl.scrollTop = 0;
+    }
+
     state.autoScrollActive = true;
     state.autoScrollAccumulator = 0;
     updateAutoScrollUI();
@@ -3564,20 +4254,20 @@ Me perseguirá, Senhor`,
     let lastTime = performance.now();
     function step(now) {
       if (!state.autoScrollActive) return;
-      const dt = (now - lastTime) / 1000;
+      const dt = Math.min(0.1, Math.max(0, (now - lastTime) / 1000));
       lastTime = now;
 
-      // Speed 1..10 maps to ~12px/sec .. ~95px/sec
-      const pixelsPerSecond = 8 + state.autoScrollSpeed * 8.5;
+      // Speed 1..10 maps to ~14px/sec .. ~105px/sec
+      const pixelsPerSecond = 6 + state.autoScrollSpeed * 9.5;
       state.autoScrollAccumulator += pixelsPerSecond * dt;
 
       if (state.autoScrollAccumulator >= 1) {
         const movePx = Math.floor(state.autoScrollAccumulator);
         state.autoScrollAccumulator -= movePx;
-        window.scrollBy(0, movePx);
+        performVerticalScrollBy(movePx);
 
-        // Stop if reached bottom
-        if (window.innerHeight + window.scrollY >= document.body.scrollHeight - 2) {
+        const { scrollTop, scrollHeight, clientHeight } = getScrollMetrics();
+        if (scrollHeight > clientHeight + 8 && scrollTop + clientHeight >= scrollHeight - 2) {
           stopAutoScroll();
           return;
         }
@@ -3624,13 +4314,20 @@ Me perseguirá, Senhor`,
     state.editorPdfData = null;
     state.editorPdfName = null;
 
+    if ($('editorOnlineQueryInput')) $('editorOnlineQueryInput').value = '';
+    if ($('editorOnlineStatus')) $('editorOnlineStatus').style.display = 'none';
+    if ($('editorOnlineResultsList')) {
+      $('editorOnlineResultsList').style.display = 'none';
+      $('editorOnlineResultsList').innerHTML = '';
+    }
+
     if (songId) {
       const song = await global.CifraDB.getSong(songId);
       if (!song) return;
       $('songModalTitle').textContent = '✏️ Editar Cifra';
       $('songTitleInput').value = song.title || '';
       $('songArtistInput').value = song.artist || '';
-      $('songCategoryInput').value = song.category || 'Repertório Geral';
+      $('songCategoryInput').value = song.category || '';
       $('songKeyInput').value = song.key || 'C';
       $('songCapoInput').value = song.capo || 0;
       $('songBpmInput').value = song.bpm || '';
@@ -3646,7 +4343,7 @@ Me perseguirá, Senhor`,
       $('songModalTitle').textContent = '🎵 Nova Cifra / PDF';
       $('songTitleInput').value = '';
       $('songArtistInput').value = '';
-      $('songCategoryInput').value = state.filterCategory !== 'ALL' ? state.filterCategory : 'Repertório Geral';
+      $('songCategoryInput').value = state.filterCategory !== 'ALL' ? state.filterCategory : '';
       $('songKeyInput').value = 'C';
       $('songCapoInput').value = 0;
       $('songBpmInput').value = '';
@@ -3663,14 +4360,19 @@ Me perseguirá, Senhor`,
     $('songModalBackdrop').classList.add('open');
   }
 
-  function updateEditorPdfStatus() {
+  function updateEditorPdfStatus(customMsg = '') {
     const statusEl = $('pdfUploadStatus');
     const clearBtn = $('clearPdfBtn');
+    if (customMsg) {
+      statusEl.innerHTML = `<span style="color:var(--accent);font-weight:700;">${customMsg}</span>`;
+      clearBtn.style.display = state.editorPdfData ? 'inline-flex' : 'none';
+      return;
+    }
     if (state.editorPdfData) {
-      statusEl.innerHTML = `<span style="color:var(--accent);font-weight:700;">✔ PDF Anexado: ${escapeHtml(state.editorPdfName || 'cifra.pdf')}</span>`;
+      statusEl.innerHTML = `<span style="color:var(--accent);font-weight:700;">✔ PDF Anexado e Convertido para Texto no App: ${escapeHtml(state.editorPdfName || 'cifra.pdf')}</span>`;
       clearBtn.style.display = 'inline-flex';
     } else {
-      statusEl.innerHTML = `Clique aqui ou arraste um arquivo <strong>.PDF</strong> de cifra do seu celular ou computador`;
+      statusEl.innerHTML = `Clique aqui ou arraste um arquivo <strong>.PDF</strong> ou <strong>.TXT</strong> para ler e converter a cifra automaticamente para o texto do app`;
       clearBtn.style.display = 'none';
     }
   }
@@ -3693,23 +4395,76 @@ Me perseguirá, Senhor`,
       : '';
   }
 
+  /**
+   * Handles attaching a PDF or Text file (.pdf, .txt, .cifra, .md) in the Song Modal,
+   * automatically reading and converting its content into native app cipher text!
+   */
   function handlePdfFileSelect(file) {
     if (!file) return;
-    if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
-      showToast('Por favor, selecione um arquivo no formato PDF.');
+    const lowerName = (file.name || '').toLowerCase();
+    const isPdf = file.type === 'application/pdf' || lowerName.endsWith('.pdf');
+    const isText =
+      file.type === 'text/plain' ||
+      lowerName.endsWith('.txt') ||
+      lowerName.endsWith('.cifra') ||
+      lowerName.endsWith('.md');
+
+    if (!isPdf && !isText) {
+      showToast('Selecione um arquivo .PDF ou .TXT de cifra.');
       return;
     }
+
+    const baseTitle = file.name.replace(/\.(pdf|txt|cifra|md)$/i, '').replace(/[_-]+/g, ' ').trim();
+    const titleInput = $('songTitleInput');
+    if (titleInput && !titleInput.value.trim() && baseTitle) {
+      titleInput.value = baseTitle;
+    }
+
+    if (isText) {
+      updateEditorPdfStatus('⏳ Lendo e convertendo arquivo de texto para cifra do app...');
+      const textReader = new FileReader();
+      textReader.onload = (e) => {
+        const rawText = String(e.target.result || '');
+        const parsed = global.ShareEngine.parseCipherMetadataAndCleanText(rawText);
+        if (parsed.text) {
+          $('songContentInput').value = parsed.text;
+        }
+        if (parsed.key) {
+          $('songKeyInput').value = parsed.key;
+        }
+        if (parsed.capo) {
+          $('songCapoInput').value = String(parsed.capo);
+        }
+        updateEditorPdfStatus(`✔ Arquivo de texto "${escapeHtml(file.name)}" convertido para o texto do app!`);
+        showToast(`Cifra "${file.name}" convertida para o texto do app!`);
+      };
+      textReader.readAsText(file);
+      return;
+    }
+
+    // PDF File: Read DataURL AND extract cipher text into #songContentInput
+    updateEditorPdfStatus('⏳ Lendo páginas do PDF e convertendo para texto da cifra no app...');
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       state.editorPdfData = e.target.result;
       state.editorPdfName = file.name;
-      updateEditorPdfStatus();
-      // If song title is still empty, auto-fill from PDF filename
-      const titleInput = $('songTitleInput');
-      if (!titleInput.value.trim()) {
-        titleInput.value = file.name.replace(/\.pdf$/i, '').replace(/[_-]+/g, ' ');
+
+      const extractedText = await global.ShareEngine.extractCipherTextFromPdf(state.editorPdfData);
+      if (extractedText && extractedText.trim()) {
+        const parsed = global.ShareEngine.parseCipherMetadataAndCleanText(extractedText);
+        $('songContentInput').value = parsed.text;
+        if (parsed.key) {
+          $('songKeyInput').value = parsed.key;
+        }
+        if (parsed.capo) {
+          $('songCapoInput').value = String(parsed.capo);
+        }
+        updateEditorPdfStatus();
+        showToast(`PDF "${file.name}" lido e convertido para texto da cifra no app!`);
+      } else {
+        updateEditorPdfStatus(`✔ PDF "${escapeHtml(file.name)}" anexado (PDF escaneado como imagem; sem texto selecionável).`);
+        showToast(`PDF "${file.name}" anexado!`);
       }
-      showToast(`PDF "${file.name}" anexado com sucesso!`);
     };
     reader.readAsDataURL(file);
   }
@@ -3724,7 +4479,7 @@ Me perseguirá, Senhor`,
 
     const content = $('songContentInput').value;
     if (!content.trim() && !state.editorPdfData) {
-      showToast('Digite a cifra ou anexe um arquivo PDF.');
+      showToast('Digite a cifra, busque online ou anexe um arquivo PDF/TXT.');
       return;
     }
 
@@ -3737,7 +4492,7 @@ Me perseguirá, Senhor`,
       id: state.editingSongId || undefined,
       title,
       artist: $('songArtistInput').value.trim(),
-      category: $('songCategoryInput').value.trim() || 'Repertório Geral',
+      category: $('songCategoryInput').value.trim(),
       key: $('songKeyInput').value.trim() || 'C',
       capo: parseInt($('songCapoInput').value || '0', 10),
       bpm: $('songBpmInput').value.trim(),
@@ -3907,7 +4662,7 @@ Me perseguirá, Senhor`,
 
     state.incomingSharedSong = parsed.d;
     $('incomingSongTitle').textContent = parsed.d.title;
-    $('incomingSongArtist').textContent = `${parsed.d.artist || 'Artista'} • Tom: ${parsed.d.key || 'C'} • Categoria: ${parsed.d.category || 'Geral'}`;
+    $('incomingSongArtist').textContent = `${parsed.d.artist || 'Artista'} • Tom: ${parsed.d.key || 'C'}${parsed.d.category ? ` • Pasta: ${parsed.d.category}` : ''}`;
     $('incomingSongPreview').innerHTML = global.ChordEngine.renderCipherHtml(parsed.d.content || '', 0);
     $('incomingShareModalBackdrop').classList.add('open');
   }
@@ -3926,15 +4681,51 @@ Me perseguirá, Senhor`,
     showToast('Cifra importada para sua biblioteca!');
   }
 
-  // Import .cifra.json package
+  // Import .cifra.json package OR direct .pdf / .txt cipher file
   function handleImportFile(file) {
     if (!file) return;
+    const lowerName = (file.name || '').toLowerCase();
+
+    // Direct PDF import -> Convert PDF into native app cipher text & save
+    if (file.type === 'application/pdf' || lowerName.endsWith('.pdf')) {
+      showToast('Lendo PDF e convertendo para texto da cifra no app...');
+      const pdfReader = new FileReader();
+      pdfReader.onload = async (e) => {
+        const pdfDataUrl = e.target.result;
+        const extractedText = await global.ShareEngine.extractCipherTextFromPdf(pdfDataUrl);
+        const parsed = global.ShareEngine.parseCipherMetadataAndCleanText(extractedText);
+        const defaultTitle = file.name.replace(/\.pdf$/i, '').replace(/[_-]+/g, ' ').trim() || 'Cifra Importada';
+
+        const saved = await global.CifraDB.saveSong({
+          title: defaultTitle,
+          artist: '',
+          category: state.filterCategory !== 'ALL' ? state.filterCategory : '',
+          key: parsed.key || 'C',
+          capo: parsed.capo || 0,
+          content: parsed.text || '',
+          pdfData: pdfDataUrl,
+          pdfName: file.name
+        });
+        await refreshData();
+        openSongReader(saved.id);
+        showToast(
+          parsed.text
+            ? `PDF "${file.name}" convertido para texto da cifra no app!`
+            : `PDF "${file.name}" importado!`
+        );
+      };
+      pdfReader.readAsDataURL(file);
+      return;
+    }
+
+    // Read as text (either .cifra.json package OR .txt/.cifra plain text cipher)
     const reader = new FileReader();
     reader.onload = async (e) => {
+      const rawText = String(e.target.result || '');
       try {
-        const pkg = JSON.parse(e.target.result);
+        const pkg = JSON.parse(rawText);
         if (!pkg || (!Array.isArray(pkg.songs) && !pkg.title)) {
-          throw new Error('Formato inválido');
+          throw new Error('Não é pacote JSON');
         }
 
         let importedSongs = 0;
@@ -3948,6 +4739,10 @@ Me perseguirá, Senhor`,
 
         if (Array.isArray(pkg.songs)) {
           for (const s of pkg.songs) {
+            if (s.pdfData && !(s.content && s.content.trim())) {
+              const ext = await global.ShareEngine.extractCipherTextFromPdf(s.pdfData);
+              if (ext) s.content = ext;
+            }
             await global.CifraDB.saveSong(s);
             importedSongs++;
           }
@@ -3963,9 +4758,25 @@ Me perseguirá, Senhor`,
         await refreshData();
         $('shareModalBackdrop').classList.remove('open');
         showToast(`Importado com sucesso: ${importedSongs} cifra(s) e ${importedSetlists} repertório(s)!`);
-      } catch (err) {
-        console.error(err);
-        showToast('Erro ao importar arquivo. Verifique se é um arquivo .cifra.json válido.');
+      } catch (jsonErr) {
+        // Treat as plain text cipher file (.txt, .cifra, .md)
+        if (rawText.trim()) {
+          const parsed = global.ShareEngine.parseCipherMetadataAndCleanText(rawText);
+          const defaultTitle = file.name.replace(/\.(txt|cifra|md|json)$/i, '').replace(/[_-]+/g, ' ').trim() || 'Cifra em Texto';
+          const saved = await global.CifraDB.saveSong({
+            title: defaultTitle,
+            artist: '',
+            category: state.filterCategory !== 'ALL' ? state.filterCategory : '',
+            key: parsed.key || 'C',
+            capo: parsed.capo || 0,
+            content: parsed.text
+          });
+          await refreshData();
+          openSongReader(saved.id);
+          showToast(`Cifra em texto "${file.name}" convertida e importada no app!`);
+        } else {
+          showToast('Erro ao importar arquivo. Selecione um arquivo .PDF, .TXT ou .cifra.json válido.');
+        }
       }
     };
     reader.readAsText(file);
@@ -3983,6 +4794,16 @@ Me perseguirá, Senhor`,
         checkIncomingShareLink();
       });
 
+      // Sync Fullscreen button if user exits native browser fullscreen via ESC or OS gesture
+      const onFsChange = () => {
+        const isNativeFs = Boolean(document.fullscreenElement || document.webkitFullscreenElement);
+        if (!isNativeFs && state.isFullscreen) {
+          // Keep CSS fullscreen unless user pressed ESC (handled in keydown)
+        }
+      };
+      document.addEventListener('fullscreenchange', onFsChange);
+      document.addEventListener('webkitfullscreenchange', onFsChange);
+
       // Setup search input
       const searchInput = $('globalSearchInput');
       const clearBtn = $('searchClearBtn');
@@ -3997,7 +4818,25 @@ Me perseguirá, Senhor`,
         });
       }
 
-      // Setup PDF drag & drop in Song Modal
+      // Close mobile sidebar when clicking/tapping anywhere outside of it
+      document.addEventListener('click', (e) => {
+        const sidebar = $('sidebar');
+        const menuBtn = $('mobileMenuBtn');
+        if (!sidebar || !sidebar.classList.contains('mobile-open')) return;
+        if (sidebar.contains(e.target) || (menuBtn && menuBtn.contains(e.target))) return;
+        this.closeMobileSidebar();
+      });
+
+      // Close any modal when clicking directly on its dark backdrop
+      document.querySelectorAll('.modal-backdrop').forEach((backdrop) => {
+        backdrop.addEventListener('click', (e) => {
+          if (e.target === backdrop) {
+            backdrop.classList.remove('open');
+          }
+        });
+      });
+
+      // Setup PDF/TXT drag & drop in Song Modal
       const dropzone = $('pdfDropzone');
       if (dropzone) {
         dropzone.addEventListener('dragover', (e) => {
@@ -4016,8 +4855,25 @@ Me perseguirá, Senhor`,
         });
       }
 
-      // Keyboard shortcuts in reader view
+      // Keyboard shortcuts (Escape closes sidebar/modals/fullscreen; Space toggles auto-scroll in reader)
       window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          const sidebar = $('sidebar');
+          if (sidebar && sidebar.classList.contains('mobile-open')) {
+            this.closeMobileSidebar();
+            return;
+          }
+          const openModal = document.querySelector('.modal-backdrop.open');
+          if (openModal) {
+            openModal.classList.remove('open');
+            return;
+          }
+          if (state.isFullscreen) {
+            exitFullscreen();
+            return;
+          }
+        }
+
         if (state.currentView !== 'reader') return;
         const tag = (e.target && e.target.tagName) || '';
         if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
@@ -4028,6 +4884,79 @@ Me perseguirá, Senhor`,
           toggleAutoScroll();
         }
       });
+
+      // Horizontal touch swipe gesture for sideways navigation on mobile
+      let touchStartX = 0;
+      let touchStartY = 0;
+      let ignoreSwipe = false;
+
+      document.addEventListener(
+        'touchstart',
+        (e) => {
+          if (!e.touches || e.touches.length !== 1) return;
+          const target = e.target;
+          ignoreSwipe = Boolean(
+            target &&
+              target.closest &&
+              target.closest(
+                '.filter-chips, .reader-toolbar, .cipher-sheet, .pdf-pages-container, .modal-dialog, .sidebar, input, textarea, select'
+              )
+          );
+          touchStartX = e.touches[0].clientX;
+          touchStartY = e.touches[0].clientY;
+        },
+        { passive: true }
+      );
+
+      document.addEventListener(
+        'touchend',
+        (e) => {
+          if (ignoreSwipe || !e.changedTouches || e.changedTouches.length !== 1) return;
+          if (document.querySelector('.modal-backdrop.open')) return;
+
+          const dx = e.changedTouches[0].clientX - touchStartX;
+          const dy = e.changedTouches[0].clientY - touchStartY;
+
+          // Require clear horizontal swipe (> 85px and at least 2x vertical movement)
+          if (Math.abs(dx) < 85 || Math.abs(dx) < Math.abs(dy) * 2) return;
+
+          const sidebar = $('sidebar');
+          if (sidebar && sidebar.classList.contains('mobile-open')) {
+            if (dx < -60) this.closeMobileSidebar();
+            return;
+          }
+
+          // Edge swipe from left opens sidebar on mobile when not in fullscreen
+          if (dx > 85 && touchStartX <= 28 && !state.isFullscreen) {
+            this.toggleMobileSidebar();
+            return;
+          }
+
+          if (state.currentView === 'reader' && state.activeSetlist) {
+            if (dx < 0) this.stageNavigate(1);
+            else this.stageNavigate(-1);
+            return;
+          }
+
+          if (state.currentView !== 'reader') {
+            const tabs = ['all', 'favorites', 'setlists'];
+            const currentTab =
+              state.currentView === 'setlists'
+                ? 'setlists'
+                : state.filterFavorites
+                ? 'favorites'
+                : 'all';
+            const idx = tabs.indexOf(currentTab);
+            const nextIdx = dx < 0 ? idx + 1 : idx - 1;
+            if (nextIdx >= 0 && nextIdx < tabs.length) {
+              if (tabs[nextIdx] === 'all') this.showAllSongs();
+              else if (tabs[nextIdx] === 'favorites') this.showFavorites();
+              else if (tabs[nextIdx] === 'setlists') this.showSetlists();
+            }
+          }
+        },
+        { passive: true }
+      );
 
       // PWA beforeinstallprompt listener
       window.addEventListener('beforeinstallprompt', (e) => {
@@ -4048,7 +4977,7 @@ Me perseguirá, Senhor`,
       state.currentView = 'library';
       state.filterCategory = 'ALL';
       state.filterFavorites = false;
-      $('sidebar').classList.remove('mobile-open');
+      this.closeMobileSidebar();
       renderSidebar();
       renderLibraryView();
     },
@@ -4056,14 +4985,14 @@ Me perseguirá, Senhor`,
     showFavorites() {
       state.currentView = 'library';
       state.filterFavorites = true;
-      $('sidebar').classList.remove('mobile-open');
+      this.closeMobileSidebar();
       renderSidebar();
       renderLibraryView();
     },
 
     showSetlists() {
       state.currentView = 'setlists';
-      $('sidebar').classList.remove('mobile-open');
+      this.closeMobileSidebar();
       renderSidebar();
       renderSetlistsView();
     },
@@ -4072,7 +5001,7 @@ Me perseguirá, Senhor`,
       state.currentView = 'library';
       state.filterFavorites = false;
       state.filterCategory = cat;
-      $('sidebar').classList.remove('mobile-open');
+      this.closeMobileSidebar();
       renderSidebar();
       renderLibraryView();
     },
@@ -4094,8 +5023,25 @@ Me perseguirá, Senhor`,
       renderLibraryView();
     },
 
-    toggleMobileSidebar() {
-      $('sidebar').classList.toggle('mobile-open');
+    toggleMobileSidebar(e) {
+      if (e && e.stopPropagation) e.stopPropagation();
+      const sidebar = $('sidebar');
+      const backdrop = $('sidebarBackdrop');
+      const appShell = $('appShell');
+
+      if (window.innerWidth <= 900) {
+        const isOpen = sidebar.classList.toggle('mobile-open');
+        if (backdrop) backdrop.classList.toggle('open', isOpen);
+      } else if (appShell) {
+        appShell.classList.toggle('sidebar-collapsed');
+      }
+    },
+
+    closeMobileSidebar() {
+      const sidebar = $('sidebar');
+      const backdrop = $('sidebarBackdrop');
+      if (sidebar) sidebar.classList.remove('mobile-open');
+      if (backdrop) backdrop.classList.remove('open');
     },
 
     toggleTheme() {
@@ -4113,8 +5059,11 @@ Me perseguirá, Senhor`,
 
     // Reader controls
     openSongReader,
+    toggleFullscreen,
+    exitFullscreen,
 
     backFromReader() {
+      exitFullscreen();
       stopAutoScroll();
       if (state.activeSetlist) {
         state.activeSetlist = null;
@@ -4217,6 +5166,223 @@ Me perseguirá, Senhor`,
       if (nextIdx < 0 || nextIdx >= state.activeSetlist.items.length) return;
       const nextItem = state.activeSetlist.items[nextIdx];
       openSongReader(nextItem.songId, state.activeSetlist, nextIdx);
+    },
+
+    // Online Cipher Search & Import (cifras.com.br/cifra/{artista}/{musica} parameter pattern)
+    openOnlineSearchModal() {
+      const input = $('onlineModalQueryInput');
+      const status = $('onlineModalStatus');
+      const container = $('onlineModalResultsContainer');
+      if (input) input.value = '';
+      if (status) status.style.display = 'none';
+      if (container) {
+        container.innerHTML = `
+          <div style="padding: 18px; text-align: center; color: var(--text-secondary); font-size: 13.5px; background: var(--bg-surface); border: 1px dashed var(--border-strong); border-radius: 10px;">
+            Digite o nome de qualquer música/artista (ex: <strong>Fernandinho Galileu</strong>) ou o parâmetro direto (ex: <code>fernandinho/galileu</code> ou <code>https://www.cifras.com.br/cifra/fernandinho/galileu</code>) e clique em <strong>Pesquisar / Importar</strong>.
+          </div>
+        `;
+      }
+      $('onlineSearchModalBackdrop').classList.add('open');
+      setTimeout(() => {
+        if (input) input.focus();
+      }, 80);
+    },
+
+    closeOnlineSearchModal() {
+      $('onlineSearchModalBackdrop').classList.remove('open');
+    },
+
+    async runModalOnlineSearch() {
+      const input = $('onlineModalQueryInput');
+      const status = $('onlineModalStatus');
+      const container = $('onlineModalResultsContainer');
+      const raw = (input ? input.value : '').trim();
+
+      if (!raw) {
+        showToast('Digite o nome da música, artista/música ou cole o link da cifra.');
+        if (input) input.focus();
+        return;
+      }
+
+      const parsed = global.ShareEngine.parseOnlineCipherInput(raw);
+      if (parsed.isDirectSlug) {
+        await this.importOnlineCipherFromModal(parsed.artistSlug, parsed.songSlug, '', '');
+        return;
+      }
+
+      if (status) {
+        status.style.display = 'block';
+        status.textContent = `⏳ Pesquisando cifras para "${raw}"...`;
+      }
+      if (container) container.innerHTML = '';
+
+      try {
+        const results = await global.ShareEngine.searchOnlineCiphers(parsed.query);
+        if (results.length === 0) {
+          if (status) {
+            status.textContent = `Nenhuma cifra encontrada para "${raw}". Tente digitar no formato artista/musica (ex: fernandinho/galileu).`;
+          }
+          return;
+        }
+
+        if (status) {
+          status.textContent = `✔ ${results.length} resultado(s) encontrado(s). Clique em "Importar para o App" na música desejada:`;
+        }
+
+        container.innerHTML = results
+          .map((r) => {
+            const safeA = escapeHtml(r.artistSlug).replace(/'/g, "\\'");
+            const safeS = escapeHtml(r.songSlug).replace(/'/g, "\\'");
+            const safeTitle = escapeHtml(r.title).replace(/'/g, "\\'");
+            const safeArtist = escapeHtml(r.artist).replace(/'/g, "\\'");
+            return `
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;background:var(--bg-surface);border:1px solid var(--border-color);border-radius:10px;flex-wrap:wrap;">
+                <div style="min-width:0;flex:1;">
+                  <div style="font-size:15px;font-weight:800;color:var(--text-primary);">${escapeHtml(r.title)}</div>
+                  <div style="font-size:13px;color:var(--text-secondary);">${escapeHtml(r.artist)}</div>
+                  <div style="font-size:11px;font-family:var(--font-mono);color:var(--text-muted);margin-top:3px;">
+                    cifras.com.br/cifra/${escapeHtml(r.slugParam)}
+                  </div>
+                </div>
+                <button type="button" class="btn btn-primary btn-sm" onclick="App.importOnlineCipherFromModal('${safeA}', '${safeS}', '${safeTitle}', '${safeArtist}')">
+                  📥 Importar para o App
+                </button>
+              </div>
+            `;
+          })
+          .join('');
+      } catch (err) {
+        console.error(err);
+        if (status) {
+          status.textContent = 'Erro ao pesquisar cifras online. Verifique sua conexão com a internet.';
+        }
+      }
+    },
+
+    async importOnlineCipherFromModal(artistSlug, songSlug, knownTitle = '', knownArtist = '') {
+      const status = $('onlineModalStatus');
+      if (status) {
+        status.style.display = 'block';
+        status.textContent = `⏳ Baixando e convertendo cifra (${artistSlug}/${songSlug}) para o texto do CifraLush...`;
+      }
+
+      try {
+        const data = await global.ShareEngine.fetchOnlineCipherBySlug(artistSlug, songSlug, knownTitle, knownArtist);
+        const saved = await global.CifraDB.saveSong({
+          title: data.title,
+          artist: data.artist,
+          category: state.filterCategory !== 'ALL' ? state.filterCategory : '',
+          key: data.key || 'C',
+          capo: data.capo || 0,
+          content: data.content,
+          notes: `Importada via parâmetro: ${artistSlug}/${songSlug}`
+        });
+        this.closeOnlineSearchModal();
+        await refreshData();
+        openSongReader(saved.id);
+        showToast(`Cifra "${data.title}" (${data.artist}) importada com sucesso!`);
+      } catch (err) {
+        console.error(err);
+        if (status) {
+          status.textContent = `❌ ${err.message || 'Não foi possível importar esta cifra.'}`;
+        }
+        showToast('Não foi possível importar a cifra. Verifique o parâmetro artista/música.');
+      }
+    },
+
+    async runEditorOnlineSearch() {
+      const input = $('editorOnlineQueryInput');
+      const status = $('editorOnlineStatus');
+      const listEl = $('editorOnlineResultsList');
+      const raw = (input ? input.value : '').trim();
+
+      if (!raw) {
+        showToast('Digite o nome da música, artista/música ou cole o link da cifra.');
+        if (input) input.focus();
+        return;
+      }
+
+      const parsed = global.ShareEngine.parseOnlineCipherInput(raw);
+      if (parsed.isDirectSlug) {
+        await this.selectEditorOnlineResult(parsed.artistSlug, parsed.songSlug, '', '');
+        return;
+      }
+
+      if (status) {
+        status.style.display = 'block';
+        status.textContent = `⏳ Pesquisando "${raw}"...`;
+      }
+      if (listEl) {
+        listEl.style.display = 'none';
+        listEl.innerHTML = '';
+      }
+
+      try {
+        const results = await global.ShareEngine.searchOnlineCiphers(parsed.query);
+        if (results.length === 0) {
+          if (status) {
+            status.textContent = `Nenhum resultado encontrado. Tente usar o formato artista/musica (ex: fernandinho/galileu).`;
+          }
+          return;
+        }
+
+        if (status) {
+          status.textContent = `Selecione uma cifra abaixo para preencher os campos automaticamente:`;
+        }
+        if (listEl) {
+          listEl.style.display = 'flex';
+          listEl.innerHTML = results
+            .map((r) => {
+              const safeA = escapeHtml(r.artistSlug).replace(/'/g, "\\'");
+              const safeS = escapeHtml(r.songSlug).replace(/'/g, "\\'");
+              const safeTitle = escapeHtml(r.title).replace(/'/g, "\\'");
+              const safeArtist = escapeHtml(r.artist).replace(/'/g, "\\'");
+              return `
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:8px;">
+                  <div style="min-width:0;flex:1;">
+                    <div style="font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(r.title)} — <span style="color:var(--text-secondary);font-weight:500;">${escapeHtml(r.artist)}</span></div>
+                    <div style="font-size:11px;font-family:var(--font-mono);color:var(--text-muted);">/cifra/${escapeHtml(r.slugParam)}</div>
+                  </div>
+                  <button type="button" class="btn btn-primary btn-sm" onclick="App.selectEditorOnlineResult('${safeA}', '${safeS}', '${safeTitle}', '${safeArtist}')">
+                    Usar Cifra
+                  </button>
+                </div>
+              `;
+            })
+            .join('');
+        }
+      } catch (err) {
+        console.error(err);
+        if (status) status.textContent = 'Erro ao buscar cifras online.';
+      }
+    },
+
+    async selectEditorOnlineResult(artistSlug, songSlug, knownTitle = '', knownArtist = '') {
+      const status = $('editorOnlineStatus');
+      const listEl = $('editorOnlineResultsList');
+      if (status) {
+        status.style.display = 'block';
+        status.textContent = `⏳ Carregando cifra de ${artistSlug}/${songSlug}...`;
+      }
+
+      try {
+        const data = await global.ShareEngine.fetchOnlineCipherBySlug(artistSlug, songSlug, knownTitle, knownArtist);
+        $('songTitleInput').value = data.title || '';
+        $('songArtistInput').value = data.artist || '';
+        $('songKeyInput').value = data.key || 'C';
+        $('songCapoInput').value = String(data.capo || 0);
+        $('songContentInput').value = data.content || '';
+        if (status) {
+          status.textContent = `✔ Cifra "${data.title}" carregada no editor abaixo! Clique em "Salvar Cifra" para concluir.`;
+        }
+        if (listEl) listEl.style.display = 'none';
+        showToast(`Cifra "${data.title}" preenchida automaticamente!`);
+      } catch (err) {
+        console.error(err);
+        if (status) {
+          status.textContent = `❌ ${err.message || 'Erro ao carregar cifra.'}`;
+        }
+      }
     },
 
     // Song Modal actions
@@ -4329,7 +5495,7 @@ Me perseguirá, Senhor`,
       const pkg = global.ShareEngine.buildExportPackage({
         type: 'single-song',
         title: `Cifra: ${state.activeSong.title}`,
-        categories: [state.activeSong.category || 'Repertório Geral'],
+        categories: state.activeSong.category ? [state.activeSong.category] : [],
         songs: [state.activeSong]
       });
       const res = await global.ShareEngine.exportPackageFile(pkg, state.activeSong.title, useNativeShare);
@@ -4345,7 +5511,7 @@ Me perseguirá, Senhor`,
       const pkg = global.ShareEngine.buildExportPackage({
         type: 'setlist',
         title: `Repertório: ${sl.title}`,
-        categories: [...new Set(includedSongs.map((s) => s.category || 'Repertório Geral'))],
+        categories: [...new Set(includedSongs.map((s) => s.category).filter(Boolean))],
         songs: includedSongs,
         setlists: [sl]
       });
@@ -4357,12 +5523,12 @@ Me perseguirá, Senhor`,
     async exportFullLibraryBackup() {
       const pkg = global.ShareEngine.buildExportPackage({
         type: 'full-backup',
-        title: 'Biblioteca Completa CifraFlow',
+        title: 'Biblioteca Completa CifraLush',
         categories: state.categories,
         songs: state.songs,
         setlists: state.setlists
       });
-      const res = await global.ShareEngine.exportPackageFile(pkg, 'biblioteca-cifraflow', false);
+      const res = await global.ShareEngine.exportPackageFile(pkg, 'biblioteca-cifralush', false);
       if (res.downloaded) {
         showToast('Backup completo da biblioteca (.cifra.json) baixado!');
       }
@@ -4422,9 +5588,18 @@ Me perseguirá, Senhor`,
       const listEl = $('categoriesManagerList');
       if (!listEl) return;
 
+      if (state.categories.length === 0) {
+        listEl.innerHTML = `
+          <div style="padding: 16px; text-align: center; color: var(--text-muted); font-size: 13px; background: var(--bg-surface); border: 1px dashed var(--border-color); border-radius: 8px;">
+            Nenhuma pasta criada ainda. Digite um nome acima e clique em <strong>+ Criar Pasta</strong>.
+          </div>
+        `;
+        return;
+      }
+
       listEl.innerHTML = state.categories
         .map((cat, idx) => {
-          const count = state.songs.filter((s) => (s.category || 'Repertório Geral') === cat).length;
+          const count = state.songs.filter((s) => (s.category || '') === cat).length;
           const safeCat = escapeHtml(cat).replace(/'/g, "\\'");
           return `
             <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;background:var(--bg-surface);border:1px solid var(--border-color);border-radius:8px;">
@@ -4514,10 +5689,10 @@ Me perseguirá, Senhor`,
     },
 
     async confirmDeleteCategory(categoryName) {
-      const count = state.songs.filter((s) => (s.category || 'Repertório Geral') === categoryName).length;
+      const count = state.songs.filter((s) => (s.category || '') === categoryName).length;
       const msg =
         count > 0
-          ? `Deseja excluir a pasta "${categoryName}"?\n\nAs ${count} música(s) dentro dela NÃO serão apagadas — elas serão movidas para outra pasta.`
+          ? `Deseja excluir a pasta "${categoryName}"?\n\nAs ${count} música(s) dentro dela NÃO serão apagadas da sua biblioteca.`
           : `Deseja excluir a pasta "${categoryName}"?`;
 
       if (!confirm(msg)) return;
@@ -4528,7 +5703,7 @@ Me perseguirá, Senhor`,
       await refreshData();
       this.renderCategoriesManagerList();
       showToast(
-        count > 0
+        count > 0 && fallback
           ? `Pasta excluída! As músicas foram movidas para "${fallback}".`
           : `Pasta "${categoryName}" excluída.`
       );

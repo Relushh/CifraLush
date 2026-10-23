@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cifraflow-v3';
+const CACHE_NAME = 'cifralush-v5';
 const STATIC_ASSETS = [
   './',
   './index.html',
@@ -38,8 +38,28 @@ self.addEventListener('fetch', (event) => {
     url.hostname.includes('youtube.com') ||
     url.hostname.includes('youtu.be') ||
     url.hostname.includes('spotify.com') ||
-    url.hostname.includes('scdn.co')
+    url.hostname.includes('scdn.co') ||
+    url.hostname.includes('sscdn.co') ||
+    url.hostname.includes('jina.ai') ||
+    url.hostname.includes('cifraclub.com.br') ||
+    url.hostname.includes('cifras.com.br')
   ) {
+    return;
+  }
+
+  // Network-first for HTML navigation so updates appear immediately
+  if (req.mode === 'navigate' || url.pathname.endsWith('.html') || url.pathname.endsWith('/')) {
+    event.respondWith(
+      fetch(req)
+        .then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const clone = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(req, clone));
+          }
+          return networkResponse;
+        })
+        .catch(() => caches.match(req))
+    );
     return;
   }
 

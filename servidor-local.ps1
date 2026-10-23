@@ -14,7 +14,7 @@ try {
 }
 
 Write-Host "=========================================================" -ForegroundColor Cyan
-Write-Host "  CifraFlow - Servidor Local Iniciado com Sucesso!" -ForegroundColor Green
+Write-Host "  CifraLush - Servidor Local Iniciado com Sucesso!" -ForegroundColor Green
 Write-Host "  Acesse no PC: $url" -ForegroundColor Yellow
 Write-Host "  Pressione Ctrl+C nesta janela para encerrar o servidor." -ForegroundColor Gray
 Write-Host "=========================================================" -ForegroundColor Cyan
