@@ -426,28 +426,39 @@ body {
   position: relative;
   flex: 1 1 0%;
   min-width: 0;
-  max-width: 520px;
+  max-width: 540px;
 }
 
 .search-icon {
   position: absolute;
-  left: 13px;
+  left: 11px;
   top: 50%;
   transform: translateY(-50%);
   color: var(--text-muted);
   pointer-events: none;
+  font-size: 13px;
 }
 
 .search-input {
   width: 100%;
-  padding: 10px 36px 10px 38px;
+  padding: 10px 14px 10px 33px;
   background-color: var(--bg-surface);
   border: 1px solid var(--border-color);
   border-radius: 99px;
   color: var(--text-primary);
-  font-size: 14px;
+  font-size: 13.5px;
   font-family: inherit;
+  text-overflow: ellipsis;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.search-input.has-value {
+  padding-right: 32px;
+}
+
+.search-input::placeholder {
+  color: var(--text-muted);
+  font-size: 13px;
 }
 
 .search-input:focus {
@@ -603,25 +614,17 @@ body {
 
 .filter-chips {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
-  touch-action: pan-x;
   max-width: 100%;
   min-width: 0;
-  padding-bottom: 4px;
-  scrollbar-width: none;
-}
-
-.filter-chips::-webkit-scrollbar {
-  display: none;
+  padding-bottom: 2px;
 }
 
 .chip {
   flex-shrink: 0;
-  padding: 6px 13px;
+  padding: 6px 12px;
   border-radius: 99px;
   font-size: 12.5px;
   font-weight: 600;
@@ -632,6 +635,8 @@ body {
   white-space: nowrap;
   transition: all 0.15s ease;
   font-family: inherit;
+  -webkit-touch-callout: none;
+  user-select: none;
 }
 
 .chip:hover {
@@ -680,6 +685,8 @@ body {
   width: 100%;
   max-width: 100%;
   overflow: hidden;
+  -webkit-touch-callout: none;
+  user-select: none;
 }
 
 .song-card:hover {
@@ -1498,6 +1505,152 @@ body.reader-fullscreen .autoscroll-bar {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* Online Search Result Cards (No button/text overlap on mobile or desktop) */
+.online-result-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.online-result-info {
+  flex: 1 1 0%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.online-result-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text-primary);
+  word-break: break-word;
+  line-height: 1.25;
+}
+
+.online-result-artist {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+  word-break: break-word;
+}
+
+.online-result-url {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  margin-top: 4px;
+  overflow-wrap: anywhere;
+  word-break: break-all;
+  line-height: 1.35;
+}
+
+.online-result-btn {
+  flex-shrink: 0;
+}
+
+/* Context Menu / Action Sheet (Long-Press on Mobile & Right-Click on PC) */
+.ctx-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  background-color: rgba(2, 6, 23, 0.52);
+  backdrop-filter: blur(2px);
+  display: none;
+}
+
+.ctx-menu-backdrop.open {
+  display: block;
+}
+
+.ctx-menu {
+  position: fixed;
+  z-index: 115;
+  background-color: var(--bg-secondary);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  min-width: 245px;
+  max-width: min(320px, calc(100vw - 24px));
+  overflow: hidden;
+  animation: fadeInUp 0.14s ease;
+}
+
+.ctx-menu-header {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--bg-elevated);
+}
+
+.ctx-menu-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ctx-menu-subtitle {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ctx-menu-list {
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
+  gap: 2px;
+}
+
+.ctx-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 13.5px;
+  font-weight: 600;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+}
+
+.ctx-menu-item:hover,
+.ctx-menu-item:active {
+  background-color: var(--bg-surface-hover);
+}
+
+.ctx-menu-item.danger {
+  color: #f87171;
+}
+
+.ctx-menu-item.danger:hover,
+.ctx-menu-item.danger:active {
+  background-color: rgba(239, 68, 68, 0.15);
+}
+
+.ctx-menu-divider {
+  height: 1px;
+  background-color: var(--border-color);
+  margin: 4px 6px;
+}
+
 /* Responsive Breakpoints */
 @media (max-width: 900px) {
   .sidebar {
@@ -1531,7 +1684,8 @@ body.reader-fullscreen .autoscroll-bar {
     padding: 16px 14px;
   }
   .topbar {
-    padding: 10px 14px;
+    padding: 10px 12px;
+    gap: 8px;
   }
   .reader-toolbar {
     top: 57px;
@@ -1545,6 +1699,35 @@ body.reader-fullscreen .autoscroll-bar {
   }
   .search-box {
     max-width: none;
+  }
+  .search-input {
+    font-size: 13px;
+    padding: 9px 12px 9px 31px;
+  }
+  .search-input::placeholder {
+    font-size: 12.2px;
+  }
+  .online-result-card {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .online-result-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  .ctx-menu {
+    left: 12px !important;
+    right: 12px !important;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important;
+    top: auto !important;
+    max-width: none;
+    width: calc(100vw - 24px);
+    border-radius: 16px;
+  }
+  .ctx-menu-item {
+    padding: 12px 14px;
+    font-size: 14.5px;
   }
   .view-header {
     flex-direction: column;
@@ -1712,7 +1895,7 @@ body.reader-fullscreen .autoscroll-bar {
             type="text"
             id="globalSearchInput"
             class="search-input"
-            placeholder="Buscar música, artista, tom ou trecho da letra..."
+            placeholder="Buscar música, artista, tom ou letra..."
           />
           <button id="searchClearBtn" class="search-clear" onclick="App.clearSearch()">✖</button>
         </div>
@@ -2355,6 +2538,17 @@ body.reader-fullscreen .autoscroll-bar {
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" onclick="App.closeOnlineSearchModal()">Fechar</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Context Menu / Action Sheet (Long-Press on Mobile & Right-Click on PC) -->
+  <div id="contextMenuBackdrop" class="ctx-menu-backdrop" onclick="App.closeContextMenu()">
+    <div id="contextMenuPopup" class="ctx-menu" onclick="event.stopPropagation()">
+      <div class="ctx-menu-header">
+        <div id="contextMenuTitle" class="ctx-menu-title">Opções</div>
+        <div id="contextMenuSubtitle" class="ctx-menu-subtitle"></div>
+      </div>
+      <div id="contextMenuList" class="ctx-menu-list"></div>
     </div>
   </div>
 
@@ -3717,7 +3911,7 @@ body.reader-fullscreen .autoscroll-bar {
             const isActive = state.currentView === 'library' && !state.filterFavorites && state.filterCategory === cat;
             const safeCat = escapeHtml(cat).replace(/'/g, "\\'");
             return `
-              <li class="nav-cat-row ${isActive ? 'active' : ''}">
+              <li class="nav-cat-row ${isActive ? 'active' : ''}" data-ctx-type="category" data-ctx-id="${escapeHtml(cat)}">
                 <button class="nav-item ${isActive ? 'active' : ''}" onclick="App.selectCategory('${safeCat}')">
                   <div class="nav-item-left">
                     <span>📁</span>
@@ -3726,8 +3920,9 @@ body.reader-fullscreen .autoscroll-bar {
                   <span class="nav-badge">${count}</span>
                 </button>
                 <div class="nav-cat-actions">
-                  <button type="button" class="nav-cat-btn" title="Renomear pasta" onclick="App.promptRenameCategory('${safeCat}')">✏️</button>
-                  <button type="button" class="nav-cat-btn" title="Excluir pasta" onclick="App.confirmDeleteCategory('${safeCat}')">🗑️</button>
+                  <button type="button" class="nav-cat-btn" title="Opções da pasta" onclick="event.stopPropagation(); App.openContextMenuForTarget('category', '${safeCat}', event.clientX, event.clientY)">⋮</button>
+                  <button type="button" class="nav-cat-btn" title="Renomear pasta" onclick="event.stopPropagation(); App.promptRenameCategory('${safeCat}')">✏️</button>
+                  <button type="button" class="nav-cat-btn" title="Excluir pasta" onclick="event.stopPropagation(); App.confirmDeleteCategory('${safeCat}')">🗑️</button>
                 </div>
               </li>
             `;
@@ -3805,7 +4000,8 @@ body.reader-fullscreen .autoscroll-bar {
           .map((cat) => {
             const active = state.filterCategory === cat && !state.filterFavorites;
             const label = cat === 'ALL' ? 'Todas as Cifras' : `📁 ${cat}`;
-            return `<button class="chip ${active ? 'active' : ''}" onclick="App.selectCategory('${escapeHtml(cat).replace(/'/g, "\\'")}')">${escapeHtml(label)}</button>`;
+            const ctxAttrs = cat !== 'ALL' ? `data-ctx-type="category" data-ctx-id="${escapeHtml(cat)}"` : '';
+            return `<button class="chip ${active ? 'active' : ''}" ${ctxAttrs} onclick="App.selectCategory('${escapeHtml(cat).replace(/'/g, "\\'")}')">${escapeHtml(label)}</button>`;
           })
           .join('') +
         `<button class="chip" style="border-style:dashed;color:var(--accent);" onclick="App.openCategoriesModal()">+ Criar / Editar Pastas</button>`;
@@ -3844,7 +4040,7 @@ body.reader-fullscreen .autoscroll-bar {
         const hasSp = Boolean(song.spotifyUrl && song.spotifyUrl.trim());
 
         return `
-          <div class="song-card" onclick="App.openSongReader('${song.id}')">
+          <div class="song-card" data-ctx-type="song" data-ctx-id="${song.id}" onclick="App.openSongReader('${song.id}')">
             <div class="song-card-top">
               <div class="song-key-badge" title="Tom da música">${escapeHtml(song.key || 'C')}</div>
               <div class="song-info">
@@ -3857,6 +4053,9 @@ body.reader-fullscreen .autoscroll-bar {
                 </button>
                 <button class="icon-btn" title="Compartilhar esta cifra" onclick="App.openShareModalForSong('${song.id}')">
                   📤
+                </button>
+                <button class="icon-btn" title="Mais opções (Editar, Excluir, Mover...)" onclick="App.openContextMenuForTarget('song', '${song.id}', event.clientX, event.clientY)">
+                  ⋮
                 </button>
               </div>
             </div>
@@ -3924,7 +4123,7 @@ body.reader-fullscreen .autoscroll-bar {
                 .join('');
 
         return `
-          <div class="setlist-card">
+          <div class="setlist-card" data-ctx-type="setlist" data-ctx-id="${sl.id}">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
               <div>
                 <h3 style="font-size:17px;font-weight:800;">${escapeHtml(sl.title)}</h3>
@@ -3936,6 +4135,7 @@ body.reader-fullscreen .autoscroll-bar {
                 <button class="icon-btn" title="Compartilhar Repertório" onclick="App.shareSetlistPackage('${sl.id}')">📤</button>
                 <button class="icon-btn" title="Editar Repertório" onclick="App.openSetlistModal('${sl.id}')">✏️</button>
                 <button class="icon-btn" title="Excluir Repertório" onclick="App.deleteSetlist('${sl.id}')">🗑️</button>
+                <button class="icon-btn" title="Mais opções" onclick="App.openContextMenuForTarget('setlist', '${sl.id}', event.clientX, event.clientY)">⋮</button>
               </div>
             </div>
             ${sl.description ? `<p style="font-size:13px;color:var(--text-secondary);">${escapeHtml(sl.description)}</p>` : ''}
@@ -4810,13 +5010,100 @@ body.reader-fullscreen .autoscroll-bar {
       if (searchInput) {
         searchInput.addEventListener('input', (e) => {
           state.searchQuery = e.target.value;
-          clearBtn.style.display = state.searchQuery ? 'block' : 'none';
+          const hasVal = Boolean(state.searchQuery);
+          clearBtn.style.display = hasVal ? 'block' : 'none';
+          searchInput.classList.toggle('has-value', hasVal);
           if (state.currentView !== 'library') {
             state.currentView = 'library';
           }
           renderLibraryView();
         });
       }
+
+      // Universal Right-Click (contextmenu) & Mobile Long-Press (manter pressionado o dedo) on Songs, Folders & Setlists
+      let longPressTimer = null;
+      let longPressTriggered = false;
+      let lpStartX = 0;
+      let lpStartY = 0;
+
+      document.addEventListener('contextmenu', (e) => {
+        const ctxEl = e.target && e.target.closest ? e.target.closest('[data-ctx-type]') : null;
+        if (!ctxEl) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const type = ctxEl.getAttribute('data-ctx-type');
+        const id = ctxEl.getAttribute('data-ctx-id');
+        if (type && id) {
+          this.openContextMenuForTarget(type, id, e.clientX, e.clientY);
+        }
+      });
+
+      document.addEventListener(
+        'touchstart',
+        (e) => {
+          if (!e.touches || e.touches.length !== 1) return;
+          // Ignore if touching an action button inside a card
+          if (e.target && e.target.closest && e.target.closest('.song-card-actions, .nav-cat-actions, .icon-btn')) {
+            return;
+          }
+          const ctxEl = e.target && e.target.closest ? e.target.closest('[data-ctx-type]') : null;
+          if (!ctxEl) return;
+
+          lpStartX = e.touches[0].clientX;
+          lpStartY = e.touches[0].clientY;
+          longPressTriggered = false;
+
+          clearTimeout(longPressTimer);
+          longPressTimer = setTimeout(() => {
+            longPressTriggered = true;
+            if (navigator.vibrate) {
+              try { navigator.vibrate(35); } catch (err) {}
+            }
+            const type = ctxEl.getAttribute('data-ctx-type');
+            const id = ctxEl.getAttribute('data-ctx-id');
+            if (type && id) {
+              this.openContextMenuForTarget(type, id, lpStartX, lpStartY);
+            }
+          }, 460);
+        },
+        { passive: true }
+      );
+
+      document.addEventListener(
+        'touchmove',
+        (e) => {
+          if (!longPressTimer || !e.touches || e.touches.length !== 1) return;
+          const dx = Math.abs(e.touches[0].clientX - lpStartX);
+          const dy = Math.abs(e.touches[0].clientY - lpStartY);
+          if (dx > 10 || dy > 10) {
+            clearTimeout(longPressTimer);
+            longPressTimer = null;
+          }
+        },
+        { passive: true }
+      );
+
+      const clearLongPress = () => {
+        if (longPressTimer) {
+          clearTimeout(longPressTimer);
+          longPressTimer = null;
+        }
+      };
+      document.addEventListener('touchend', clearLongPress, { passive: true });
+      document.addEventListener('touchcancel', clearLongPress, { passive: true });
+
+      // Suppress normal click right after a long-press opened the context menu
+      document.addEventListener(
+        'click',
+        (e) => {
+          if (longPressTriggered) {
+            e.preventDefault();
+            e.stopPropagation();
+            longPressTriggered = false;
+          }
+        },
+        true
+      );
 
       // Close mobile sidebar when clicking/tapping anywhere outside of it
       document.addEventListener('click', (e) => {
@@ -4855,9 +5142,14 @@ body.reader-fullscreen .autoscroll-bar {
         });
       }
 
-      // Keyboard shortcuts (Escape closes sidebar/modals/fullscreen; Space toggles auto-scroll in reader)
+      // Keyboard shortcuts (Escape closes context menu/sidebar/modals/fullscreen; Space toggles auto-scroll in reader)
       window.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
+          const ctxBackdrop = $('contextMenuBackdrop');
+          if (ctxBackdrop && ctxBackdrop.classList.contains('open')) {
+            this.closeContextMenu();
+            return;
+          }
           const sidebar = $('sidebar');
           if (sidebar && sidebar.classList.contains('mobile-open')) {
             this.closeMobileSidebar();
@@ -5018,9 +5310,195 @@ body.reader-fullscreen .autoscroll-bar {
 
     clearSearch() {
       state.searchQuery = '';
-      $('globalSearchInput').value = '';
+      const input = $('globalSearchInput');
+      if (input) {
+        input.value = '';
+        input.classList.remove('has-value');
+      }
       $('searchClearBtn').style.display = 'none';
       renderLibraryView();
+    },
+
+    // Context Menu / Action Sheet (Long-Press on Mobile & Right-Click on PC)
+    openContextMenuForTarget(type, id, clientX = 0, clientY = 0) {
+      const backdrop = $('contextMenuBackdrop');
+      const popup = $('contextMenuPopup');
+      const titleEl = $('contextMenuTitle');
+      const subEl = $('contextMenuSubtitle');
+      const listEl = $('contextMenuList');
+      if (!backdrop || !popup || !listEl) return;
+
+      if (type === 'song') {
+        const song = state.songs.find((s) => s.id === id);
+        if (!song) return;
+        const safeId = escapeHtml(song.id).replace(/'/g, "\\'");
+        titleEl.textContent = `🎵 ${song.title}`;
+        subEl.textContent = `${song.artist || 'Artista não informado'} • Tom: ${song.key || 'C'}${song.category ? ` • 📁 ${song.category}` : ''}`;
+        listEl.innerHTML = `
+          <button type="button" class="ctx-menu-item" onclick="App.closeContextMenu(); App.openSongReader('${safeId}')">
+            <span>📖</span> <span>Abrir Cifra</span>
+          </button>
+          <button type="button" class="ctx-menu-item" onclick="App.closeContextMenu(); App.openShareModalForSong('${safeId}')">
+            <span>📤</span> <span>Compartilhar Cifra</span>
+          </button>
+          <button type="button" class="ctx-menu-item" onclick="App.closeContextMenu(); App.openSongModal('${safeId}')">
+            <span>✏️</span> <span>Editar Cifra</span>
+          </button>
+          <button type="button" class="ctx-menu-item" onclick="App.closeContextMenu(); App.toggleFavorite('${safeId}')">
+            <span>${song.favorite ? '☆' : '⭐'}</span> <span>${song.favorite ? 'Remover das Favoritas' : 'Adicionar às Favoritas'}</span>
+          </button>
+          <button type="button" class="ctx-menu-item" onclick="App.closeContextMenu(); App.promptMoveSongCategory('${safeId}')">
+            <span>📁</span> <span>Mover para Pasta / Categoria...</span>
+          </button>
+          <button type="button" class="ctx-menu-item" onclick="App.closeContextMenu(); App.duplicateSong('${safeId}')">
+            <span>📄</span> <span>Duplicar Cifra</span>
+          </button>
+          <div class="ctx-menu-divider"></div>
+          <button type="button" class="ctx-menu-item danger" onclick="App.closeContextMenu(); App.confirmDeleteSongById('${safeId}')">
+            <span>🗑️</span> <span>Excluir Cifra</span>
+          </button>
+        `;
+      } else if (type === 'category') {
+        const catName = id;
+        const safeCat = escapeHtml(catName).replace(/'/g, "\\'");
+        const count = state.songs.filter((s) => (s.category || '') === catName).length;
+        titleEl.textContent = `📁 ${catName}`;
+        subEl.textContent = `Pasta • ${count} cifra(s)`;
+        listEl.innerHTML = `
+          <button type="button" class="ctx-menu-item" onclick="App.closeContextMenu(); App.selectCategory('${safeCat}')">
+            <span>📂</span> <span>Abrir Pasta</span>
+          </button>
+          <button type="button" class="ctx-menu-item" onclick="App.closeContextMenu(); App.createNewSongInCategory('${safeCat}')">
+            <span>➕</span> <span>Nova Cifra nesta Pasta</span>
+          </button>
+          <button type="button" class="ctx-menu-item" onclick="App.closeContextMenu(); App.exportCategoryPackage('${safeCat}')">
+            <span>📤</span> <span>Compartilhar / Exportar Pasta</span>
+          </button>
+          <button type="button" class="ctx-menu-item" onclick="App.closeContextMenu(); App.promptRenameCategory('${safeCat}')">
+            <span>✏️</span> <span>Renomear Pasta</span>
+          </button>
+          <div class="ctx-menu-divider"></div>
+          <button type="button" class="ctx-menu-item danger" onclick="App.closeContextMenu(); App.confirmDeleteCategory('${safeCat}')">
+            <span>🗑️</span> <span>Excluir Pasta</span>
+          </button>
+        `;
+      } else if (type === 'setlist') {
+        const sl = state.setlists.find((s) => s.id === id);
+        if (!sl) return;
+        const safeSlId = escapeHtml(sl.id).replace(/'/g, "\\'");
+        titleEl.textContent = `📋 ${sl.title}`;
+        subEl.textContent = `Repertório • ${(sl.items || []).length} música(s)`;
+        listEl.innerHTML = `
+          <button type="button" class="ctx-menu-item" onclick="App.closeContextMenu(); App.startSetlistStage('${safeSlId}', 0)">
+            <span>▶️</span> <span>Iniciar Modo Palco</span>
+          </button>
+          <button type="button" class="ctx-menu-item" onclick="App.closeContextMenu(); App.shareSetlistPackage('${safeSlId}')">
+            <span>📤</span> <span>Compartilhar Repertório</span>
+          </button>
+          <button type="button" class="ctx-menu-item" onclick="App.closeContextMenu(); App.openSetlistModal('${safeSlId}')">
+            <span>✏️</span> <span>Editar Repertório</span>
+          </button>
+          <div class="ctx-menu-divider"></div>
+          <button type="button" class="ctx-menu-item danger" onclick="App.closeContextMenu(); App.deleteSetlist('${safeSlId}')">
+            <span>🗑️</span> <span>Excluir Repertório</span>
+          </button>
+        `;
+      } else {
+        return;
+      }
+
+      backdrop.classList.add('open');
+
+      // Position near cursor on Desktop (> 680px); on Mobile CSS automatically styles it as a bottom sheet
+      if (window.innerWidth > 680) {
+        const menuW = 265;
+        const menuH = 310;
+        const x = Math.max(12, Math.min(clientX || window.innerWidth / 2 - 130, window.innerWidth - menuW - 12));
+        const y = Math.max(12, Math.min(clientY || window.innerHeight / 2 - 150, window.innerHeight - menuH - 12));
+        popup.style.left = `${x}px`;
+        popup.style.top = `${y}px`;
+      } else {
+        popup.style.left = '';
+        popup.style.top = '';
+      }
+    },
+
+    closeContextMenu() {
+      const backdrop = $('contextMenuBackdrop');
+      if (backdrop) backdrop.classList.remove('open');
+    },
+
+    async confirmDeleteSongById(songId) {
+      const song = await global.CifraDB.getSong(songId);
+      if (!song) return;
+      if (!confirm(`Deseja excluir a cifra "${song.title}" permanentemente?`)) return;
+      await global.CifraDB.deleteSong(songId);
+      if (state.currentView === 'reader' && state.activeSong && state.activeSong.id === songId) {
+        state.currentView = 'library';
+      }
+      await refreshData();
+      showToast(`Cifra "${song.title}" excluída.`);
+    },
+
+    async duplicateSong(songId) {
+      const song = await global.CifraDB.getSong(songId);
+      if (!song) return;
+      const copy = {
+        ...song,
+        id: undefined,
+        title: `${song.title} (Cópia)`,
+        createdAt: Date.now()
+      };
+      await global.CifraDB.saveSong(copy);
+      await refreshData();
+      showToast(`Cópia de "${song.title}" criada!`);
+    },
+
+    async promptMoveSongCategory(songId) {
+      const song = await global.CifraDB.getSong(songId);
+      if (!song) return;
+      const existingHint = state.categories.length > 0
+        ? `\nPastas existentes: ${state.categories.join(', ')}`
+        : '\n(Digite o nome de uma pasta para criá-la ou deixe vazio para remover da pasta)';
+      const newCat = prompt(
+        `Informe o nome da Pasta / Categoria para "${song.title}":${existingHint}`,
+        song.category || ''
+      );
+      if (newCat === null) return;
+      song.category = newCat.trim();
+      await global.CifraDB.saveSong(song);
+      await refreshData();
+      showToast(
+        song.category
+          ? `"${song.title}" movida para a pasta "${song.category}"!`
+          : `"${song.title}" removida da pasta.`
+      );
+    },
+
+    async createNewSongInCategory(categoryName) {
+      this.closeMobileSidebar();
+      await openSongModal(null);
+      if ($('songCategoryInput')) {
+        $('songCategoryInput').value = categoryName;
+      }
+    },
+
+    async exportCategoryPackage(categoryName) {
+      const songsInCat = state.songs.filter((s) => (s.category || '') === categoryName);
+      if (songsInCat.length === 0) {
+        showToast(`A pasta "${categoryName}" ainda não possui cifras para exportar.`);
+        return;
+      }
+      const pkg = global.ShareEngine.buildExportPackage({
+        type: 'category',
+        title: `Pasta: ${categoryName}`,
+        categories: [categoryName],
+        songs: songsInCat
+      });
+      const res = await global.ShareEngine.exportPackageFile(pkg, `pasta-${categoryName}`, true);
+      if (res.downloaded) {
+        showToast(`Pasta "${categoryName}" (${songsInCat.length} cifras) exportada!`);
+      }
     },
 
     toggleMobileSidebar(e) {
@@ -5236,15 +5714,15 @@ body.reader-fullscreen .autoscroll-bar {
             const safeTitle = escapeHtml(r.title).replace(/'/g, "\\'");
             const safeArtist = escapeHtml(r.artist).replace(/'/g, "\\'");
             return `
-              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;background:var(--bg-surface);border:1px solid var(--border-color);border-radius:10px;flex-wrap:wrap;">
-                <div style="min-width:0;flex:1;">
-                  <div style="font-size:15px;font-weight:800;color:var(--text-primary);">${escapeHtml(r.title)}</div>
-                  <div style="font-size:13px;color:var(--text-secondary);">${escapeHtml(r.artist)}</div>
-                  <div style="font-size:11px;font-family:var(--font-mono);color:var(--text-muted);margin-top:3px;">
+              <div class="online-result-card">
+                <div class="online-result-info">
+                  <div class="online-result-title">${escapeHtml(r.title)}</div>
+                  <div class="online-result-artist">${escapeHtml(r.artist)}</div>
+                  <div class="online-result-url">
                     cifras.com.br/cifra/${escapeHtml(r.slugParam)}
                   </div>
                 </div>
-                <button type="button" class="btn btn-primary btn-sm" onclick="App.importOnlineCipherFromModal('${safeA}', '${safeS}', '${safeTitle}', '${safeArtist}')">
+                <button type="button" class="btn btn-primary btn-sm online-result-btn" onclick="App.importOnlineCipherFromModal('${safeA}', '${safeS}', '${safeTitle}', '${safeArtist}')">
                   📥 Importar para o App
                 </button>
               </div>
@@ -5338,13 +5816,13 @@ body.reader-fullscreen .autoscroll-bar {
               const safeTitle = escapeHtml(r.title).replace(/'/g, "\\'");
               const safeArtist = escapeHtml(r.artist).replace(/'/g, "\\'");
               return `
-                <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:8px;">
-                  <div style="min-width:0;flex:1;">
-                    <div style="font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escapeHtml(r.title)} — <span style="color:var(--text-secondary);font-weight:500;">${escapeHtml(r.artist)}</span></div>
-                    <div style="font-size:11px;font-family:var(--font-mono);color:var(--text-muted);">/cifra/${escapeHtml(r.slugParam)}</div>
+                <div class="online-result-card" style="background:var(--bg-secondary);padding:10px 12px;">
+                  <div class="online-result-info">
+                    <div class="online-result-title" style="font-size:14px;">${escapeHtml(r.title)} — <span style="color:var(--text-secondary);font-weight:500;">${escapeHtml(r.artist)}</span></div>
+                    <div class="online-result-url">/cifra/${escapeHtml(r.slugParam)}</div>
                   </div>
-                  <button type="button" class="btn btn-primary btn-sm" onclick="App.selectEditorOnlineResult('${safeA}', '${safeS}', '${safeTitle}', '${safeArtist}')">
-                    Usar Cifra
+                  <button type="button" class="btn btn-primary btn-sm online-result-btn" onclick="App.selectEditorOnlineResult('${safeA}', '${safeS}', '${safeTitle}', '${safeArtist}')">
+                    📥 Usar Cifra
                   </button>
                 </div>
               `;

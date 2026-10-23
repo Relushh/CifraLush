@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cifralush-v5';
+const CACHE_NAME = 'cifralush-v6';
 const STATIC_ASSETS = [
   './',
   './index.html',
