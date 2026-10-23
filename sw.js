@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cifralush-v8';
+const CACHE_NAME = 'cifralush-v9';
 const USER_VAULT_CACHE = 'cifralush-user-vault-permanent';
 const STATIC_ASSETS = [
   './',

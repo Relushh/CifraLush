@@ -2400,14 +2400,32 @@ body.reader-fullscreen .autoscroll-bar {
           <div id="editorOnlineResultsList" style="display: none; flex-direction: column; gap: 6px; margin-top: 8px; max-height: 210px; overflow-y: auto;"></div>
         </div>
 
+        <!-- Real-Time Duplicate Verification Alert Banner -->
+        <div id="songDuplicateBanner" style="display: none; background: rgba(239, 68, 68, 0.12); border: 1px solid rgba(239, 68, 68, 0.45); border-radius: 10px; padding: 12px 14px; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
+          <div style="flex: 1; min-width: 200px;">
+            <div id="songDuplicateBannerTitle" style="font-size: 13.5px; font-weight: 800; color: #f87171;">
+              ⚠️ Arquivo / Cifra já publicada na biblioteca!
+            </div>
+            <div id="songDuplicateBannerSub" style="font-size: 12.5px; color: var(--text-secondary); margin-top: 2px;"></div>
+          </div>
+          <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+            <button type="button" id="songDuplicateOpenBtn" class="btn btn-secondary btn-sm">
+              📖 Abrir Existente
+            </button>
+            <button type="button" id="songDuplicateEditBtn" class="btn btn-primary btn-sm">
+              ✏️ Editar Existente
+            </button>
+          </div>
+        </div>
+
         <div class="form-grid">
           <div class="form-group">
             <label class="form-label">Nome da Música *</label>
-            <input type="text" id="songTitleInput" class="form-input" placeholder="Ex: Tempo Perdido" />
+            <input type="text" id="songTitleInput" class="form-input" placeholder="Ex: Tempo Perdido" oninput="App.checkEditorDuplicateLive()" />
           </div>
           <div class="form-group">
             <label class="form-label">Artista / Banda</label>
-            <input type="text" id="songArtistInput" class="form-input" placeholder="Ex: Legião Urbana" />
+            <input type="text" id="songArtistInput" class="form-input" placeholder="Ex: Legião Urbana" oninput="App.checkEditorDuplicateLive()" />
           </div>
           <div class="form-group">
             <label class="form-label">Categoria / Pasta (Opcional)</label>
@@ -5256,7 +5274,156 @@ body.reader-fullscreen .autoscroll-bar {
 
     updateEditorPdfStatus();
     updateMediaDetectionBadges();
+    checkEditorDuplicateLive();
     $('songModalBackdrop').classList.add('open');
+  }
+
+  function normalizeCompareText(str) {
+    return String(str || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/\.(pdf|txt|cifra|md|json)$/i, '')
+      .replace(/^\d{1,3}\s*[-.)]\s*/, '')
+      .replace(/[^a-z0-9]+/g, ' ')
+      .trim();
+  }
+
+  /**
+   * Checks if a candidate song/file is already published in the library to prevent duplicates.
+   * Matches by:
+   * 1. Identical PDF binary DataURL
+   * 2. Normalized PDF/file name
+   * 3. Normalized Title + Artist (or Title when artist is omitted on one side)
+   * 4. Combined filename vs Artist+Title
+   * 5. Identical cipher body text (> 40 chars)
+   */
+  function findDuplicateSong(candidate, songsList = state.songs, ignoreSongId = null) {
+    if (!candidate || !Array.isArray(songsList)) return null;
+
+    const candTitle = normalizeCompareText(candidate.title);
+    const candArtist = normalizeCompareText(candidate.artist);
+    const candPdfName = normalizeCompareText(candidate.pdfName);
+    const candCombined1 = normalizeCompareText(`${candidate.artist || ''} ${candidate.title || ''}`);
+    const candCombined2 = normalizeCompareText(`${candidate.title || ''} ${candidate.artist || ''}`);
+    const candPdfData = candidate.pdfData || null;
+    const candContentNorm =
+      candidate.content && String(candidate.content).trim().length > 40
+        ? normalizeCompareText(candidate.content)
+        : '';
+
+    for (const s of songsList) {
+      if (!s) continue;
+      if (ignoreSongId && s.id === ignoreSongId) continue;
+
+      // 1. Exact PDF binary data match
+      if (candPdfData && s.pdfData && candPdfData.length === s.pdfData.length && candPdfData === s.pdfData) {
+        return { song: s, reason: 'mesmo arquivo PDF já publicado' };
+      }
+
+      // 2. Exact PDF/file name match
+      const sPdfName = normalizeCompareText(s.pdfName);
+      if (candPdfName && sPdfName && candPdfName === sPdfName) {
+        return { song: s, reason: `arquivo "${s.pdfName}" já publicado` };
+      }
+
+      // 3. Title & Artist match
+      const sTitle = normalizeCompareText(s.title);
+      const sArtist = normalizeCompareText(s.artist);
+      const sCombined1 = normalizeCompareText(`${s.artist || ''} ${s.title || ''}`);
+      const sCombined2 = normalizeCompareText(`${s.title || ''} ${s.artist || ''}`);
+
+      if (candTitle && sTitle && candTitle === sTitle) {
+        if (candArtist && sArtist) {
+          if (candArtist === sArtist || candArtist.includes(sArtist) || sArtist.includes(candArtist)) {
+            return { song: s, reason: `música "${s.title}" (${s.artist}) já publicada` };
+          }
+        } else {
+          return { song: s, reason: `música "${s.title}" já publicada` };
+        }
+      }
+
+      // 4. Combined filename vs Title+Artist
+      if (
+        candPdfName &&
+        (candPdfName === sTitle ||
+          (sCombined1 && candPdfName === sCombined1) ||
+          (sCombined2 && candPdfName === sCombined2))
+      ) {
+        return { song: s, reason: `arquivo correspondente a "${s.title}" já publicado` };
+      }
+      if (
+        sPdfName &&
+        (sPdfName === candTitle ||
+          (candCombined1 && sPdfName === candCombined1) ||
+          (candCombined2 && sPdfName === candCombined2))
+      ) {
+        return { song: s, reason: `música "${s.title}" já possui este arquivo publicado` };
+      }
+
+      // 5. Identical cipher body text
+      if (candContentNorm) {
+        const sContentNorm =
+          s.content && String(s.content).trim().length > 40 ? normalizeCompareText(s.content) : '';
+        if (sContentNorm && candContentNorm === sContentNorm) {
+          return { song: s, reason: `conteúdo idêntico à cifra "${s.title}" já publicada` };
+        }
+      }
+    }
+
+    return null;
+  }
+
+  function checkEditorDuplicateLive() {
+    const banner = $('songDuplicateBanner');
+    if (!banner) return null;
+
+    const title = ($('songTitleInput') ? $('songTitleInput').value : '').trim();
+    const artist = ($('songArtistInput') ? $('songArtistInput').value : '').trim();
+    const content = ($('songContentInput') ? $('songContentInput').value : '').trim();
+
+    if (!title && !state.editorPdfName && !state.editorPdfData) {
+      banner.style.display = 'none';
+      return null;
+    }
+
+    const dup = findDuplicateSong(
+      {
+        title,
+        artist,
+        pdfName: state.editorPdfName,
+        pdfData: state.editorPdfData,
+        content
+      },
+      state.songs,
+      state.editingSongId
+    );
+
+    if (!dup) {
+      banner.style.display = 'none';
+      return null;
+    }
+
+    const ex = dup.song;
+    $('songDuplicateBannerTitle').textContent = `⚠️ Atenção: ${dup.reason}!`;
+    $('songDuplicateBannerSub').textContent = `Cadastro existente: "${ex.title}"${ex.artist ? ` — ${ex.artist}` : ''}${ex.category ? ` (Pasta: ${ex.category})` : ''}. Evite criar em duplicidade abrindo ou editando o existente.`;
+
+    const openBtn = $('songDuplicateOpenBtn');
+    const editBtn = $('songDuplicateEditBtn');
+    if (openBtn) {
+      openBtn.onclick = () => {
+        $('songModalBackdrop').classList.remove('open');
+        openSongReader(ex.id);
+      };
+    }
+    if (editBtn) {
+      editBtn.onclick = () => {
+        openSongModal(ex.id);
+      };
+    }
+
+    banner.style.display = 'flex';
+    return dup;
   }
 
   function updateEditorPdfStatus(customMsg = '') {
@@ -5335,7 +5502,12 @@ body.reader-fullscreen .autoscroll-bar {
           $('songCapoInput').value = String(parsed.capo);
         }
         updateEditorPdfStatus(`✔ Arquivo de texto "${escapeHtml(file.name)}" convertido para o texto do app!`);
-        showToast(`Cifra "${file.name}" convertida para o texto do app!`);
+        const dup = checkEditorDuplicateLive();
+        if (dup) {
+          showToast(`⚠️ Atenção: "${dup.song.title}" já está publicada na biblioteca!`);
+        } else {
+          showToast(`Cifra "${file.name}" convertida para o texto do app!`);
+        }
       };
       textReader.readAsText(file);
       return;
@@ -5359,10 +5531,20 @@ body.reader-fullscreen .autoscroll-bar {
           $('songCapoInput').value = String(parsed.capo);
         }
         updateEditorPdfStatus();
-        showToast(`PDF "${file.name}" lido e convertido para texto da cifra no app!`);
+        const dup = checkEditorDuplicateLive();
+        if (dup) {
+          showToast(`⚠️ Este PDF já está publicado na biblioteca como "${dup.song.title}"!`);
+        } else {
+          showToast(`PDF "${file.name}" lido e convertido para texto da cifra no app!`);
+        }
       } else {
         updateEditorPdfStatus(`✔ PDF "${escapeHtml(file.name)}" anexado (PDF escaneado como imagem; sem texto selecionável).`);
-        showToast(`PDF "${file.name}" anexado!`);
+        const dup = checkEditorDuplicateLive();
+        if (dup) {
+          showToast(`⚠️ Este PDF já está publicado na biblioteca como "${dup.song.title}"!`);
+        } else {
+          showToast(`PDF "${file.name}" anexado!`);
+        }
       }
     };
     reader.readAsDataURL(file);
@@ -5380,6 +5562,34 @@ body.reader-fullscreen .autoscroll-bar {
     if (!content.trim() && !state.editorPdfData) {
       showToast('Digite a cifra, busque online ou anexe um arquivo PDF/TXT.');
       return;
+    }
+
+    const artist = $('songArtistInput').value.trim();
+    const dup = findDuplicateSong(
+      {
+        title,
+        artist,
+        pdfName: state.editorPdfName,
+        pdfData: state.editorPdfData,
+        content
+      },
+      state.songs,
+      state.editingSongId
+    );
+
+    if (dup) {
+      const shouldUpdateExisting = confirm(
+        `⚠️ Evitar Duplicidade: Já existe um arquivo/cifra publicado na sua biblioteca!\n\n` +
+          `• Existente: "${dup.song.title}"${dup.song.artist ? ` (${dup.song.artist})` : ''}\n` +
+          `• Motivo: ${dup.reason}\n\n` +
+          `Deseja ATUALIZAR a cifra existente em vez de criar uma cópia duplicada?\n` +
+          `(Clique em OK para atualizar a existente ou Cancelar para revisar)`
+      );
+      if (!shouldUpdateExisting) {
+        checkEditorDuplicateLive();
+        return;
+      }
+      state.editingSongId = dup.song.id;
     }
 
     let existing = null;
@@ -5568,6 +5778,16 @@ body.reader-fullscreen .autoscroll-bar {
 
   async function acceptIncomingSharedSong() {
     if (!state.incomingSharedSong) return;
+    const dup = findDuplicateSong(state.incomingSharedSong, state.songs);
+    if (dup) {
+      state.incomingSharedSong = null;
+      history.replaceState(null, document.title, window.location.pathname + window.location.search);
+      $('incomingShareModalBackdrop').classList.remove('open');
+      openSongReader(dup.song.id);
+      showToast(`⚠️ A cifra "${dup.song.title}" já estava publicada na biblioteca! Abrindo a existente...`);
+      return;
+    }
+
     const saved = await global.CifraDB.saveSong({
       ...state.incomingSharedSong,
       id: undefined
@@ -5628,7 +5848,7 @@ body.reader-fullscreen .autoscroll-bar {
 
   /**
    * Batch imports multiple PDF/TXT/Cifra files at once directly into the library,
-   * skipping manual song-by-song registration.
+   * skipping manual song-by-song registration and verifying published files to prevent duplicates.
    */
   async function importMultipleFilesBatch(fileList, customCategory = null) {
     const files = Array.from(fileList || []).filter(Boolean);
@@ -5646,10 +5866,12 @@ body.reader-fullscreen .autoscroll-bar {
     if (container) {
       progressToast = document.createElement('div');
       progressToast.className = 'toast';
-      progressToast.textContent = `⏳ Importando ${files.length} arquivo(s)...`;
+      progressToast.textContent = `⏳ Verificando e importando ${files.length} arquivo(s)...`;
       container.appendChild(progressToast);
     }
 
+    const workingSongsList = [...state.songs];
+    const skippedDuplicates = [];
     let importedSongsCount = 0;
     let importedSetlistsCount = 0;
 
@@ -5658,17 +5880,50 @@ body.reader-fullscreen .autoscroll-bar {
       const lowerName = (file.name || '').toLowerCase();
 
       if (progressToast) {
-        progressToast.textContent = `⏳ Importando (${i + 1}/${files.length}): ${file.name}...`;
+        progressToast.textContent = `⏳ Verificando (${i + 1}/${files.length}): ${file.name}...`;
       }
 
       try {
         if (file.type === 'application/pdf' || lowerName.endsWith('.pdf')) {
+          const meta = parseFilenameMeta(file.name);
+
+          // Fast pre-check by filename and parsed Title/Artist before reading PDF pages
+          const quickDup = findDuplicateSong(
+            {
+              title: meta.title,
+              artist: meta.artist,
+              pdfName: file.name
+            },
+            workingSongsList
+          );
+
+          if (quickDup) {
+            skippedDuplicates.push(file.name);
+            continue;
+          }
+
           const pdfDataUrl = await readFileAsDataURL(file);
           const extractedText = await global.ShareEngine.extractCipherTextFromPdf(pdfDataUrl);
           const parsed = global.ShareEngine.parseCipherMetadataAndCleanText(extractedText);
-          const meta = parseFilenameMeta(file.name);
 
-          await global.CifraDB.saveSong(
+          // Deep check by PDF binary DataURL and extracted cipher text
+          const deepDup = findDuplicateSong(
+            {
+              title: meta.title,
+              artist: meta.artist,
+              pdfName: file.name,
+              pdfData: pdfDataUrl,
+              content: parsed.text || ''
+            },
+            workingSongsList
+          );
+
+          if (deepDup) {
+            skippedDuplicates.push(file.name);
+            continue;
+          }
+
+          const saved = await global.CifraDB.saveSong(
             {
               title: meta.title,
               artist: meta.artist,
@@ -5681,6 +5936,7 @@ body.reader-fullscreen .autoscroll-bar {
             },
             true
           );
+          workingSongsList.push(saved);
           importedSongsCount++;
         } else {
           const rawText = await readFileAsText(file);
@@ -5711,11 +5967,22 @@ body.reader-fullscreen .autoscroll-bar {
               }
               if (Array.isArray(pkg.songs)) {
                 for (const s of pkg.songs) {
+                  const dupPkgSong = findDuplicateSong(s, workingSongsList, s.id);
+                  if (dupPkgSong && (!s.id || s.id !== dupPkgSong.song.id)) {
+                    skippedDuplicates.push(s.title || s.pdfName || 'Cifra');
+                    continue;
+                  }
                   if (s.pdfData && !(s.content && s.content.trim())) {
                     const ext = await global.ShareEngine.extractCipherTextFromPdf(s.pdfData);
                     if (ext) s.content = ext;
                   }
-                  await global.CifraDB.saveSong(s, true);
+                  const savedPkgSong = await global.CifraDB.saveSong(s, true);
+                  const existingIdx = workingSongsList.findIndex((w) => w.id === savedPkgSong.id);
+                  if (existingIdx !== -1) {
+                    workingSongsList[existingIdx] = savedPkgSong;
+                  } else {
+                    workingSongsList.push(savedPkgSong);
+                  }
                   importedSongsCount++;
                 }
               }
@@ -5731,7 +5998,22 @@ body.reader-fullscreen .autoscroll-bar {
           if (!handledAsJson && rawText.trim()) {
             const parsed = global.ShareEngine.parseCipherMetadataAndCleanText(rawText);
             const meta = parseFilenameMeta(file.name);
-            await global.CifraDB.saveSong(
+            const txtDup = findDuplicateSong(
+              {
+                title: meta.title,
+                artist: meta.artist,
+                pdfName: file.name,
+                content: parsed.text
+              },
+              workingSongsList
+            );
+
+            if (txtDup) {
+              skippedDuplicates.push(file.name);
+              continue;
+            }
+
+            const savedTxt = await global.CifraDB.saveSong(
               {
                 title: meta.title,
                 artist: meta.artist,
@@ -5742,6 +6024,7 @@ body.reader-fullscreen .autoscroll-bar {
               },
               true
             );
+            workingSongsList.push(savedTxt);
             importedSongsCount++;
           }
         }
@@ -5767,8 +6050,17 @@ body.reader-fullscreen .autoscroll-bar {
 
     if (importedSongsCount > 0 || importedSetlistsCount > 0) {
       const catSuffix = targetCategory ? ` na pasta "${targetCategory}"` : '';
+      const dupInfo =
+        skippedDuplicates.length > 0
+          ? ` (⚠️ ${skippedDuplicates.length} já publicado(s) ignorado(s) para evitar duplicidade)`
+          : '';
       showToast(
-        `✅ ${importedSongsCount} cifra(s)/PDF(s)${importedSetlistsCount ? ` e ${importedSetlistsCount} repertório(s)` : ''} adicionados de uma vez${catSuffix}!`
+        `✅ ${importedSongsCount} cifra(s)/PDF(s)${importedSetlistsCount ? ` e ${importedSetlistsCount} repertório(s)` : ''} adicionado(s)${catSuffix}!${dupInfo}`
+      );
+    } else if (skippedDuplicates.length > 0) {
+      const previewNames = skippedDuplicates.slice(0, 3).join(', ') + (skippedDuplicates.length > 3 ? '...' : '');
+      showToast(
+        `⚠️ Duplicidade evitada: ${skippedDuplicates.length === 1 ? 'o arquivo selecionado já está publicado' : `todos os ${skippedDuplicates.length} arquivos já estão publicados`} (${previewNames}).`
       );
     } else {
       showToast('Nenhum arquivo válido (.PDF, .TXT ou .cifra.json) pôde ser importado.');
@@ -5780,19 +6072,42 @@ body.reader-fullscreen .autoscroll-bar {
     if (!file) return;
     const lowerName = (file.name || '').toLowerCase();
 
-    // Direct PDF import -> Convert PDF into native app cipher text & save
+    // Direct PDF import -> Verify duplicate, convert PDF into native app cipher text & save
     if (file.type === 'application/pdf' || lowerName.endsWith('.pdf')) {
+      const meta = parseFilenameMeta(file.name);
+      const quickDup = findDuplicateSong({ title: meta.title, artist: meta.artist, pdfName: file.name }, state.songs);
+      if (quickDup) {
+        openSongReader(quickDup.song.id);
+        showToast(`⚠️ "${quickDup.song.title}" já está publicada na biblioteca! Abrindo a cifra existente para evitar duplicidade.`);
+        return;
+      }
+
       showToast('Lendo PDF e convertendo para texto da cifra no app...');
       const pdfReader = new FileReader();
       pdfReader.onload = async (e) => {
         const pdfDataUrl = e.target.result;
         const extractedText = await global.ShareEngine.extractCipherTextFromPdf(pdfDataUrl);
         const parsed = global.ShareEngine.parseCipherMetadataAndCleanText(extractedText);
-        const defaultTitle = file.name.replace(/\.pdf$/i, '').replace(/[_-]+/g, ' ').trim() || 'Cifra Importada';
+
+        const deepDup = findDuplicateSong(
+          {
+            title: meta.title,
+            artist: meta.artist,
+            pdfName: file.name,
+            pdfData: pdfDataUrl,
+            content: parsed.text || ''
+          },
+          state.songs
+        );
+        if (deepDup) {
+          openSongReader(deepDup.song.id);
+          showToast(`⚠️ Este PDF já está publicado como "${deepDup.song.title}"! Abrindo a cifra existente...`);
+          return;
+        }
 
         const saved = await global.CifraDB.saveSong({
-          title: defaultTitle,
-          artist: '',
+          title: meta.title,
+          artist: meta.artist,
           category: state.filterCategory !== 'ALL' ? state.filterCategory : '',
           key: parsed.key || 'C',
           capo: parsed.capo || 0,
@@ -5823,7 +6138,9 @@ body.reader-fullscreen .autoscroll-bar {
         }
 
         let importedSongs = 0;
+        let skippedPkgDuplicates = 0;
         let importedSetlists = 0;
+        const workingList = [...state.songs];
 
         if (pkg.account && typeof pkg.account === 'object') {
           await global.CifraDB.saveUserAccount(pkg.account);
@@ -5838,21 +6155,33 @@ body.reader-fullscreen .autoscroll-bar {
             localStorage.setItem('cifraflow_fontsize', String(state.fontSize));
             document.documentElement.style.setProperty('--cipher-font-size', `${state.fontSize}px`);
           }
+          if (pkg.settings.viewMode === 'list' || pkg.settings.viewMode === 'grid') {
+            state.viewMode = pkg.settings.viewMode;
+            localStorage.setItem('cifraflow_viewmode', state.viewMode);
+          }
         }
 
         if (Array.isArray(pkg.categories)) {
           for (const cat of pkg.categories) {
-            await global.CifraDB.ensureCategory(cat);
+            await global.CifraDB.ensureCategory(cat, true);
           }
         }
 
         if (Array.isArray(pkg.songs)) {
           for (const s of pkg.songs) {
+            const dupPkg = findDuplicateSong(s, workingList, s.id);
+            if (dupPkg && (!s.id || s.id !== dupPkg.song.id)) {
+              skippedPkgDuplicates++;
+              continue;
+            }
             if (s.pdfData && !(s.content && s.content.trim())) {
               const ext = await global.ShareEngine.extractCipherTextFromPdf(s.pdfData);
               if (ext) s.content = ext;
             }
-            await global.CifraDB.saveSong(s);
+            const savedS = await global.CifraDB.saveSong(s, true);
+            const idx = workingList.findIndex((w) => w.id === savedS.id);
+            if (idx !== -1) workingList[idx] = savedS;
+            else workingList.push(savedS);
             importedSongs++;
           }
         }
@@ -5864,17 +6193,35 @@ body.reader-fullscreen .autoscroll-bar {
           }
         }
 
+        await global.CifraDB.syncToDeviceVault();
         await refreshData();
         $('shareModalBackdrop').classList.remove('open');
-        showToast(`Importado com sucesso: ${importedSongs} cifra(s) e ${importedSetlists} repertório(s)!`);
+        const skipNote =
+          skippedPkgDuplicates > 0 ? ` (${skippedPkgDuplicates} duplicada(s) ignorada(s))` : '';
+        showToast(`Importado com sucesso: ${importedSongs} cifra(s) e ${importedSetlists} repertório(s)!${skipNote}`);
       } catch (jsonErr) {
         // Treat as plain text cipher file (.txt, .cifra, .md)
         if (rawText.trim()) {
           const parsed = global.ShareEngine.parseCipherMetadataAndCleanText(rawText);
-          const defaultTitle = file.name.replace(/\.(txt|cifra|md|json)$/i, '').replace(/[_-]+/g, ' ').trim() || 'Cifra em Texto';
+          const meta = parseFilenameMeta(file.name);
+          const txtDup = findDuplicateSong(
+            {
+              title: meta.title,
+              artist: meta.artist,
+              pdfName: file.name,
+              content: parsed.text
+            },
+            state.songs
+          );
+          if (txtDup) {
+            openSongReader(txtDup.song.id);
+            showToast(`⚠️ A cifra "${txtDup.song.title}" já está publicada na biblioteca! Abrindo a existente...`);
+            return;
+          }
+
           const saved = await global.CifraDB.saveSong({
-            title: defaultTitle,
-            artist: '',
+            title: meta.title,
+            artist: meta.artist,
             category: state.filterCategory !== 'ALL' ? state.filterCategory : '',
             key: parsed.key || 'C',
             capo: parsed.capo || 0,
@@ -6648,18 +6995,26 @@ body.reader-fullscreen .autoscroll-bar {
             const safeS = escapeHtml(r.songSlug).replace(/'/g, "\\'");
             const safeTitle = escapeHtml(r.title).replace(/'/g, "\\'");
             const safeArtist = escapeHtml(r.artist).replace(/'/g, "\\'");
+            const existingDup = findDuplicateSong({ title: r.title, artist: r.artist }, state.songs);
+            const safeDupId = existingDup ? escapeHtml(existingDup.song.id).replace(/'/g, "\\'") : '';
+
             return `
               <div class="online-result-card">
                 <div class="online-result-info">
-                  <div class="online-result-title">${escapeHtml(r.title)}</div>
+                  <div class="online-result-title">
+                    ${escapeHtml(r.title)}
+                    ${existingDup ? `<span class="badge" style="margin-left:6px;background:rgba(16,185,129,0.16);color:#34d399;">✔ Já publicada</span>` : ''}
+                  </div>
                   <div class="online-result-artist">${escapeHtml(r.artist)}</div>
                   <div class="online-result-url">
                     cifras.com.br/cifra/${escapeHtml(r.slugParam)}
                   </div>
                 </div>
-                <button type="button" class="btn btn-primary btn-sm online-result-btn" onclick="App.importOnlineCipherFromModal('${safeA}', '${safeS}', '${safeTitle}', '${safeArtist}')">
-                  📥 Importar para o App
-                </button>
+                ${
+                  existingDup
+                    ? `<button type="button" class="btn btn-secondary btn-sm online-result-btn" onclick="App.closeOnlineSearchModal(); App.openSongReader('${safeDupId}')">📖 Abrir Existente</button>`
+                    : `<button type="button" class="btn btn-primary btn-sm online-result-btn" onclick="App.importOnlineCipherFromModal('${safeA}', '${safeS}', '${safeTitle}', '${safeArtist}')">📥 Importar para o App</button>`
+                }
               </div>
             `;
           })
@@ -6674,6 +7029,16 @@ body.reader-fullscreen .autoscroll-bar {
 
     async importOnlineCipherFromModal(artistSlug, songSlug, knownTitle = '', knownArtist = '') {
       const status = $('onlineModalStatus');
+      if (knownTitle) {
+        const preDup = findDuplicateSong({ title: knownTitle, artist: knownArtist }, state.songs);
+        if (preDup) {
+          this.closeOnlineSearchModal();
+          openSongReader(preDup.song.id);
+          showToast(`⚠️ A cifra "${preDup.song.title}" já está publicada na sua biblioteca! Abrindo a existente...`);
+          return;
+        }
+      }
+
       if (status) {
         status.style.display = 'block';
         status.textContent = `⏳ Baixando e convertendo cifra (${artistSlug}/${songSlug}) para o texto do CifraLush...`;
@@ -6681,6 +7046,14 @@ body.reader-fullscreen .autoscroll-bar {
 
       try {
         const data = await global.ShareEngine.fetchOnlineCipherBySlug(artistSlug, songSlug, knownTitle, knownArtist);
+        const dup = findDuplicateSong({ title: data.title, artist: data.artist, content: data.content }, state.songs);
+        if (dup) {
+          this.closeOnlineSearchModal();
+          openSongReader(dup.song.id);
+          showToast(`⚠️ A cifra "${dup.song.title}" já está publicada na sua biblioteca! Abrindo a existente...`);
+          return;
+        }
+
         const saved = await global.CifraDB.saveSong({
           title: data.title,
           artist: data.artist,
@@ -6789,6 +7162,7 @@ body.reader-fullscreen .autoscroll-bar {
           status.textContent = `✔ Cifra "${data.title}" carregada no editor abaixo! Clique em "Salvar Cifra" para concluir.`;
         }
         if (listEl) listEl.style.display = 'none';
+        checkEditorDuplicateLive();
         showToast(`Cifra "${data.title}" preenchida automaticamente!`);
       } catch (err) {
         console.error(err);
@@ -6840,7 +7214,9 @@ body.reader-fullscreen .autoscroll-bar {
       state.editorPdfData = null;
       state.editorPdfName = null;
       updateEditorPdfStatus();
+      checkEditorDuplicateLive();
     },
+    checkEditorDuplicateLive,
     insertCipherSnippet(snippet) {
       const textarea = $('songContentInput');
       if (!textarea) return;
